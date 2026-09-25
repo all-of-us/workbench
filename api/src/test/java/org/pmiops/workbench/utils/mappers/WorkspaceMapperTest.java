@@ -18,13 +18,7 @@ import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
-import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapperImpl;
-import org.pmiops.workbench.cohorts.CohortMapperImpl;
-import org.pmiops.workbench.cohorts.CohortService;
-import org.pmiops.workbench.conceptset.ConceptSetService;
-import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.VwbUserPodDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
@@ -39,7 +33,6 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.initialcredits.WorkspaceInitialCreditUsageService;
 import org.pmiops.workbench.institution.InstitutionService;
-import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
 import org.pmiops.workbench.model.ResearchOutcomeEnum;
@@ -66,10 +59,7 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 @SpringJUnitConfig
 public class WorkspaceMapperTest {
   @MockitoBean private FireCloudService fireCloudService;
-  @MockitoBean private CohortService cohortService;
-  @MockitoBean private ConceptSetService conceptSetService;
   @MockitoBean private InstitutionService institutionService;
-  @MockitoBean private LeonardoApiClient leonardoApiClient;
   @MockitoBean private MailService mailService;
   @MockitoBean private TaskQueueService taskQueueService;
   @MockitoBean private UserDao userDao;
@@ -118,11 +108,7 @@ public class WorkspaceMapperTest {
 
   @TestConfiguration
   @Import({
-    CohortMapperImpl.class,
-    CohortReviewMapperImpl.class,
     CommonMappers.class,
-    ConceptSetMapperImpl.class,
-    DataSetMapperImpl.class,
     FakeClockConfiguration.class,
     FirecloudMapperImpl.class,
     InitialCreditsService.class,

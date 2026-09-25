@@ -17,7 +17,6 @@ import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import { AccessTierShortNames } from 'app/utils/access-tiers';
-import { LeoRuntimeInitializer } from 'app/utils/leo-runtime-initializer';
 import {
   currentWorkspaceStore,
   NavigateFn,
@@ -28,13 +27,9 @@ import {
   MatchParams,
   profileStore,
   routeDataStore,
-  runtimeDiskStore,
-  runtimeStore,
   serverConfigStore,
-  userAppsStore,
   useStore,
 } from 'app/utils/stores';
-import { maybeStartPollingForUserApps } from 'app/utils/user-apps-utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { isUsingInitialCredits } from 'app/utils/workspace-utils';
 import { zendeskBaseUrl } from 'app/utils/zendesk';
@@ -178,49 +173,8 @@ const UnlinkedBillingNotification = () => {
   );
 };
 
-interface UpdateRuntimeStoresProps {
-  workspaceNamespace: string;
-  pollAborter: AbortController;
-  setPollAborter: (ac: AbortController) => void;
-}
-const updateRuntimeStores = async ({
-  workspaceNamespace,
-  pollAborter,
-  setPollAborter,
-}: UpdateRuntimeStoresProps) => {
-  runtimeDiskStore.set({
-    workspaceNamespace,
-    gcePersistentDisk: undefined,
-    gcePersistentDiskLoaded: false,
-  });
-  runtimeStore.set({
-    workspaceNamespace,
-    runtime: undefined,
-    runtimeLoaded: false,
-  });
-  pollAborter.abort();
-  const newPollAborter = new AbortController();
-  setPollAborter(newPollAborter);
-
-  try {
-    await LeoRuntimeInitializer.initialize({
-      workspaceNamespace,
-      pollAbortSignal: newPollAborter.signal,
-      maxCreateCount: 0,
-      maxResumeCount: 0,
-    });
-  } catch {
-    // Ignore InitialRuntimeNotFoundError.
-    // Ignore ExceededActionCountError. This is thrown when the runtime doesn't exist, or
-    // isn't started. Both of these scenarios are expected, since we don't want to do any lazy
-    // initialization here.
-    // Also ignore LeoRuntimeInitializationAbortedError - this is expected when navigating
-    // away from a page during a poll.
-    // Ideally, we would handle or log errors except the ones listed above.
-  }
-};
-
 interface GetWorkspaceProps {
+  workspaceNamespace: string;
   terraName: string;
   setWorkspace: (w: WorkspaceData) => void;
   navigate: NavigateFn;
@@ -230,9 +184,7 @@ const getWorkspaceAndUpdateStores = async ({
   terraName,
   setWorkspace,
   navigate,
-  pollAborter,
-  setPollAborter,
-}: GetWorkspaceProps & UpdateRuntimeStoresProps) => {
+}: GetWorkspaceProps) => {
   try {
     const { workspace, accessLevel } = await workspacesApi().getWorkspace(
       workspaceNamespace,
@@ -241,11 +193,6 @@ const getWorkspaceAndUpdateStores = async ({
     currentWorkspaceStore.next({
       ...workspace,
       accessLevel,
-    });
-    updateRuntimeStores({
-      workspaceNamespace: workspace.namespace,
-      pollAborter,
-      setPollAborter,
     });
     setWorkspace({
       ...workspace,
@@ -258,13 +205,12 @@ const getWorkspaceAndUpdateStores = async ({
   }
 };
 
-export const WorkspaceWrapper = ({ hideSpinner }) => {
+export const WorkspaceWrapper = () => {
   const params = useParams<MatchParams>();
   const { ns, terraName } = params;
   const routeData = useStore(routeDataStore);
   const [navigate] = useNavigation();
 
-  const [pollAborter, setPollAborter] = useState(new AbortController());
   const [workspace, setWorkspace] = useState<WorkspaceData>(undefined);
   const [showNewCtNotification, setShowNewCtNotification] = useState(false);
   const [showUnlinkedBillingNotification, setShowUnlinkedBillingNotification] =
@@ -278,16 +224,6 @@ export const WorkspaceWrapper = ({ hideSpinner }) => {
   const restrictedLegacyUser =
     serverConfigStore.get().config.restrictLegacyAccess &&
     !profile?.migrationTestingGroup;
-
-  useEffect(() => {
-    hideSpinner();
-    return () => {
-      const { timeoutID } = userAppsStore.get();
-      if (timeoutID) {
-        clearTimeout(timeoutID);
-      }
-    };
-  }, []);
 
   useEffect(() => {
     if (!workspace || !restrictedLegacyUser) {
@@ -312,9 +248,6 @@ export const WorkspaceWrapper = ({ hideSpinner }) => {
       return;
     }
 
-    console.log(terraName);
-
-    maybeStartPollingForUserApps(ns);
     workspacesApi().updateRecentWorkspaces(ns, terraName);
 
     // avoid a redundant fetch if we can find the workspace in the currentWorkspaceStore or the
@@ -327,11 +260,6 @@ export const WorkspaceWrapper = ({ hideSpinner }) => {
       wsInCurrentStore.namespace === ns &&
       wsInCurrentStore.terraName === terraName
     ) {
-      updateRuntimeStores({
-        workspaceNamespace: ns,
-        pollAborter,
-        setPollAborter,
-      });
       setWorkspace(wsInCurrentStore);
     } else {
       // if the current workspace store is set to something besides where the routing indicates, it's invalid
@@ -346,11 +274,6 @@ export const WorkspaceWrapper = ({ hideSpinner }) => {
         wsInNextStore.terraName === terraName
       ) {
         currentWorkspaceStore.next(wsInNextStore);
-        updateRuntimeStores({
-          workspaceNamespace: ns,
-          pollAborter,
-          setPollAborter,
-        });
         setWorkspace(wsInNextStore);
       } else {
         getWorkspaceAndUpdateStores({
@@ -358,8 +281,6 @@ export const WorkspaceWrapper = ({ hideSpinner }) => {
           terraName,
           setWorkspace,
           navigate,
-          pollAborter,
-          setPollAborter,
         });
       }
     }

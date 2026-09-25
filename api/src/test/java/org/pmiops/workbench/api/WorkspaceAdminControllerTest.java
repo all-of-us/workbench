@@ -14,12 +14,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
-import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapperImpl;
-import org.pmiops.workbench.cohorts.CohortMapperImpl;
-import org.pmiops.workbench.cohorts.CohortService;
-import org.pmiops.workbench.conceptset.ConceptSetService;
-import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
-import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -27,8 +21,6 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudMonitoringService;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.lab.notebooks.NotebooksService;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListRuntimeResponse;
-import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.model.AdminLockingRequest;
 import org.pmiops.workbench.model.AdminWorkspaceCloudStorageCounts;
 import org.pmiops.workbench.model.AdminWorkspaceObjectsCounts;
@@ -56,8 +48,6 @@ public class WorkspaceAdminControllerTest {
   @MockitoBean private ActionAuditQueryService actionAuditQueryService;
   @MockitoBean private CloudMonitoringService cloudMonitoringService;
   @MockitoBean private CloudStorageClient cloudStorageClient;
-  @MockitoBean private CohortService cohortService;
-  @MockitoBean private ConceptSetService conceptSetService;
   @MockitoBean private NotebooksService notebooksService;
   private static final long DB_WORKSPACE_ID = 2222L;
   private static final String FIRECLOUD_WORKSPACE_CREATOR_USERNAME = "jay@allofus.biz";
@@ -71,7 +61,6 @@ public class WorkspaceAdminControllerTest {
       "Locking Reason text length should be at least 10 characters long and at most 4000 characters";
 
   @MockitoBean private FireCloudService mockFirecloudService;
-  @MockitoBean private LeonardoApiClient mockLeonardoNotebooksClient;
   @MockitoBean private WorkspaceAdminService mockWorkspaceAdminService;
   @MockitoBean private WorkspaceService mockWorkspaceService;
 
@@ -80,11 +69,7 @@ public class WorkspaceAdminControllerTest {
   @TestConfiguration
   @Import({
     FakeClockConfiguration.class,
-    CohortMapperImpl.class,
-    CohortReviewMapperImpl.class,
     CommonMappers.class,
-    ConceptSetMapperImpl.class,
-    DataSetMapperImpl.class,
     FirecloudMapperImpl.class,
     WorkspaceAdminController.class,
     WorkspaceMapperImpl.class,
@@ -123,12 +108,6 @@ public class WorkspaceAdminControllerTest {
     when(mockWorkspaceAdminService.getAdminWorkspaceCloudStorageCounts(
             WORKSPACE_NAMESPACE, dbWorkspace.getFirecloudName()))
         .thenReturn(cloudStorageCounts);
-
-    LeonardoListRuntimeResponse leonardoListRuntimeResponse =
-        TestMockFactory.createLeonardoListRuntimesResponse();
-    List<LeonardoListRuntimeResponse> runtimes = List.of(leonardoListRuntimeResponse);
-    when(mockLeonardoNotebooksClient.listRuntimesByProjectAsService(WORKSPACE_NAMESPACE))
-        .thenReturn(runtimes);
 
     RawlsWorkspaceDetails fcWorkspace =
         TestMockFactory.createTerraWorkspace(

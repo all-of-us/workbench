@@ -13,7 +13,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
-import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
@@ -38,7 +37,6 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.TooManyRequestsException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.iam.IamService;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.model.*;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
@@ -51,7 +49,6 @@ import org.pmiops.workbench.workspaces.WorkspaceOperationMapper;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceFactory;
 import org.pmiops.workbench.workspaces.migration.WorkspaceMigrationService;
-import org.pmiops.workbench.workspaces.resources.WorkspaceResourcesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -66,7 +63,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final Clock clock;
   private final FireCloudService fireCloudService;
   private final InitialCreditsService initialCreditsService;
-  private final IamService iamService;
   private final Provider<DbUser> userProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final TaskQueueService taskQueueService;
@@ -77,7 +73,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final WorkspaceMapper workspaceMapper;
   private final WorkspaceOperationDao workspaceOperationDao;
   private final WorkspaceOperationMapper workspaceOperationMapper;
-  private final WorkspaceResourcesService workspaceResourcesService;
   private final WorkspaceService workspaceService;
   private final WorkspaceMigrationService workspaceMigrationService;
   private final VwbUserService vwbUserService;
@@ -92,7 +87,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       Clock clock,
       FireCloudService fireCloudService,
       InitialCreditsService initialCreditsService,
-      IamService iamService,
       Provider<DbUser> userProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       TaskQueueService taskQueueService,
@@ -103,7 +97,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       WorkspaceMapper workspaceMapper,
       WorkspaceOperationDao workspaceOperationDao,
       WorkspaceOperationMapper workspaceOperationMapper,
-      WorkspaceResourcesService workspaceResourcesService,
       WorkspaceService workspaceService,
       WorkspaceMigrationService workspaceMigrationService,
       WorkspaceServiceFactory workspaceServiceFactory,
@@ -115,7 +108,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.clock = clock;
     this.fireCloudService = fireCloudService;
     this.initialCreditsService = initialCreditsService;
-    this.iamService = iamService;
     this.taskQueueService = taskQueueService;
     this.userDao = userDao;
     this.userProvider = userProvider;
@@ -126,7 +118,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.workspaceMapper = workspaceMapper;
     this.workspaceOperationDao = workspaceOperationDao;
     this.workspaceOperationMapper = workspaceOperationMapper;
-    this.workspaceResourcesService = workspaceResourcesService;
     this.workspaceService = workspaceService;
     this.workspaceMigrationService = workspaceMigrationService;
     this.workspaceServiceFactory = workspaceServiceFactory;
@@ -202,11 +193,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     final Workspace createdWorkspace =
         workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace, initialCreditsService);
     workspaceAuditor.fireCreateAction(createdWorkspace, dbWorkspace.getWorkspaceId());
-
-    if (dbWorkspace.isCDRAndWorkspaceTanagraEnabled()) {
-      workspaceService.createTanagraStudy(
-          createdWorkspace.getNamespace(), createdWorkspace.getName());
-    }
     return ResponseEntity.ok(createdWorkspace);
   }
 
@@ -644,16 +630,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
             fromWorkspaceNamespace, fromWorkspaceTerraName, toWorkspace, toCdrVersion);
     DbWorkspace dbWorkspace = createDbWorkspace(toWorkspace, toCdrVersion, user, toFcWorkspace);
 
-    try {
-      dbWorkspace =
-          workspaceService.saveAndCloneCohortsConceptSetsAndDataSets(fromWorkspace, dbWorkspace);
-    } catch (Exception e) {
-      // Tell Google to set the billing account back to initial-credits if our clone fails
-      workspaceService.updateWorkspaceBillingAccount(
-          dbWorkspace, workbenchConfigProvider.get().billing.initialCreditsBillingAccountName());
-      throw e;
-    }
-
     // Note: It is possible for a workspace to be (partially) created and return
     // a 500 to the user if this block of code fails since the workspace is already
     // committed to the database in an earlier call
@@ -935,26 +911,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
             dbWorkspace, workspaceAccessLevel, initialCreditsService);
     recentWorkspaceResponse.add(recentWorkspace);
     return ResponseEntity.ok(recentWorkspaceResponse);
-  }
-
-  @Override
-  public ResponseEntity<WorkspaceResourceResponse> getWorkspaceResourcesV2(
-      String workspaceNamespace, String workspaceTerraName, List<String> resourceTypeStrings) {
-    WorkspaceAccessLevel workspaceAccessLevel =
-        workspaceAuthService.enforceWorkspaceAccessLevel(
-            workspaceNamespace, workspaceTerraName, WorkspaceAccessLevel.READER);
-
-    final DbWorkspace dbWorkspace =
-        workspaceDao.getRequiredWithCohorts(workspaceNamespace, workspaceTerraName);
-    // When loading resources we are not accessing CDR tables for concept sets
-    CdrVersionContext.setCdrVersionNoCheckAuthDomain(dbWorkspace.getCdrVersion());
-    WorkspaceResourceResponse workspaceResourceResponse = new WorkspaceResourceResponse();
-    workspaceResourceResponse.addAll(
-        workspaceResourcesService.getWorkspaceResources(
-            dbWorkspace,
-            workspaceAccessLevel,
-            resourceTypeStrings.stream().map(ResourceType::fromValue).toList()));
-    return ResponseEntity.ok(workspaceResourceResponse);
   }
 
   @Override

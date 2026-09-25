@@ -3,27 +3,14 @@ import { useEffect, useState } from 'react';
 import { Link, matchPath } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 
-import { Cohort, CohortReview, ConceptSet, Profile } from 'generated/fetch';
+import { Profile } from 'generated/fetch';
 
-import { cond } from '@terra-ui-packages/core-utils';
 import { BannerScenario } from 'app/lab/pages/workspace/initial-credits/banner-config';
 import { CreditBanner } from 'app/lab/pages/workspace/initial-credits/credit-banner';
 import { InvalidBillingBanner } from 'app/lab/pages/workspace/invalid-billing-banner';
-import { dropJupyterNotebookFileSuffix } from 'app/pages/analysis/util';
-import {
-  analysisTabName,
-  analysisTabPath,
-  appDisplayPath,
-  dataTabPath,
-  workspacePath,
-} from 'app/routing/utils';
+import { dataTabPath, workspacePath } from 'app/routing/utils';
 import colors from 'app/styles/colors';
-import {
-  withCurrentCohort,
-  withCurrentCohortReview,
-  withCurrentConceptSet,
-  withCurrentWorkspace,
-} from 'app/utils';
+import { withCurrentWorkspace } from 'app/utils';
 import {
   MatchParams,
   profileStore,
@@ -64,41 +51,15 @@ class BreadcrumbData {
 export const getTrail = (
   type: BreadcrumbType,
   workspace: WorkspaceData,
-  cohort: Cohort,
-  cohortReview: CohortReview,
-  conceptSet: ConceptSet,
   params: MatchParams
 ): Array<BreadcrumbData> => {
-  const { ns, terraName, cid, crid, csid, pid, nbName, appType } = params;
+  const { ns, terraName } = params;
   switch (type) {
-    case BreadcrumbType.UserApp:
-      return [
-        ...getTrail(
-          BreadcrumbType.Workspace,
-          workspace,
-          cohort,
-          cohortReview,
-          conceptSet,
-          params
-        ),
-        new BreadcrumbData(
-          fp.upperFirst(analysisTabName),
-          analysisTabPath(ns, terraName)
-        ),
-        new BreadcrumbData(appType, appDisplayPath(ns, terraName, appType)),
-      ];
     case BreadcrumbType.Workspaces:
       return [new BreadcrumbData('Workspaces', '/workspaces')];
     case BreadcrumbType.Workspace:
       return [
-        ...getTrail(
-          BreadcrumbType.Workspaces,
-          workspace,
-          cohort,
-          cohortReview,
-          conceptSet,
-          params
-        ),
+        ...getTrail(BreadcrumbType.Workspaces, workspace, params),
         new BreadcrumbData(
           workspace ? workspace.name : '...',
           dataTabPath(ns, terraName)
@@ -106,14 +67,7 @@ export const getTrail = (
       ];
     case BreadcrumbType.WorkspaceEdit:
       return [
-        ...getTrail(
-          BreadcrumbType.Workspace,
-          workspace,
-          cohort,
-          cohortReview,
-          conceptSet,
-          params
-        ),
+        ...getTrail(BreadcrumbType.Workspace, workspace, params),
         new BreadcrumbData(
           'Edit Workspace',
           `${workspacePath(ns, terraName)}/edit`
@@ -121,172 +75,15 @@ export const getTrail = (
       ];
     case BreadcrumbType.WorkspaceDuplicate:
       return [
-        ...getTrail(
-          BreadcrumbType.Workspace,
-          workspace,
-          cohort,
-          cohortReview,
-          conceptSet,
-          params
-        ),
+        ...getTrail(BreadcrumbType.Workspace, workspace, params),
         new BreadcrumbData(
           'Duplicate Workspace',
           `${workspacePath(ns, terraName)}/duplicate`
         ),
       ];
-    case BreadcrumbType.Analysis:
-      return [
-        ...getTrail(
-          BreadcrumbType.Workspace,
-          workspace,
-          cohort,
-          cohortReview,
-          conceptSet,
-          params
-        ),
-        new BreadcrumbData(
-          fp.upperFirst(analysisTabName),
-          analysisTabPath(ns, terraName)
-        ),
-        new BreadcrumbData(
-          nbName && dropJupyterNotebookFileSuffix(decodeURIComponent(nbName)),
-          `${analysisTabPath(ns, terraName)}/${nbName}`
-        ),
-      ];
-    case BreadcrumbType.AnalysisPreview:
-      return [
-        ...getTrail(
-          BreadcrumbType.Workspace,
-          workspace,
-          cohort,
-          cohortReview,
-          conceptSet,
-          params
-        ),
-        new BreadcrumbData(
-          fp.upperFirst(analysisTabName),
-          analysisTabPath(ns, terraName)
-        ),
-        new BreadcrumbData(
-          nbName && dropJupyterNotebookFileSuffix(decodeURIComponent(nbName)),
-          `${analysisTabPath(ns, terraName)}/preview/${nbName}`
-        ),
-      ];
-    case BreadcrumbType.ConceptSet:
-      return [
-        ...getTrail(
-          BreadcrumbType.Data,
-          workspace,
-          cohort,
-          cohortReview,
-          conceptSet,
-          params
-        ),
-        new BreadcrumbData(
-          conceptSet ? conceptSet.name : '...',
-          `${dataTabPath(ns, terraName)}/concepts/sets/${csid}`
-        ),
-      ];
-    case BreadcrumbType.Cohort:
-      return [
-        ...getTrail(
-          BreadcrumbType.Data,
-          workspace,
-          cohort,
-          cohortReview,
-          conceptSet,
-          params
-        ),
-        new BreadcrumbData(
-          cohort ? cohort.name : '...',
-          `${dataTabPath(ns, terraName)}/cohorts/${cid}`
-        ),
-      ];
-    case BreadcrumbType.CohortReview:
-      return [
-        ...getTrail(
-          BreadcrumbType.Data,
-          workspace,
-          cohort,
-          cohortReview,
-          conceptSet,
-          params
-        ),
-        new BreadcrumbData(
-          cohortReview ? cohortReview.cohortName : '...',
-          `${dataTabPath(ns, terraName)}/cohorts/${cid}/reviews/${crid}`
-        ),
-      ];
-    case BreadcrumbType.Participant:
-      return [
-        ...getTrail(
-          BreadcrumbType.CohortReview,
-          workspace,
-          cohort,
-          cohortReview,
-          conceptSet,
-          params
-        ),
-        new BreadcrumbData(
-          `Participant ${pid}`,
-          `${dataTabPath(
-            ns,
-            terraName
-          )}/cohorts/${cid}/reviews/${crid}/participants/${pid}`
-        ),
-      ];
-    case BreadcrumbType.CohortAdd:
-      return [
-        ...getTrail(
-          BreadcrumbType.Data,
-          workspace,
-          cohort,
-          cohortReview,
-          conceptSet,
-          params
-        ),
-        new BreadcrumbData(
-          'Build Cohort Criteria',
-          `${dataTabPath(ns, terraName)}/cohorts/build`
-        ),
-      ];
-    case BreadcrumbType.SearchConcepts:
-      return [
-        ...getTrail(
-          BreadcrumbType.Data,
-          workspace,
-          cohort,
-          cohortReview,
-          conceptSet,
-          params
-        ),
-        new BreadcrumbData(
-          'Search Concepts',
-          `${dataTabPath(ns, terraName)}/concepts`
-        ),
-      ];
-    case BreadcrumbType.Dataset:
-      return [
-        ...getTrail(
-          BreadcrumbType.Data,
-          workspace,
-          cohort,
-          cohortReview,
-          conceptSet,
-          params
-        ),
-        new BreadcrumbData('Dataset', `${dataTabPath(ns, terraName)}/datasets`),
-      ];
     case BreadcrumbType.Data:
       return [
-        ...getTrail(
-          BreadcrumbType.Workspaces,
-          workspace,
-          cohort,
-          cohortReview,
-          conceptSet,
-          params
-        ),
+        ...getTrail(BreadcrumbType.Workspaces, workspace, params),
         new BreadcrumbData(
           workspace ? workspace.name : '...',
           `${dataTabPath(ns, terraName)}`
@@ -390,17 +187,11 @@ const getCreditBannerData = (workspace: WorkspaceData, profile: Profile) => {
 
 interface Props {
   workspace: WorkspaceData;
-  cohort: Cohort;
-  cohortReview: CohortReview;
-  conceptSet: ConceptSet;
   routeData: RouteDataStore;
 }
 
 export const Breadcrumb = fp.flow(
   withCurrentWorkspace(),
-  withCurrentCohort(),
-  withCurrentCohortReview(),
-  withCurrentConceptSet(),
   withStore(routeDataStore, 'routeData')
 )((props: Props) => {
   const { profile } = profileStore.get();
@@ -431,73 +222,10 @@ export const Breadcrumb = fp.flow(
       ? workspaceMatch.params
       : {};
 
-    const cohortMatch = matchPath<MatchParams>(location.pathname, {
-      path: '/workspaces/:ns/:terraName/data/cohorts/:cid',
+    return getTrail(props.routeData.breadcrumb, props.workspace, {
+      ns,
+      terraName,
     });
-    const { cid = '' } = cohortMatch ? cohortMatch.params : {};
-
-    const conceptSetMatch = matchPath<MatchParams>(location.pathname, {
-      path: '/workspaces/:ns/:terraName/data/concepts/sets/:csid',
-    });
-    const { csid = '' } = conceptSetMatch ? conceptSetMatch.params : {};
-
-    const participantMatch = matchPath<MatchParams>(location.pathname, {
-      path: '/workspaces/:ns/:terraName/data/cohorts/:cid/review/participants/:pid',
-    });
-    const { pid = '' } = participantMatch ? participantMatch.params : {};
-
-    // WARNING
-    // because this pattern *also* matches previews and user apps, it must be checked AFTER those in the cond()
-    const analysisMatch = matchPath<MatchParams>(location.pathname, {
-      path: `/workspaces/:ns/:terraName/${analysisTabName}/:nbName`,
-    });
-
-    const analysisPreviewMatch = matchPath<MatchParams>(location.pathname, {
-      path: `/workspaces/:ns/:terraName/${analysisTabName}/preview/:nbName`,
-    });
-
-    const userAppMatch = matchPath<MatchParams>(location.pathname, {
-      path: `/workspaces/:ns/:terraName/${analysisTabName}/userApp/:appType`,
-    });
-
-    const {
-      nbName = '',
-      appType = '',
-      breadcrumbType,
-    } = cond<MatchParams & { breadcrumbType: BreadcrumbType }>(
-      [
-        !!analysisPreviewMatch,
-        () => ({
-          ...analysisPreviewMatch.params,
-          breadcrumbType: BreadcrumbType.AnalysisPreview,
-        }),
-      ],
-      [
-        !!userAppMatch,
-        () => ({
-          ...userAppMatch.params,
-          breadcrumbType: BreadcrumbType.UserApp,
-        }),
-      ],
-      [
-        // this check must go after analysisPreviewMatch and userAppMatch
-        !!analysisMatch,
-        () => ({
-          ...analysisMatch.params,
-          breadcrumbType: BreadcrumbType.Analysis,
-        }),
-      ],
-      () => ({ breadcrumbType: props.routeData.breadcrumb })
-    );
-
-    return getTrail(
-      breadcrumbType,
-      props.workspace,
-      props.cohort,
-      props.cohortReview,
-      props.conceptSet,
-      { ns, terraName, cid, csid, pid, nbName, appType }
-    );
   };
 
   const first = (): Array<BreadcrumbData> => {

@@ -3,16 +3,9 @@ import { useCallback, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import * as querystring from 'querystring-es3';
 
-import {
-  Cohort,
-  CohortReview,
-  ConceptSet,
-  Criteria,
-  ErrorResponse,
-} from 'generated/fetch';
+import { ErrorResponse } from 'generated/fetch';
 
 import { SidebarIconId } from 'app/components/help-sidebar-icons';
-import { Selection } from 'app/pages/data/cohort/selection-list';
 import { serverConfigStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
@@ -36,29 +29,8 @@ export interface GroupCount {
   role: string;
   status: string;
 }
-export const currentGroupCountsStore = new BehaviorSubject<GroupCount[]>([]);
-export const currentCohortStore = new BehaviorSubject<Cohort>(undefined);
-export const currentCohortReviewStore = new BehaviorSubject<CohortReview>(
-  undefined
-);
-export const currentConceptSetStore = new BehaviorSubject<ConceptSet>(
-  undefined
-);
 export const systemErrorStore = new BehaviorSubject<ErrorResponse>(undefined);
-export const currentCohortCriteriaStore = new BehaviorSubject<Array<Selection>>(
-  undefined
-);
-export const currentConceptStore = new BehaviorSubject<Array<Criteria>>(
-  undefined
-);
-export const attributesSelectionStore = new BehaviorSubject<Criteria>(
-  undefined
-);
-export const currentCohortSearchContextStore = new BehaviorSubject<any>(
-  undefined
-);
 export const sidebarActiveIconStore = new BehaviorSubject<SidebarIconId>(null);
-export const conceptSetUpdating = new BehaviorSubject<boolean>(false);
 
 export interface NavigateExtras {
   queryParams?: object;

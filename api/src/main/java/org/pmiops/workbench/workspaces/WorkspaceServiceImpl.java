@@ -12,7 +12,6 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Duration;
 import java.util.*;
-import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -21,20 +20,13 @@ import java.util.stream.Stream;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
-import org.pmiops.workbench.cdr.CdrVersionContext;
-import org.pmiops.workbench.cohorts.CohortCloningService;
-import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.dataset.DataSetService;
 import org.pmiops.workbench.db.dao.FeaturedWorkspaceDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentWorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbCdrVersion;
-import org.pmiops.workbench.db.model.DbCohort;
-import org.pmiops.workbench.db.model.DbConceptSet;
-import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbFeaturedWorkspace;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
@@ -55,14 +47,6 @@ import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceListResponse;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
-import org.pmiops.workbench.tanagra.api.TanagraApi;
-import org.pmiops.workbench.tanagra.model.Cohort;
-import org.pmiops.workbench.tanagra.model.CohortCloneInfo;
-import org.pmiops.workbench.tanagra.model.CohortList;
-import org.pmiops.workbench.tanagra.model.FeatureSet;
-import org.pmiops.workbench.tanagra.model.FeatureSetCloneInfo;
-import org.pmiops.workbench.tanagra.model.FeatureSetList;
-import org.pmiops.workbench.tanagra.model.StudyCreateInfo;
 import org.pmiops.workbench.utils.mappers.FeaturedWorkspaceMapper;
 import org.pmiops.workbench.utils.mappers.FirecloudMapper;
 import org.pmiops.workbench.utils.mappers.UserMapper;
@@ -90,9 +74,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   private final BillingProjectAuditor billingProjectAuditor;
   private final Clock clock;
   private final CloudBillingClient cloudBillingClient;
-  private final CohortCloningService cohortCloningService;
-  private final ConceptSetService conceptSetService;
-  private final DataSetService dataSetService;
   private final FeaturedWorkspaceDao featuredWorkspaceDao;
   private final FeaturedWorkspaceMapper featuredWorkspaceMapper;
   private final FireCloudService fireCloudService;
@@ -101,7 +82,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   private final MailService mailService;
   private final Provider<DbUser> userProvider;
   private final Provider<Stopwatch> stopwatchProvider;
-  private final Provider<TanagraApi> tanagraApiProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final UserDao userDao;
   private final UserMapper userMapper;
@@ -117,9 +97,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       BillingProjectAuditor billingProjectAuditor,
       Clock clock,
       CloudBillingClient cloudBillingClient,
-      CohortCloningService cohortCloningService,
-      ConceptSetService conceptSetService,
-      DataSetService dataSetService,
       FeaturedWorkspaceDao featuredWorkspaceDao,
       FeaturedWorkspaceMapper featuredWorkspaceMapper,
       FireCloudService fireCloudService,
@@ -128,7 +105,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       MailService mailService,
       Provider<DbUser> userProvider,
       Provider<Stopwatch> stopwatchProvider,
-      Provider<TanagraApi> tanagraApiProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       UserDao userDao,
       UserMapper userMapper,
@@ -141,9 +117,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     this.billingProjectAuditor = billingProjectAuditor;
     this.clock = clock;
     this.cloudBillingClient = cloudBillingClient;
-    this.cohortCloningService = cohortCloningService;
-    this.conceptSetService = conceptSetService;
-    this.dataSetService = dataSetService;
     this.featuredWorkspaceDao = featuredWorkspaceDao;
     this.featuredWorkspaceMapper = featuredWorkspaceMapper;
     this.fireCloudService = fireCloudService;
@@ -151,7 +124,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     this.initialCreditsService = initialCreditsService;
     this.mailService = mailService;
     this.stopwatchProvider = stopwatchProvider;
-    this.tanagraApiProvider = tanagraApiProvider;
     this.userDao = userDao;
     this.userMapper = userMapper;
     this.userProvider = userProvider;
@@ -393,85 +365,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
-  @Transactional
-  public DbWorkspace saveAndCloneCohortsConceptSetsAndDataSets(DbWorkspace from, DbWorkspace to) {
-    // Save the workspace first to allocate an ID.
-    to = workspaceDao.save(to);
-    CdrVersionContext.setCdrVersionNoCheckAuthDomain(to.getCdrVersion());
-
-    if (to.isCDRAndWorkspaceTanagraEnabled()) {
-      // Create a new tanagra study that matches AoU workspace
-      createTanagraStudy(to.getWorkspaceNamespace(), to.getName());
-      // Clone tanagra cohorts
-      cloneTanagraCohorts(from.getWorkspaceNamespace(), to.getWorkspaceNamespace());
-      // Cone tanagra feature sets
-      cloneTanagraFeatureSets(from.getWorkspaceNamespace(), to.getWorkspaceNamespace());
-    } else {
-      Map<Long, Long> fromCohortIdToToCohortId = new HashMap<>();
-      for (DbCohort fromCohort : from.getCohorts()) {
-        fromCohortIdToToCohortId.put(
-            fromCohort.getCohortId(),
-            cohortCloningService.cloneCohortAndReviews(fromCohort, to).getCohortId());
-      }
-      Map<Long, Long> fromConceptSetIdToToConceptSetId = new HashMap<>();
-      for (DbConceptSet fromConceptSet : conceptSetService.getConceptSets(from)) {
-        fromConceptSetIdToToConceptSetId.put(
-            fromConceptSet.getConceptSetId(),
-            conceptSetService.cloneConceptSetAndConceptIds(fromConceptSet, to).getConceptSetId());
-      }
-      for (DbDataset dataSet : dataSetService.getDataSets(from)) {
-        dataSetService.cloneDataSetToWorkspace(
-            dataSet,
-            to,
-            fromCohortIdToToCohortId.entrySet().stream()
-                .filter(cohortIdEntry -> dataSet.getCohortIds().contains(cohortIdEntry.getKey()))
-                .map(Entry::getValue)
-                .collect(Collectors.toSet()),
-            fromConceptSetIdToToConceptSetId.entrySet().stream()
-                .filter(conceptSetId -> dataSet.getConceptSetIds().contains(conceptSetId.getKey()))
-                .map(Entry::getValue)
-                .collect(Collectors.toSet()),
-            new ArrayList<>(dataSet.getPrePackagedConceptSet()));
-      }
-    }
-    return to;
-  }
-
-  private void cloneTanagraCohorts(String fromWorkspaceNamespace, String toWorkspaceNamespace) {
-    boolean hasMoreResults = true;
-    int offset = 0;
-    int limit = 50;
-    while (hasMoreResults) {
-      List<Cohort> cohorts =
-          listTanagraCohorts(fromWorkspaceNamespace, offset, limit).stream().toList();
-      cohorts.forEach(
-          cohort -> cloneTanagraCohort(cohort, fromWorkspaceNamespace, toWorkspaceNamespace));
-      if (cohorts.size() < limit) {
-        hasMoreResults = false;
-      } else {
-        offset += limit;
-      }
-    }
-  }
-
-  private void cloneTanagraFeatureSets(String fromWorkspaceNamespace, String toWorkspaceNamespace) {
-    boolean hasMoreResults = true;
-    int offset = 0;
-    int limit = 50;
-    while (hasMoreResults) {
-      List<FeatureSet> featureSets =
-          listTanagraFeatureSets(fromWorkspaceNamespace, offset, limit).stream().toList();
-      featureSets.forEach(
-          fs -> cloneTanagraFeatureSet(fs, fromWorkspaceNamespace, toWorkspaceNamespace));
-      if (featureSets.size() < limit) {
-        hasMoreResults = false;
-      } else {
-        offset += limit;
-      }
-    }
-  }
-
-  @Override
   public List<UserRole> getFirecloudUserRoles(String workspaceNamespace, String firecloudName) {
     Map<String, RawlsWorkspaceAccessEntry> emailToRole =
         workspaceAuthService.getFirecloudWorkspaceAcl(workspaceNamespace, firecloudName);
@@ -651,87 +544,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   @Override
   public List<DbWorkspace> lookupWorkspacesByNamespace(Collection<String> workspaceNamespaces) {
     return workspaceDao.getByWorkspaceNamespaceIn(workspaceNamespaces);
-  }
-
-  @Override
-  public void createTanagraStudy(String workspaceNamespace, String workspaceName) {
-    try {
-      StudyCreateInfo studyCreateInfo =
-          new StudyCreateInfo().id(workspaceNamespace).displayName(workspaceName);
-      tanagraApiProvider.get().createStudy(studyCreateInfo);
-    } catch (Exception e) {
-      log.log(
-          Level.SEVERE,
-          String.format(
-              "Could not create a Tanagra study for workspace namespace: %s, name: %s",
-              workspaceNamespace, workspaceName),
-          e);
-    }
-  }
-
-  @Override
-  public CohortList listTanagraCohorts(String workspaceNamespace, Integer offset, Integer limit) {
-    try {
-      return tanagraApiProvider.get().listCohorts(workspaceNamespace, offset, limit);
-    } catch (Exception e) {
-      log.log(
-          Level.SEVERE,
-          String.format("Could not list cohorts for workspace: %s", workspaceNamespace),
-          e);
-    }
-    return new CohortList();
-  }
-
-  @Override
-  public FeatureSetList listTanagraFeatureSets(
-      String workspaceNamespace, Integer offset, Integer limit) {
-    try {
-      return tanagraApiProvider.get().listFeatureSets(workspaceNamespace, offset, limit);
-    } catch (Exception e) {
-      log.log(
-          Level.SEVERE,
-          String.format("Could not list feature sets for workspace: %s", workspaceNamespace),
-          e);
-    }
-    return new FeatureSetList();
-  }
-
-  @Override
-  public void cloneTanagraCohort(
-      Cohort cohort, String fromWorkspaceNamespace, String toWorkspaceNamespace) {
-    CohortCloneInfo cohortCloneInfo =
-        new CohortCloneInfo()
-            .destinationStudyId(toWorkspaceNamespace)
-            .displayName(cohort.getDisplayName())
-            .description(cohort.getDescription());
-    try {
-      tanagraApiProvider.get().cloneCohort(cohortCloneInfo, fromWorkspaceNamespace, cohort.getId());
-    } catch (Exception e) {
-      log.log(
-          Level.SEVERE,
-          String.format("Could not clone cohort for workspace: %s", toWorkspaceNamespace),
-          e);
-    }
-  }
-
-  @Override
-  public void cloneTanagraFeatureSet(
-      FeatureSet featureSet, String fromWorkspaceNamespace, String toWorkspaceNamespace) {
-    FeatureSetCloneInfo cloneInfo =
-        new FeatureSetCloneInfo()
-            .destinationStudyId(toWorkspaceNamespace)
-            .displayName(featureSet.getDisplayName())
-            .description(featureSet.getDescription());
-    try {
-      tanagraApiProvider
-          .get()
-          .cloneFeatureSet(cloneInfo, fromWorkspaceNamespace, featureSet.getId());
-    } catch (Exception e) {
-      log.log(
-          Level.SEVERE,
-          String.format("Could not clone feature set for workspace: %s", toWorkspaceNamespace),
-          e);
-    }
   }
 
   @Override

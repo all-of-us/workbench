@@ -13,15 +13,12 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
 import org.pmiops.workbench.actionaudit.auditors.AdminAuditor;
-import org.pmiops.workbench.actionaudit.auditors.LeonardoRuntimeAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
@@ -42,22 +39,16 @@ import org.pmiops.workbench.google.CloudMonitoringService;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.lab.notebooks.NotebooksService;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGetRuntimeResponse;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeStatus;
-import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AccessReason;
 import org.pmiops.workbench.model.AdminLockingRequest;
-import org.pmiops.workbench.model.AdminRuntimeFields;
 import org.pmiops.workbench.model.AdminWorkspaceCloudStorageCounts;
 import org.pmiops.workbench.model.AdminWorkspaceObjectsCounts;
 import org.pmiops.workbench.model.AdminWorkspaceResources;
 import org.pmiops.workbench.model.CloudStorageTraffic;
 import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
-import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.PublishWorkspaceRequest;
 import org.pmiops.workbench.model.TimeSeriesPoint;
-import org.pmiops.workbench.model.UserAppEnvironment;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -68,10 +59,8 @@ import org.pmiops.workbench.model.WorkspaceUserAdminView;
 import org.pmiops.workbench.model.WorkspaceWaitingForRetrieval;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.utils.mappers.FeaturedWorkspaceMapper;
-import org.pmiops.workbench.utils.mappers.LeonardoMapper;
 import org.pmiops.workbench.utils.mappers.UserMapper;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
-import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -92,9 +81,6 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   private final FeaturedWorkspaceDao featuredWorkspaceDao;
   private final FireCloudService fireCloudService;
   private final InitialCreditsService initialCreditsService;
-  private final LeonardoMapper leonardoMapper;
-  private final LeonardoApiClient leonardoApiClient;
-  private final LeonardoRuntimeAuditor leonardoRuntimeAuditor;
   private final MailService mailService;
   private final NotebooksService notebooksService;
   private final UserMapper userMapper;
@@ -103,7 +89,6 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   private final WorkspaceDao workspaceDao;
   private final WorkspaceMapper workspaceMapper;
   private final WorkspaceService workspaceService;
-  private final WorkspaceAuthService workspaceAuthService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
@@ -119,9 +104,6 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
       FeaturedWorkspaceDao featuredWorkspaceDao,
       FireCloudService fireCloudService,
       InitialCreditsService initialCreditsService,
-      LeonardoMapper leonardoMapper,
-      LeonardoApiClient leonardoApiClient,
-      LeonardoRuntimeAuditor leonardoRuntimeAuditor,
       MailService mailService,
       NotebooksService notebooksService,
       UserMapper userMapper,
@@ -130,7 +112,6 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
       WorkspaceDao workspaceDao,
       WorkspaceMapper workspaceMapper,
       WorkspaceService workspaceService,
-      WorkspaceAuthService workspaceAuthService,
       Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.actionAuditQueryService = actionAuditQueryService;
     this.adminAuditor = adminAuditor;
@@ -143,9 +124,6 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     this.featuredWorkspaceDao = featuredWorkspaceDao;
     this.fireCloudService = fireCloudService;
     this.initialCreditsService = initialCreditsService;
-    this.leonardoMapper = leonardoMapper;
-    this.leonardoApiClient = leonardoApiClient;
-    this.leonardoRuntimeAuditor = leonardoRuntimeAuditor;
     this.mailService = mailService;
     this.notebooksService = notebooksService;
     this.userMapper = userMapper;
@@ -154,7 +132,6 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     this.workspaceDao = workspaceDao;
     this.workspaceMapper = workspaceMapper;
     this.workspaceService = workspaceService;
-    this.workspaceAuthService = workspaceAuthService;
     this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
@@ -276,47 +253,6 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
         .activeStatus(dbWorkspace.getWorkspaceActiveStatusEnum());
   }
 
-  @Override
-  public List<AdminRuntimeFields> listRuntimes(String workspaceNamespace) {
-    final DbWorkspace dbWorkspace = getWorkspaceByNamespaceOrThrow(workspaceNamespace);
-    return leonardoApiClient.listRuntimesByProjectAsService(dbWorkspace.getGoogleProject()).stream()
-        .map(leonardoMapper::toAdminRuntimeFields)
-        .toList();
-  }
-
-  @Override
-  public List<UserAppEnvironment> listUserApps(String workspaceNamespace) {
-    final DbWorkspace dbWorkspace = getWorkspaceByNamespaceOrThrow(workspaceNamespace);
-    return leonardoApiClient.listAppsInProjectAsService(dbWorkspace.getGoogleProject());
-  }
-
-  @Override
-  public AdminRuntimeFields deleteRuntime(String workspaceNamespace, String runtimeNameToDelete) {
-    final String googleProject =
-        getWorkspaceByNamespaceOrThrow(workspaceNamespace).getGoogleProject();
-    leonardoApiClient.deleteRuntimeAsService(
-        googleProject, runtimeNameToDelete, /* deleteDisk */ false);
-
-    // fetch again to confirm deletion
-    LeonardoGetRuntimeResponse refreshedRuntime =
-        leonardoApiClient.getRuntimeAsService(googleProject, runtimeNameToDelete);
-
-    // DELETED is an acceptable status from an implementation standpoint, but we will never
-    // receive runtimes with that status from Leo. We don't want to because we reuse runtime
-    // names and thus could have >1 deleted runtimes with the same name in the project.
-    List<LeonardoRuntimeStatus> acceptableStates =
-        List.of(LeonardoRuntimeStatus.DELETING, LeonardoRuntimeStatus.ERROR);
-    if (!acceptableStates.contains(refreshedRuntime.getStatus())) {
-      log.log(
-          Level.SEVERE,
-          String.format(
-              "Runtime %s/%s is not in a deleting state", googleProject, runtimeNameToDelete));
-    }
-
-    leonardoRuntimeAuditor.fireDeleteRuntime(googleProject, runtimeNameToDelete);
-    return leonardoMapper.toAdminRuntimeFields(refreshedRuntime);
-  }
-
   private DbWorkspace getWorkspaceByNamespaceOrThrow(String workspaceNamespace) {
     return getFirstWorkspaceByNamespace(workspaceNamespace)
         .orElseThrow(
@@ -374,26 +310,6 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
         workspaceNamespace, workspaceName, notebookNameWithFileExtension, accessReason);
     return notebooksService.adminGetReadOnlyHtml(
         workspaceNamespace, workspaceName, notebookNameWithFileExtension);
-  }
-
-  // NOTE: may be an undercount since we only retrieve the first Page of Storage List results
-  @Override
-  public List<FileDetail> listFiles(String workspaceNamespace, boolean onlyAppFiles) {
-    final String workspaceName =
-        getWorkspaceByNamespaceOrThrow(workspaceNamespace).getFirecloudName();
-    final String bucketName =
-        fireCloudService
-            .getWorkspaceAsService(workspaceNamespace, workspaceName)
-            .getWorkspace()
-            .getBucketName();
-    Set<String> workspaceUsers =
-        workspaceAuthService.getFirecloudWorkspaceAcl(workspaceNamespace, workspaceName).keySet();
-    // If onlyAppFiles is true get all Apps (Jupyter/Rmd/R) files, else return all files from bucket
-    return onlyAppFiles
-        ? notebooksService.getNotebooksAsService(bucketName, workspaceNamespace, workspaceName)
-        : cloudStorageClient.getBlobPage(bucketName).stream()
-            .map(blob -> cloudStorageClient.blobToFileDetail(blob, bucketName, workspaceUsers))
-            .collect(Collectors.toList());
   }
 
   @Override

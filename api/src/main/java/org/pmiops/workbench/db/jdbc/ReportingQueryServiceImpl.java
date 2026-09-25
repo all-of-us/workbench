@@ -2,7 +2,6 @@ package org.pmiops.workbench.db.jdbc;
 
 import static org.pmiops.workbench.db.model.DbStorageEnums.*;
 import static org.pmiops.workbench.db.model.DbUser.USER_APP_NAME_PREFIX;
-import static org.pmiops.workbench.leonardo.LeonardoAppUtils.appServiceNameToAppType;
 import static org.pmiops.workbench.utils.BillingUtils.getBillingAccountType;
 import static org.pmiops.workbench.utils.mappers.CommonMappers.offsetDateTimeUtc;
 
@@ -19,7 +18,6 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser.DbGeneralDiscoverySource;
 import org.pmiops.workbench.model.*;
-import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.InstitutionMembershipRequirement;
 import org.pmiops.workbench.model.NewUserSatisfactionSurveySatisfaction;
 import org.pmiops.workbench.model.PartnerDiscoverySource;
@@ -786,10 +784,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
           .ifPresent(
               appName -> {
                 res.setAppName(appName);
-                res.setAppType(
-                    appServiceNameToAppType(appName)
-                        .map(AppType::toString)
-                        .orElse("[unknown app type]"));
+                res.setAppType("[unknown app type]");
               });
       queryResults.add(res);
     }

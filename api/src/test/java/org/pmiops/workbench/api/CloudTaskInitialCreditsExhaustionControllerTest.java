@@ -45,7 +45,6 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.initialcredits.WorkspaceInitialCreditUsageService;
 import org.pmiops.workbench.institution.InstitutionService;
-import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.ExhaustedInitialCreditsEventRequest;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
@@ -67,7 +66,6 @@ class CloudTaskInitialCreditsExhaustionControllerTest {
 
   @MockitoBean private FireCloudService fireCloudService;
   @MockitoBean private InstitutionService institutionService;
-  @MockitoBean private LeonardoApiClient leonardoApiClient;
   @MockitoBean private TaskQueueService taskQueueService;
   @MockitoBean private UserServiceAuditor userServiceAuditor;
   @MockitoBean private WorkspaceInitialCreditUsageService workspaceInitialCreditUsageService;

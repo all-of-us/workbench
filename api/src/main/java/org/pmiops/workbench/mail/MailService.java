@@ -7,7 +7,6 @@ import java.util.List;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exfiltration.EgressRemediationAction;
-import org.pmiops.workbench.model.Disk;
 import org.pmiops.workbench.model.SendBillingSetupEmailRequest;
 
 public interface MailService {
@@ -36,29 +35,13 @@ public interface MailService {
   void alertUserAccessTierExpiration(
       final DbUser user, Instant expirationTime, String tierShortName) throws MessagingException;
 
-  /**
-   * Notifies the specified users via BCC that there is an unused persistent disk. CC could also be
-   * considered here, but may require a policy discussion, as we'd be introducing the sharing of
-   * contact emails across users with this change. the workspace is on initial credits,
-   * workspaceInitialCreditsRemaining should be provided.
-   */
-  void alertUsersUnusedDiskWarningThreshold(
-      List<DbUser> users,
-      DbWorkspace diskWorkspace,
-      Disk disk,
-      boolean isDiskAttached,
-      int daysUnused,
-      @Nullable Double workspaceInitialCreditsRemaining)
-      throws MessagingException;
-
   void sendBillingSetupEmail(final DbUser user, SendBillingSetupEmailRequest emailRequest)
       throws MessagingException;
 
   void sendEgressRemediationEmail(
       final DbUser user,
       EgressRemediationAction egressRemediationAction,
-      @Nullable String gkeServiceName)
-      throws MessagingException;
+      @Nullable String gkeServiceName);
 
   void sendEgressRemediationEmailForVwb(
       final DbUser user, EgressRemediationAction egressRemediationAction) throws MessagingException;

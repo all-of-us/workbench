@@ -3,29 +3,9 @@ import { Redirect, Switch, useParams, useRouteMatch } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 
 import { AppRoute, withRouteData } from 'app/components/app-router';
-import { LEONARDO_APP_PAGE_KEY } from 'app/components/help-sidebar';
 import { withRoutingSpinner } from 'app/components/with-routing-spinner';
 import { BreadcrumbType } from 'app/lab/components/breadcrumb-type';
-import { GKEAppLauncher } from 'app/pages/analysis/gke-app-launcher';
-import { InteractiveNotebook } from 'app/pages/analysis/interactive-notebook';
-import {
-  LeoApplicationType,
-  LeonardoAppLauncher,
-} from 'app/pages/analysis/leonardo-app-launcher';
-import { AppFilesList } from 'app/pages/appAnalysis/app-files-list';
-import { CohortActions } from 'app/pages/data/cohort/cohort-actions';
-import { CohortPage } from 'app/pages/data/cohort/cohort-page';
-import { CohortReviewPage } from 'app/pages/data/cohort-review/cohort-review-page';
-import { DetailPage } from 'app/pages/data/cohort-review/detail-page';
-import { QueryReport } from 'app/pages/data/cohort-review/query-report.component';
-import { ConceptHomepage } from 'app/pages/data/concept/concept-homepage';
-import { ConceptSearch } from 'app/pages/data/concept/concept-search';
-import { ConceptSetActions } from 'app/pages/data/concept/concept-set-actions';
-import { DatasetPage } from 'app/pages/data/data-set/dataset-page';
-import { DataComponentSplitter } from 'app/pages/data/tanagra-dev/data-component-splitter';
-import { TanagraContainer } from 'app/pages/data/tanagra-dev/tanagra-container';
-import { TanagraDev } from 'app/pages/data/tanagra-dev/tanagra-dev';
-import { DataExplorer } from 'app/pages/data-explorer/data-explorer';
+import { DataComponent } from 'app/pages/data/data-component';
 import { Migration } from 'app/pages/workspace/migration';
 import { MigrationFolderSync } from 'app/pages/workspace/migration-folder-sync';
 import { WorkspaceAbout } from 'app/pages/workspace/workspace-about';
@@ -33,63 +13,15 @@ import {
   WorkspaceEdit,
   WorkspaceEditMode,
 } from 'app/pages/workspace/workspace-edit';
-import { adminLockedGuard, appIsValidGuard } from 'app/routing/guards';
-import { MatchParams, withParamsKey } from 'app/utils/stores';
+import { adminLockedGuard } from 'app/routing/guards';
+import { MatchParams } from 'app/utils/stores';
 
-import { analysisTabName } from './utils';
-
-const CohortPagePage = fp.flow(withRouteData, withRoutingSpinner)(CohortPage);
-const CohortActionsPage = fp.flow(
+const DataComponentPage = fp.flow(
   withRouteData,
   withRoutingSpinner
-)(CohortActions);
-const CohortReviewPagePage = fp.flow(
-  withRouteData,
-  withRoutingSpinner
-)(CohortReviewPage);
-const ConceptHomepagePage = fp.flow(
-  withRouteData,
-  withRoutingSpinner
-)(ConceptHomepage);
-const ConceptSearchPage = fp.flow(
-  withRouteData,
-  withRoutingSpinner
-)(ConceptSearch);
-const ConceptSetActionsPage = fp.flow(
-  withRouteData,
-  withRoutingSpinner
-)(ConceptSetActions);
-const DataExplorerPage = fp.flow(
-  withRouteData,
-  withRoutingSpinner
-)(DataExplorer);
-const DataComponentPage = fp.flow(withRouteData)(DataComponentSplitter);
+)(DataComponent);
 const MigrationPage = fp.flow(withRouteData)(Migration);
 const MigrationFolderSyncPage = fp.flow(withRouteData)(MigrationFolderSync);
-const DataSetComponentPage = fp.flow(
-  withRouteData,
-  withRoutingSpinner
-)(DatasetPage);
-const TanagraContainerPage = fp.flow(
-  withRouteData,
-  withRoutingSpinner
-)(TanagraContainer);
-const DetailPagePage = fp.flow(withRouteData, withRoutingSpinner)(DetailPage);
-const InteractiveNotebookPage = fp.flow(
-  withRouteData,
-  withRoutingSpinner
-)(InteractiveNotebook);
-const LeonardoAppRedirectPage = fp.flow(
-  withRouteData,
-  withRoutingSpinner
-)(LeonardoAppLauncher);
-const LeonardoSparkConsoleRedirectPage = fp.flow(
-  withRouteData,
-  withRoutingSpinner,
-  // Force remounting on parameter change.
-  withParamsKey('sparkConsolePath')
-)(LeonardoAppLauncher);
-const QueryReportPage = fp.flow(withRouteData, withRoutingSpinner)(QueryReport);
 const WorkspaceAboutPage = fp.flow(
   withRouteData,
   withRoutingSpinner
@@ -98,12 +30,6 @@ const WorkspaceEditPage = fp.flow(
   withRouteData,
   withRoutingSpinner
 )(WorkspaceEdit);
-const GKEAppRedirectPage = fp.flow(
-  withRouteData,
-  withRoutingSpinner
-)(GKEAppLauncher);
-const AppsListPage = fp.flow(withRouteData)(AppFilesList);
-const TanagraDevPage = fp.flow(withRouteData, withRoutingSpinner)(TanagraDev);
 
 export const WorkspaceRoutes = () => {
   const { path } = useRouteMatch();
@@ -149,113 +75,6 @@ export const WorkspaceRoutes = () => {
       </AppRoute>
       <AppRoute
         exact
-        path={`${path}/${analysisTabName}`}
-        guards={[adminLockedGuard(ns, terraName)]}
-      >
-        <AppsListPage
-          routeData={{
-            title: 'View Analysis Files',
-            pageKey: analysisTabName,
-            workspaceNavBarTab: analysisTabName,
-            breadcrumb: BreadcrumbType.Workspace,
-          }}
-        />
-      </AppRoute>
-      <AppRoute
-        exact
-        path={`${path}/${analysisTabName}/preview/:nbName`}
-        guards={[adminLockedGuard(ns, terraName)]}
-      >
-        <InteractiveNotebookPage
-          routeData={{
-            pathElementForTitle: 'nbName',
-            breadcrumb: BreadcrumbType.AnalysisPreview,
-            pageKey: LEONARDO_APP_PAGE_KEY,
-            workspaceNavBarTab: analysisTabName,
-            minimizeChrome: true,
-          }}
-        />
-      </AppRoute>
-      <AppRoute
-        exact
-        path={`${path}/${analysisTabName}/:nbName`}
-        guards={[adminLockedGuard(ns, terraName)]}
-      >
-        <LeonardoAppRedirectPage
-          key='notebook'
-          routeData={{
-            pathElementForTitle: 'nbName',
-            breadcrumb: BreadcrumbType.Analysis,
-            // The iframe we use to display the Jupyter notebook does something strange
-            // to the height calculation of the container, which is normally set to auto.
-            // Setting this flag sets the container to 100% so that no content is clipped.
-            contentFullHeightOverride: true,
-            pageKey: LEONARDO_APP_PAGE_KEY,
-            workspaceNavBarTab: analysisTabName,
-            minimizeChrome: true,
-          }}
-          leoAppType={LeoApplicationType.JupyterNotebook}
-        />
-      </AppRoute>
-      <AppRoute
-        exact
-        path={`${path}/${analysisTabName}/userApp/:appType`}
-        guards={[
-          adminLockedGuard(ns, terraName),
-          appIsValidGuard(ns, terraName),
-        ]}
-      >
-        <GKEAppRedirectPage
-          key='app'
-          routeData={{
-            pathElementForTitle: 'appType',
-            breadcrumb: BreadcrumbType.UserApp,
-            // The iframe we use to display the Gke App does something strange
-            // to the height calculation of the container, which is normally set to auto.
-            // Setting this flag sets the container to 100% so that no content is clipped.
-            // This is same as the configuration used for Jupyter iframe
-            contentFullHeightOverride: true,
-            pageKey: LEONARDO_APP_PAGE_KEY,
-            workspaceNavBarTab: analysisTabName,
-            minimizeChrome: true,
-          }}
-        />
-      </AppRoute>
-      <AppRoute
-        exact
-        path={`${path}/terminals`}
-        guards={[adminLockedGuard(ns, terraName)]}
-      >
-        <LeonardoAppRedirectPage
-          key='terminal'
-          routeData={{
-            breadcrumb: BreadcrumbType.Workspace,
-            pageKey: LEONARDO_APP_PAGE_KEY,
-            contentFullHeightOverride: true,
-            workspaceNavBarTab: analysisTabName,
-            minimizeChrome: true,
-          }}
-          leoAppType={LeoApplicationType.JupyterTerminal}
-        />
-      </AppRoute>
-      <AppRoute
-        exact
-        path={`${path}/spark/:sparkConsolePath`}
-        guards={[adminLockedGuard(ns, terraName)]}
-      >
-        <LeonardoSparkConsoleRedirectPage
-          routeData={{
-            breadcrumb: BreadcrumbType.Workspace,
-            pageKey: LEONARDO_APP_PAGE_KEY,
-            contentFullHeightOverride: true,
-            workspaceNavBarTab: analysisTabName,
-            minimizeChrome: true,
-          }}
-          leoAppType={LeoApplicationType.SparkConsole}
-        />
-      </AppRoute>
-      <AppRoute
-        exact
         path={`${path}/data`}
         guards={[adminLockedGuard(ns, terraName)]}
       >
@@ -293,230 +112,6 @@ export const WorkspaceRoutes = () => {
             breadcrumb: BreadcrumbType.Workspace,
             workspaceNavBarTab: 'data',
             pageKey: 'data',
-          }}
-        />
-      </AppRoute>
-      <AppRoute
-        exact
-        path={`${path}/data/data-sets`}
-        guards={[adminLockedGuard(ns, terraName)]}
-      >
-        <DataSetComponentPage
-          routeData={{
-            title: 'Dataset Page',
-            breadcrumb: BreadcrumbType.Dataset,
-            workspaceNavBarTab: 'data',
-            pageKey: 'datasetBuilder',
-          }}
-        />
-      </AppRoute>
-      <AppRoute
-        exact
-        path={`${path}/data/data-sets/:dataSetId`}
-        guards={[adminLockedGuard(ns, terraName)]}
-      >
-        <DataSetComponentPage
-          routeData={{
-            title: 'Edit Dataset',
-            breadcrumb: BreadcrumbType.Dataset,
-            workspaceNavBarTab: 'data',
-            pageKey: 'datasetBuilder',
-          }}
-        />
-      </AppRoute>
-      <AppRoute
-        exact
-        path={`${path}/data/cohorts/build`}
-        guards={[adminLockedGuard(ns, terraName)]}
-      >
-        <CohortPagePage
-          routeData={{
-            title: 'Build Cohort Criteria',
-            breadcrumb: BreadcrumbType.CohortAdd,
-            workspaceNavBarTab: 'data',
-            pageKey: 'cohortBuilder',
-          }}
-        />
-      </AppRoute>
-      <AppRoute
-        exact
-        path={`${path}/data/cohorts/:cid/actions`}
-        guards={[adminLockedGuard(ns, terraName)]}
-      >
-        <CohortActionsPage
-          routeData={{
-            title: 'Cohort Actions',
-            breadcrumb: BreadcrumbType.Cohort,
-            workspaceNavBarTab: 'data',
-            pageKey: 'cohortBuilder',
-          }}
-        />
-      </AppRoute>
-      <AppRoute
-        exact
-        path={`${path}/data/cohorts/:cid/reviews/cohort-description`}
-        guards={[adminLockedGuard(ns, terraName)]}
-      >
-        <QueryReportPage
-          routeData={{
-            title: 'Review Cohort Description',
-            breadcrumb: BreadcrumbType.Cohort,
-            workspaceNavBarTab: 'data',
-            pageKey: 'cohortDescription',
-          }}
-        />
-      </AppRoute>
-      <AppRoute
-        exact
-        path={`${path}/data/cohorts/:cid/reviews/:crid/cohort-description`}
-        guards={[adminLockedGuard(ns, terraName)]}
-      >
-        <QueryReportPage
-          routeData={{
-            title: 'Review Cohort Description',
-            breadcrumb: BreadcrumbType.Cohort,
-            workspaceNavBarTab: 'data',
-            pageKey: 'cohortDescription',
-          }}
-        />
-      </AppRoute>
-      <AppRoute
-        exact
-        path={`${path}/data/cohorts/:cid/reviews`}
-        guards={[adminLockedGuard(ns, terraName)]}
-      >
-        <CohortReviewPagePage
-          routeData={{
-            title: 'Review Cohort Participants',
-            breadcrumb: BreadcrumbType.Cohort,
-            workspaceNavBarTab: 'data',
-            pageKey: 'reviewParticipants',
-          }}
-        />
-      </AppRoute>
-      <AppRoute
-        exact
-        path={`${path}/data/cohorts/:cid/reviews/:crid`}
-        guards={[adminLockedGuard(ns, terraName)]}
-      >
-        <CohortReviewPagePage
-          routeData={{
-            title: 'Review Cohort Participants',
-            breadcrumb: BreadcrumbType.CohortReview,
-            workspaceNavBarTab: 'data',
-            pageKey: 'reviewParticipants',
-          }}
-        />
-      </AppRoute>
-      <AppRoute
-        exact
-        path={`${path}/data/cohorts/:cid/reviews/:crid/participants/:pid`}
-        guards={[adminLockedGuard(ns, terraName)]}
-      >
-        <DetailPagePage
-          routeData={{
-            title: 'Participant Detail',
-            breadcrumb: BreadcrumbType.Participant,
-            workspaceNavBarTab: 'data',
-            pageKey: 'reviewParticipantDetail',
-          }}
-        />
-      </AppRoute>
-      <AppRoute
-        exact
-        path={`${path}/data/concepts`}
-        guards={[adminLockedGuard(ns, terraName)]}
-      >
-        <ConceptHomepagePage
-          routeData={{
-            title: 'Search Concepts',
-            breadcrumb: BreadcrumbType.SearchConcepts,
-            workspaceNavBarTab: 'data',
-            pageKey: 'searchConceptSets',
-          }}
-        />
-      </AppRoute>
-      <AppRoute
-        exact
-        path={`${path}/data/concepts/sets/:csid`}
-        guards={[adminLockedGuard(ns, terraName)]}
-      >
-        <ConceptSearchPage
-          routeData={{
-            title: 'Concept Set',
-            breadcrumb: BreadcrumbType.ConceptSet,
-            workspaceNavBarTab: 'data',
-            pageKey: 'conceptSets',
-          }}
-        />
-      </AppRoute>
-      <AppRoute
-        exact
-        path={`${path}/data/concepts/:domain`}
-        guards={[adminLockedGuard(ns, terraName)]}
-      >
-        <ConceptSearchPage
-          routeData={{
-            title: 'Search Concepts',
-            breadcrumb: BreadcrumbType.SearchConcepts,
-            workspaceNavBarTab: 'data',
-            pageKey: 'conceptSets',
-          }}
-        />
-      </AppRoute>
-      <AppRoute
-        exact
-        path={`${path}/data/concepts/sets/:csid/actions`}
-        guards={[adminLockedGuard(ns, terraName)]}
-      >
-        <ConceptSetActionsPage
-          routeData={{
-            title: 'Concept Set Actions',
-            breadcrumb: BreadcrumbType.ConceptSet,
-            workspaceNavBarTab: 'data',
-            pageKey: 'conceptSetActions',
-          }}
-        />
-      </AppRoute>
-      <AppRoute
-        exact
-        path={`${path}/data/tanagra/*`}
-        guards={[adminLockedGuard(ns, terraName)]}
-      >
-        <TanagraContainerPage
-          routeData={{
-            title: 'Data Page',
-            breadcrumb: BreadcrumbType.Workspace,
-            workspaceNavBarTab: 'data',
-            pageKey: 'data',
-          }}
-        />
-      </AppRoute>
-      <AppRoute
-        exact
-        path={`${path}/data-explorer`}
-        guards={[adminLockedGuard(ns, terraName)]}
-      >
-        <DataExplorerPage
-          routeData={{
-            title: 'Visual Data Explorer',
-            breadcrumb: BreadcrumbType.Workspace,
-            pageKey: 'data',
-            workspaceNavBarTab: 'data-explorer',
-          }}
-        />
-      </AppRoute>
-      <AppRoute
-        exact
-        path={`${path}/tanagra`}
-        guards={[adminLockedGuard(ns, terraName)]}
-      >
-        <TanagraDevPage
-          routeData={{
-            title: 'Tanagra Dev Env',
-            breadcrumb: BreadcrumbType.Workspace,
-            pageKey: 'data',
-            workspaceNavBarTab: 'tanagra',
           }}
         />
       </AppRoute>

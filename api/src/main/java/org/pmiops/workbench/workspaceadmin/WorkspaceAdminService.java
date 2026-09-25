@@ -6,13 +6,10 @@ import java.util.Optional;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.AccessReason;
 import org.pmiops.workbench.model.AdminLockingRequest;
-import org.pmiops.workbench.model.AdminRuntimeFields;
 import org.pmiops.workbench.model.AdminWorkspaceCloudStorageCounts;
 import org.pmiops.workbench.model.AdminWorkspaceObjectsCounts;
 import org.pmiops.workbench.model.CloudStorageTraffic;
-import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.PublishWorkspaceRequest;
-import org.pmiops.workbench.model.UserAppEnvironment;
 import org.pmiops.workbench.model.WorkspaceAdminView;
 import org.pmiops.workbench.model.WorkspaceAuditLogQueryResponse;
 import org.pmiops.workbench.model.WorkspaceUserAdminView;
@@ -30,10 +27,6 @@ public interface WorkspaceAdminService {
 
   WorkspaceAdminView getWorkspaceAdminView(String workspaceNamespace);
 
-  List<AdminRuntimeFields> listRuntimes(String workspaceNamespace);
-
-  List<UserAppEnvironment> listUserApps(String workspaceNamespace);
-
   WorkspaceAuditLogQueryResponse getWorkspaceAuditLogEntries(
       String workspaceNamespace,
       Integer limit,
@@ -44,10 +37,6 @@ public interface WorkspaceAdminService {
 
   String getReadOnlyNotebook(
       String workspaceNamespace, String notebookName, AccessReason accessReason);
-
-  List<FileDetail> listFiles(String workspaceNamespace, boolean onlyAppFiles);
-
-  AdminRuntimeFields deleteRuntime(String workspaceNamespace, String runtimeNameToDelete);
 
   void setAdminLockedState(String workspaceNamespace, AdminLockingRequest adminLockingRequest);
 

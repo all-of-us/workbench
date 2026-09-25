@@ -27,7 +27,6 @@ import {
 import { shouldShowDemographicSurvey } from 'app/utils/profile-utils';
 import {
   cdrVersionStore,
-  compoundRuntimeOpStore,
   profileStore,
   routeDataStore,
   serverConfigStore,
@@ -55,14 +54,6 @@ const styles = reactStyles({
     position: 'absolute',
   },
 });
-
-const checkOpsBeforeUnload = (e) => {
-  if (Object.keys(compoundRuntimeOpStore.get()).length > 0) {
-    // https://developer.mozilla.org/en-US/docs/Web/API/WindowEventHandlers/onbeforeunload
-    e.preventDefault();
-    e.returnValue = '';
-  }
-};
 
 const DemographicSurveyPage = fp.flow(
   withRouteData,
@@ -124,14 +115,6 @@ export const SignedInImpl = (spinnerProps: WithSpinnerOverlayProps) => {
   const { config } = useStore(serverConfigStore);
   const { tiers } = useStore(cdrVersionStore);
   const profileState = useStore(profileStore);
-
-  useEffect(() => {
-    window.addEventListener('beforeunload', checkOpsBeforeUnload);
-
-    return () => {
-      window.removeEventListener('beforeunload', checkOpsBeforeUnload);
-    };
-  }, []);
 
   useEffect(() => {
     const subscription = routeDataStore.subscribe(({ minimizeChrome }) => {

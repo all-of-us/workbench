@@ -27,10 +27,7 @@ import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.LegacySQLTypeName;
 import com.google.cloud.bigquery.Schema;
 import com.google.cloud.bigquery.TableResult;
-import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,8 +36,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -59,33 +54,11 @@ import org.pmiops.workbench.actionaudit.auditors.LeonardoRuntimeAuditor;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
 import org.pmiops.workbench.actionaudit.bucket.BucketAuditQueryService;
 import org.pmiops.workbench.actionaudit.bucket.BucketAuditQueryServiceImpl;
-import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
-import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
-import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
-import org.pmiops.workbench.cohortbuilder.chart.ChartQueryBuilder;
-import org.pmiops.workbench.cohortbuilder.chart.ChartService;
-import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapper;
-import org.pmiops.workbench.cohortreview.CohortAnnotationDefinitionServiceImpl;
-import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
-import org.pmiops.workbench.cohortreview.ReviewQueryBuilder;
-import org.pmiops.workbench.cohortreview.mapper.CohortAnnotationDefinitionMapperImpl;
-import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapperImpl;
-import org.pmiops.workbench.cohortreview.mapper.ParticipantCohortAnnotationMapperImpl;
-import org.pmiops.workbench.cohortreview.mapper.ParticipantCohortStatusMapperImpl;
-import org.pmiops.workbench.cohorts.CohortCloningService;
-import org.pmiops.workbench.cohorts.CohortFactoryImpl;
-import org.pmiops.workbench.cohorts.CohortMapperImpl;
-import org.pmiops.workbench.cohorts.CohortService;
-import org.pmiops.workbench.conceptset.ConceptSetService;
-import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.dataset.DataSetService;
-import org.pmiops.workbench.dataset.DataSetServiceImpl;
-import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
@@ -102,11 +75,6 @@ import org.pmiops.workbench.db.dao.WorkspaceOperationDao;
 import org.pmiops.workbench.db.jdbc.ReportingQueryService;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbCdrVersion;
-import org.pmiops.workbench.db.model.DbCohort;
-import org.pmiops.workbench.db.model.DbCohortReview;
-import org.pmiops.workbench.db.model.DbConceptSet;
-import org.pmiops.workbench.db.model.DbConceptSetConceptId;
-import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -123,14 +91,12 @@ import org.pmiops.workbench.exfiltration.ObjectNameLengthServiceImpl;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
-import org.pmiops.workbench.genomics.GenomicExtractionService;
 import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.google.CloudMonitoringService;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.iam.IamService;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.lab.notebooks.NotebooksService;
-import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.*;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
@@ -161,8 +127,6 @@ import org.pmiops.workbench.workspaceadmin.WorkspaceAdminServiceImpl;
 import org.pmiops.workbench.workspaces.*;
 import org.pmiops.workbench.workspaces.migration.WorkspaceMigrationService;
 import org.pmiops.workbench.workspaces.resources.UserRecentResourceService;
-import org.pmiops.workbench.workspaces.resources.WorkspaceResourceMapperImpl;
-import org.pmiops.workbench.workspaces.resources.WorkspaceResourcesServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -191,14 +155,8 @@ public class WorkspacesControllerTest {
   @MockitoBean private BillingProjectAuditor billingProjectAuditor;
   @MockitoBean private CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
   @MockitoBean private CdrVersionService cdrVersionService;
-  @MockitoBean private ChartQueryBuilder chartQueryBuilder;
-  @MockitoBean private ChartService chartService;
   @MockitoBean private CloudMonitoringService cloudMonitoringService;
-  @MockitoBean private CohortBuilderMapper cohortBuilderMapper;
 
-  @MockitoBean private CohortQueryBuilder cohortQueryBuilder;
-  @MockitoBean private GenomicExtractionService genomicExtractionService;
-  @MockitoBean private LeonardoApiClient leonardoApiClient;
   @MockitoBean private LeonardoRuntimeAuditor leonardoRuntimeAuditor;
   @MockitoBean private MailService mailService;
   @MockitoBean private NotebooksService notebooksService;
@@ -261,7 +219,6 @@ public class WorkspacesControllerTest {
   @MockitoBean AccessTierService accessTierService;
   @MockitoBean BucketAuditQueryService bucketAuditQueryService;
   @MockitoBean CloudBillingClient mockCloudBillingClient;
-  @MockitoBean CohortBuilderService cohortBuilderService;
   @MockitoBean FeaturedWorkspaceMapper featuredWorkspaceMapper;
   @MockitoBean FireCloudService fireCloudService;
   @MockitoBean InitialCreditsService mockInitialCreditsService;
@@ -276,17 +233,10 @@ public class WorkspacesControllerTest {
 
   @Autowired AccessTierDao accessTierDao;
   @Autowired CdrVersionDao cdrVersionDao;
-  @Autowired CohortAnnotationDefinitionController cohortAnnotationDefinitionController;
   @Autowired CohortDao cohortDao;
-  @Autowired CohortReviewController cohortReviewController;
   @Autowired CohortReviewDao cohortReviewDao;
-  @Autowired CohortsController cohortsController;
   @Autowired ConceptSetDao conceptSetDao;
-  @Autowired ConceptSetService conceptSetService;
-  @Autowired ConceptSetsController conceptSetsController;
-  @Autowired DataSetController dataSetController;
   @Autowired DataSetDao dataSetDao;
-  @Autowired DataSetService dataSetService;
   @Autowired FakeClock fakeClock;
   @Autowired FirecloudMapper firecloudMapper;
   @Autowired ObjectNameLengthService objectNameLengthService;
@@ -311,38 +261,16 @@ public class WorkspacesControllerTest {
   @Import({
     BucketAuditQueryServiceImpl.class,
     CdrVersionService.class,
-    CohortAnnotationDefinitionController.class,
-    CohortAnnotationDefinitionMapperImpl.class,
-    CohortAnnotationDefinitionServiceImpl.class,
-    CohortCloningService.class,
-    CohortFactoryImpl.class,
-    CohortMapperImpl.class,
-    CohortReviewController.class,
-    CohortReviewMapperImpl.class,
-    CohortReviewServiceImpl.class,
-    CohortService.class,
-    CohortsController.class,
     CommonMappers.class,
-    ConceptSetMapperImpl.class,
-    ConceptSetService.class,
-    ConceptSetsController.class,
-    DataSetController.class,
-    DataSetMapperImpl.class,
-    DataSetServiceImpl.class,
     FakeClockConfiguration.class,
     FirecloudMapperImpl.class,
     LeonardoMapperImpl.class,
     ObjectNameLengthServiceImpl.class,
-    ParticipantCohortAnnotationMapperImpl.class,
-    ParticipantCohortStatusMapperImpl.class,
-    ReviewQueryBuilder.class,
     UserMapperImpl.class,
     WorkspaceAdminServiceImpl.class,
     WorkspaceAuthService.class,
     WorkspaceMapperImpl.class,
     WorkspaceOperationMapperImpl.class,
-    WorkspaceResourceMapperImpl.class,
-    WorkspaceResourcesServiceImpl.class,
     WorkspaceServiceImpl.class,
     WorkspacesController.class,
   })
@@ -368,8 +296,6 @@ public class WorkspacesControllerTest {
 
     currentUser = createUser(LOGGED_IN_USER_EMAIL);
     registeredTier = accessTierDao.save(createRegisteredTier());
-
-    when(cohortBuilderService.findAllDemographicsMap()).thenReturn(HashBasedTable.create());
 
     when(accessTierService.getAccessTierShortNamesForUser(currentUser))
         .thenReturn(List.of(AccessTierService.REGISTERED_TIER_SHORT_NAME));
@@ -1430,10 +1356,6 @@ public class WorkspacesControllerTest {
     } catch (Exception e) {
       verify(fireCloudService)
           .updateBillingAccount(modWorkspace.getNamespace(), modWorkspace.getBillingAccountName());
-      verify(fireCloudService)
-          .updateBillingAccountAsService(
-              modWorkspace.getNamespace(),
-              workbenchConfig.billing.initialCreditsBillingAccountName());
       return;
     }
     fail();
@@ -1527,615 +1449,6 @@ public class WorkspacesControllerTest {
 
     writerUser = userDao.save(writerUser);
     return writerUser;
-  }
-
-  @Test
-  public void testCloneWorkspaceWithCohortsAndConceptSets() {
-    stubFcGetWorkspaceACL();
-    Long participantId = 1L;
-    CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
-    Workspace workspace = createWorkspace();
-    workspace = workspacesController.createWorkspace(workspace).getBody();
-
-    Cohort c1 = createDefaultCohort("c1");
-    c1 =
-        cohortsController
-            .createCohort(workspace.getNamespace(), workspace.getTerraName(), c1)
-            .getBody();
-    Cohort c2 = createDefaultCohort("c2");
-    c2 =
-        cohortsController
-            .createCohort(workspace.getNamespace(), workspace.getTerraName(), c2)
-            .getBody();
-
-    stubBigQueryCohortCalls();
-    CreateReviewRequest reviewReq = new CreateReviewRequest().size(1).name("review1");
-    CohortReview cr1 =
-        cohortReviewController
-            .createCohortReview(
-                workspace.getNamespace(), workspace.getTerraName(), c1.getId(), reviewReq)
-            .getBody();
-    CohortAnnotationDefinition cad1EnumResponse =
-        cohortAnnotationDefinitionController
-            .createCohortAnnotationDefinition(
-                workspace.getNamespace(),
-                workspace.getTerraName(),
-                c1.getId(),
-                new CohortAnnotationDefinition()
-                    .cohortId(c1.getId())
-                    .annotationType(AnnotationType.ENUM)
-                    .columnName("cad")
-                    .enumValues(List.of("value")))
-            .getBody();
-    ParticipantCohortAnnotation pca1EnumResponse =
-        cohortReviewController
-            .createParticipantCohortAnnotation(
-                workspace.getNamespace(),
-                workspace.getTerraName(),
-                cr1.getCohortReviewId(),
-                participantId,
-                new ParticipantCohortAnnotation()
-                    .cohortAnnotationDefinitionId(
-                        cad1EnumResponse.getCohortAnnotationDefinitionId())
-                    .annotationValueEnum("value")
-                    .participantId(participantId)
-                    .cohortReviewId(cr1.getCohortReviewId()))
-            .getBody();
-    CohortAnnotationDefinition cad1StringResponse =
-        cohortAnnotationDefinitionController
-            .createCohortAnnotationDefinition(
-                workspace.getNamespace(),
-                workspace.getTerraName(),
-                c1.getId(),
-                new CohortAnnotationDefinition()
-                    .cohortId(c1.getId())
-                    .annotationType(AnnotationType.STRING)
-                    .columnName("cad1"))
-            .getBody();
-    ParticipantCohortAnnotation pca1StringResponse =
-        cohortReviewController
-            .createParticipantCohortAnnotation(
-                workspace.getNamespace(),
-                workspace.getTerraName(),
-                cr1.getCohortReviewId(),
-                participantId,
-                new ParticipantCohortAnnotation()
-                    .cohortAnnotationDefinitionId(
-                        cad1StringResponse.getCohortAnnotationDefinitionId())
-                    .annotationValueString("value1")
-                    .participantId(participantId)
-                    .cohortReviewId(cr1.getCohortReviewId()))
-            .getBody();
-
-    stubBigQueryCohortCalls();
-    reviewReq.setSize(2);
-    reviewReq.setName("review2");
-    CohortReview cr2 =
-        cohortReviewController
-            .createCohortReview(
-                workspace.getNamespace(), workspace.getTerraName(), c2.getId(), reviewReq)
-            .getBody();
-    CohortAnnotationDefinition cad2EnumResponse =
-        cohortAnnotationDefinitionController
-            .createCohortAnnotationDefinition(
-                workspace.getNamespace(),
-                workspace.getTerraName(),
-                c2.getId(),
-                new CohortAnnotationDefinition()
-                    .cohortId(c2.getId())
-                    .annotationType(AnnotationType.ENUM)
-                    .columnName("cad")
-                    .enumValues(List.of("value")))
-            .getBody();
-    ParticipantCohortAnnotation pca2EnumResponse =
-        cohortReviewController
-            .createParticipantCohortAnnotation(
-                workspace.getNamespace(),
-                workspace.getTerraName(),
-                cr2.getCohortReviewId(),
-                participantId,
-                new ParticipantCohortAnnotation()
-                    .cohortAnnotationDefinitionId(
-                        cad2EnumResponse.getCohortAnnotationDefinitionId())
-                    .annotationValueEnum("value")
-                    .participantId(participantId)
-                    .cohortReviewId(cr2.getCohortReviewId()))
-            .getBody();
-    CohortAnnotationDefinition cad2BooleanResponse =
-        cohortAnnotationDefinitionController
-            .createCohortAnnotationDefinition(
-                workspace.getNamespace(),
-                workspace.getTerraName(),
-                c2.getId(),
-                new CohortAnnotationDefinition()
-                    .cohortId(c2.getId())
-                    .annotationType(AnnotationType.BOOLEAN)
-                    .columnName("cad1"))
-            .getBody();
-    ParticipantCohortAnnotation pca2BooleanResponse =
-        cohortReviewController
-            .createParticipantCohortAnnotation(
-                workspace.getNamespace(),
-                workspace.getTerraName(),
-                cr2.getCohortReviewId(),
-                participantId,
-                new ParticipantCohortAnnotation()
-                    .cohortAnnotationDefinitionId(
-                        cad2BooleanResponse.getCohortAnnotationDefinitionId())
-                    .annotationValueBoolean(Boolean.TRUE)
-                    .participantId(participantId)
-                    .cohortReviewId(cr2.getCohortReviewId()))
-            .getBody();
-
-    DbConceptSetConceptId dbConceptSetConceptId1 =
-        DbConceptSetConceptId.builder()
-            .addConceptId(CLIENT_CONCEPT_1.getConceptId())
-            .addStandard(true)
-            .build();
-    DbConceptSetConceptId dbConceptSetConceptId2 =
-        DbConceptSetConceptId.builder()
-            .addConceptId(CLIENT_CONCEPT_2.getConceptId())
-            .addStandard(true)
-            .build();
-    when(conceptBigQueryService.getParticipantCountForConcepts(
-            Domain.CONDITION, ImmutableSet.of(dbConceptSetConceptId1, dbConceptSetConceptId2)))
-        .thenReturn(123);
-    ConceptSetConceptId conceptSetConceptId1 = new ConceptSetConceptId();
-    conceptSetConceptId1.setConceptId(CLIENT_CONCEPT_1.getConceptId());
-    conceptSetConceptId1.setStandard(true);
-    ConceptSet conceptSet1 =
-        conceptSetsController
-            .createConceptSet(
-                workspace.getNamespace(),
-                workspace.getTerraName(),
-                new CreateConceptSetRequest()
-                    .conceptSet(
-                        new ConceptSet().name("cs1").description("d1").domain(Domain.CONDITION))
-                    .addAddedConceptSetConceptIdsItem(conceptSetConceptId1))
-            .getBody();
-    ConceptSetConceptId conceptSetConceptId2 = new ConceptSetConceptId();
-    conceptSetConceptId2.setConceptId(CLIENT_CONCEPT_3.getConceptId());
-    conceptSetConceptId2.setStandard(true);
-    ConceptSet conceptSet2 =
-        conceptSetsController
-            .createConceptSet(
-                workspace.getNamespace(),
-                workspace.getTerraName(),
-                new CreateConceptSetRequest()
-                    .conceptSet(
-                        new ConceptSet().name("cs2").description("d2").domain(Domain.MEASUREMENT))
-                    .addAddedConceptSetConceptIdsItem(conceptSetConceptId2))
-            .getBody();
-    ConceptSetConceptId conceptSetConceptId3 = new ConceptSetConceptId();
-    conceptSetConceptId3.setConceptId(CLIENT_CONCEPT_1.getConceptId());
-    conceptSetConceptId3.setStandard(true);
-    ConceptSetConceptId conceptSetConceptId4 = new ConceptSetConceptId();
-    conceptSetConceptId4.setConceptId(CLIENT_CONCEPT_2.getConceptId());
-    conceptSetConceptId4.setStandard(true);
-    conceptSet1 =
-        conceptSetsController
-            .updateConceptSetConcepts(
-                workspace.getNamespace(),
-                workspace.getTerraName(),
-                conceptSet1.getId(),
-                new UpdateConceptSetRequest()
-                    .etag(conceptSet1.getEtag())
-                    .addedConceptSetConceptIds(
-                        ImmutableList.of(conceptSetConceptId3, conceptSetConceptId4)))
-            .getBody();
-
-    CloneWorkspaceRequest req = new CloneWorkspaceRequest();
-    Workspace modWorkspace = new Workspace();
-    modWorkspace.setName("Cloned");
-    modWorkspace.setDisplayName("Cloned");
-    modWorkspace.setTerraName("cloned");
-    modWorkspace.setNamespace("cloned-ns");
-    modWorkspace.setBillingAccountName("billing-account");
-
-    final ResearchPurpose modPurpose = new ResearchPurpose();
-    modPurpose.setAncestry(true);
-    modWorkspace.setResearchPurpose(modPurpose);
-
-    req.setWorkspace(modWorkspace);
-    final RawlsWorkspaceDetails clonedWorkspace =
-        stubCloneWorkspace(
-            modWorkspace.getNamespace(), modWorkspace.getTerraName(), LOGGED_IN_USER_EMAIL);
-
-    stubGetWorkspace(clonedWorkspace, WorkspaceAccessLevel.WRITER);
-    Workspace cloned =
-        workspacesController
-            .cloneWorkspace(workspace.getNamespace(), workspace.getTerraName(), req)
-            .getBody()
-            .getWorkspace();
-
-    List<Cohort> cohorts =
-        cohortsController
-            .getCohortsInWorkspace(cloned.getNamespace(), cloned.getTerraName())
-            .getBody()
-            .getItems();
-    List<CohortReview> cohortReviews =
-        cohortReviewController
-            .getCohortReviewsInWorkspace(cloned.getNamespace(), cloned.getTerraName())
-            .getBody()
-            .getItems();
-    Map<String, Cohort> cohortsByName = Maps.uniqueIndex(cohorts, c -> c.getName());
-    Map<String, CohortReview> cohortReviewsByName =
-        Maps.uniqueIndex(cohortReviews, c -> c.getCohortName());
-    assertThat(cohortsByName).hasSize(2);
-    assertThat(cohortsByName.keySet()).containsExactly("c1", "c2");
-    assertThat(cohorts.stream().map(c -> c.getId()).collect(Collectors.toList()))
-        .containsNoneOf(c1.getId(), c2.getId());
-
-    CohortReview gotCr1 =
-        cohortReviewController
-            .getParticipantCohortStatuses(
-                cloned.getNamespace(),
-                cloned.getTerraName(),
-                cohortReviewsByName.get("review1").getCohortReviewId(),
-                new PageFilterRequest())
-            .getBody()
-            .getCohortReview();
-    assertThat(gotCr1.getReviewSize()).isEqualTo(cr1.getReviewSize());
-    assertThat(gotCr1.getParticipantCohortStatuses()).isEqualTo(cr1.getParticipantCohortStatuses());
-
-    CohortAnnotationDefinitionListResponse clonedCad1List =
-        cohortAnnotationDefinitionController
-            .getCohortAnnotationDefinitions(
-                cloned.getNamespace(), cloned.getTerraName(), cohortsByName.get("c1").getId())
-            .getBody();
-    assertCohortAnnotationDefinitions(
-        clonedCad1List,
-        Arrays.asList(cad1EnumResponse, cad1StringResponse),
-        cohortsByName.get("c1").getId());
-
-    ParticipantCohortAnnotationListResponse clonedPca1List =
-        cohortReviewController
-            .getParticipantCohortAnnotations(
-                cloned.getNamespace(),
-                cloned.getTerraName(),
-                gotCr1.getCohortReviewId(),
-                participantId)
-            .getBody();
-
-    assertParticipantCohortAnnotation(
-        clonedPca1List,
-        clonedCad1List,
-        Arrays.asList(pca1EnumResponse, pca1StringResponse),
-        gotCr1.getCohortReviewId(),
-        participantId);
-
-    CohortReview gotCr2 =
-        cohortReviewController
-            .getParticipantCohortStatuses(
-                cloned.getNamespace(),
-                cloned.getTerraName(),
-                cohortReviewsByName.get("review2").getCohortReviewId(),
-                new PageFilterRequest())
-            .getBody()
-            .getCohortReview();
-    assertThat(gotCr2.getReviewSize()).isEqualTo(cr2.getReviewSize());
-    assertThat(gotCr2.getParticipantCohortStatuses()).isEqualTo(cr2.getParticipantCohortStatuses());
-
-    CohortAnnotationDefinitionListResponse clonedCad2List =
-        cohortAnnotationDefinitionController
-            .getCohortAnnotationDefinitions(
-                cloned.getNamespace(), cloned.getTerraName(), cohortsByName.get("c2").getId())
-            .getBody();
-    assertCohortAnnotationDefinitions(
-        clonedCad2List,
-        Arrays.asList(cad2EnumResponse, cad2BooleanResponse),
-        cohortsByName.get("c2").getId());
-
-    ParticipantCohortAnnotationListResponse clonedPca2List =
-        cohortReviewController
-            .getParticipantCohortAnnotations(
-                cloned.getNamespace(),
-                cloned.getTerraName(),
-                gotCr2.getCohortReviewId(),
-                participantId)
-            .getBody();
-    assertParticipantCohortAnnotation(
-        clonedPca2List,
-        clonedCad2List,
-        Arrays.asList(pca2EnumResponse, pca2BooleanResponse),
-        gotCr2.getCohortReviewId(),
-        participantId);
-
-    assertThat(ImmutableSet.of(gotCr1.getCohortReviewId(), gotCr2.getCohortReviewId()))
-        .containsNoneOf(cr1.getCohortReviewId(), cr2.getCohortReviewId());
-
-    List<ConceptSet> conceptSets =
-        conceptSetsController
-            .getConceptSetsInWorkspace(cloned.getNamespace(), cloned.getTerraName())
-            .getBody()
-            .getItems();
-    assertThat(conceptSets.size()).isEqualTo(2);
-    assertConceptSetClone(conceptSets.get(0), conceptSet1, cloned, 123);
-    assertConceptSetClone(conceptSets.get(1), conceptSet2, cloned, 0);
-
-    workspacesController.deleteWorkspace(workspace.getNamespace(), workspace.getTerraName());
-    try {
-      workspacesController.getWorkspace(workspace.getNamespace(), workspace.getTerraName());
-      fail("NotFoundException expected");
-    } catch (NotFoundException e) {
-      // expected
-    }
-  }
-
-  @Test
-  public void testCloneWorkspaceWithConceptSetNewCdrVersionNewConceptSetCount() {
-    stubFcGetWorkspaceACL();
-    CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
-    Workspace workspace = createWorkspace();
-    workspace = workspacesController.createWorkspace(workspace).getBody();
-
-    DbCdrVersion cdrVersion2 = new DbCdrVersion();
-    cdrVersion2.setName("2");
-    cdrVersion2.setCdrDbName("");
-    cdrVersion2.setAccessTier(registeredTier);
-    cdrVersion2 = cdrVersionDao.save(cdrVersion2);
-
-    DbConceptSetConceptId dbConceptSetConceptId1 =
-        DbConceptSetConceptId.builder()
-            .addConceptId(CLIENT_CONCEPT_1.getConceptId())
-            .addStandard(true)
-            .build();
-    DbConceptSetConceptId dbConceptSetConceptId2 =
-        DbConceptSetConceptId.builder()
-            .addConceptId(CLIENT_CONCEPT_2.getConceptId())
-            .addStandard(true)
-            .build();
-    when(conceptBigQueryService.getParticipantCountForConcepts(
-            Domain.CONDITION, ImmutableSet.of(dbConceptSetConceptId1, dbConceptSetConceptId2)))
-        .thenReturn(123);
-
-    ConceptSetConceptId conceptSetConceptId1 = new ConceptSetConceptId();
-    conceptSetConceptId1.setConceptId(CLIENT_CONCEPT_1.getConceptId());
-    conceptSetConceptId1.setStandard(true);
-    ConceptSetConceptId conceptSetConceptId2 = new ConceptSetConceptId();
-    conceptSetConceptId2.setConceptId(CLIENT_CONCEPT_2.getConceptId());
-    conceptSetConceptId2.setStandard(true);
-    ConceptSet conceptSet1 =
-        conceptSetsController
-            .createConceptSet(
-                workspace.getNamespace(),
-                workspace.getTerraName(),
-                new CreateConceptSetRequest()
-                    .conceptSet(
-                        new ConceptSet().name("cs1").description("d1").domain(Domain.CONDITION))
-                    .addedConceptSetConceptIds(
-                        ImmutableList.of(conceptSetConceptId1, conceptSetConceptId2)))
-            .getBody();
-
-    CloneWorkspaceRequest req = new CloneWorkspaceRequest();
-    Workspace modWorkspace = new Workspace();
-    modWorkspace.setName("Cloned");
-    modWorkspace.setDisplayName("Cloned");
-    modWorkspace.setTerraName("cloned");
-    modWorkspace.setNamespace("cloned-ns");
-    modWorkspace.setBillingAccountName("billing-account");
-    modWorkspace.setCdrVersionId(String.valueOf(cdrVersion2.getCdrVersionId()));
-
-    ResearchPurpose modPurpose = new ResearchPurpose();
-    modPurpose.setAncestry(true);
-    modWorkspace.setResearchPurpose(modPurpose);
-    req.setWorkspace(modWorkspace);
-
-    RawlsWorkspaceDetails clonedWorkspace =
-        stubCloneWorkspace(
-            modWorkspace.getNamespace(), modWorkspace.getTerraName(), LOGGED_IN_USER_EMAIL);
-
-    when(conceptBigQueryService.getParticipantCountForConcepts(
-            Domain.CONDITION, ImmutableSet.of(dbConceptSetConceptId1, dbConceptSetConceptId2)))
-        .thenReturn(456);
-
-    stubGetWorkspace(clonedWorkspace, WorkspaceAccessLevel.WRITER);
-    Workspace cloned =
-        workspacesController
-            .cloneWorkspace(workspace.getNamespace(), workspace.getTerraName(), req)
-            .getBody()
-            .getWorkspace();
-    List<ConceptSet> conceptSets =
-        conceptSetsController
-            .getConceptSetsInWorkspace(cloned.getNamespace(), cloned.getTerraName())
-            .getBody()
-            .getItems();
-    assertThat(conceptSets.size()).isEqualTo(1);
-    assertConceptSetClone(conceptSets.get(0), conceptSet1, cloned, 456);
-  }
-
-  @Test
-  public void testCloneWorkspace_Dataset() {
-    CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
-    Workspace workspace = createWorkspace();
-    workspace = workspacesController.createWorkspace(workspace).getBody();
-
-    DbWorkspace dbWorkspace =
-        workspaceDao.findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
-            workspace.getNamespace(),
-            workspace.getTerraName(),
-            DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
-
-    DbCdrVersion cdrVersion2 = new DbCdrVersion();
-    cdrVersion2.setName("2");
-    cdrVersion2.setCdrDbName("");
-    cdrVersion2.setAccessTier(registeredTier);
-    cdrVersion2 = cdrVersionDao.save(cdrVersion2);
-
-    final String expectedConceptSetName = "cs1";
-    final String expectedConceptSetDescription = "d1";
-    DbConceptSet originalConceptSet = new DbConceptSet();
-    originalConceptSet.setName(expectedConceptSetName);
-
-    originalConceptSet.setDescription(expectedConceptSetDescription);
-    originalConceptSet.setDomainEnum(Domain.CONDITION);
-    DbConceptSetConceptId dbConceptSetConceptId =
-        DbConceptSetConceptId.builder()
-            .addConceptId(CLIENT_CONCEPT_1.getConceptId())
-            .addStandard(true)
-            .build();
-    originalConceptSet.setConceptSetConceptIds(Collections.singleton(dbConceptSetConceptId));
-    originalConceptSet.setWorkspaceId(dbWorkspace.getWorkspaceId());
-    originalConceptSet = conceptSetDao.save(originalConceptSet);
-
-    final String expectedCohortName = "cohort name";
-    final String expectedCohortDescription = "cohort description";
-    DbCohort originalCohort = new DbCohort();
-    originalCohort.setName(expectedCohortName);
-    originalCohort.setDescription(expectedCohortDescription);
-    originalCohort.setWorkspaceId(dbWorkspace.getWorkspaceId());
-    originalCohort = cohortDao.save(originalCohort);
-
-    final String expectedCohortReviewName = "cohort review";
-    final String expectedCohortReviewDefinition = "cohort definition";
-    DbCohortReview originalCohortReview = new DbCohortReview();
-    originalCohortReview.setCohortName(expectedCohortReviewName);
-    originalCohortReview.setCohortDefinition(expectedCohortReviewDefinition);
-    originalCohortReview.setCohortId(originalCohort.getCohortId());
-    originalCohortReview = cohortReviewDao.save(originalCohortReview);
-
-    originalCohort.setCohortReviews(Collections.singleton(originalCohortReview));
-    originalCohort = cohortDao.save(originalCohort);
-
-    final String expectedDatasetName = "data set name";
-    DbDataset originalDataSet = new DbDataset();
-    originalDataSet.setName(expectedDatasetName);
-    originalDataSet.setVersion(1);
-    originalDataSet.setConceptSetIds(
-        Collections.singletonList(originalConceptSet.getConceptSetId()));
-    originalDataSet.setCohortIds(Collections.singletonList(originalCohort.getCohortId()));
-    originalDataSet.setWorkspaceId(dbWorkspace.getWorkspaceId());
-    originalDataSet.setPrePackagedConceptSetEnum(List.of(PrePackagedConceptSetEnum.NONE));
-    dataSetDao.save(originalDataSet);
-
-    CloneWorkspaceRequest req = new CloneWorkspaceRequest();
-    Workspace modWorkspace = new Workspace();
-    modWorkspace.setName("Cloned");
-    modWorkspace.setDisplayName("Cloned");
-    modWorkspace.setTerraName("cloned");
-    modWorkspace.setNamespace("cloned-ns");
-    modWorkspace.setBillingAccountName("billing-account");
-    modWorkspace.setCdrVersionId(String.valueOf(cdrVersion2.getCdrVersionId()));
-
-    ResearchPurpose modPurpose = new ResearchPurpose();
-    modPurpose.setAncestry(true);
-    modWorkspace.setResearchPurpose(modPurpose);
-    req.setWorkspace(modWorkspace);
-
-    stubGetWorkspace(
-        modWorkspace.getNamespace(),
-        modWorkspace.getTerraName(),
-        LOGGED_IN_USER_EMAIL,
-        WorkspaceAccessLevel.OWNER);
-    stubFcGetWorkspaceACL();
-    RawlsWorkspaceDetails clonedWorkspace =
-        stubCloneWorkspace(
-            modWorkspace.getNamespace(), modWorkspace.getTerraName(), LOGGED_IN_USER_EMAIL);
-
-    stubGetWorkspace(clonedWorkspace, WorkspaceAccessLevel.READER);
-    Workspace cloned =
-        workspacesController
-            .cloneWorkspace(workspace.getNamespace(), workspace.getTerraName(), req)
-            .getBody()
-            .getWorkspace();
-
-    DbWorkspace clonedDbWorkspace =
-        workspaceDao.findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
-            cloned.getNamespace(),
-            cloned.getTerraName(),
-            DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
-
-    List<DbDataset> dataSets = dataSetService.getDataSets(clonedDbWorkspace);
-    assertThat(dataSets).hasSize(1);
-    assertThat(dataSets.get(0).getName()).isEqualTo(expectedDatasetName);
-    assertThat(dataSets.get(0).getDataSetId()).isNotEqualTo(originalDataSet.getDataSetId());
-
-    List<DbConceptSet> conceptSets = dataSetService.getConceptSetsForDataset(dataSets.get(0));
-    assertThat(conceptSets).hasSize(1);
-    assertThat(conceptSets.get(0).getName()).isEqualTo(expectedConceptSetName);
-    assertThat(conceptSets.get(0).getDescription()).isEqualTo(expectedConceptSetDescription);
-    assertThat(conceptSets.get(0).getDomainEnum()).isEqualTo(Domain.CONDITION);
-    assertThat(conceptSets.get(0).getConceptSetConceptIds())
-        .isEqualTo(Collections.singleton(dbConceptSetConceptId));
-    assertThat(conceptSets.get(0).getConceptSetId())
-        .isNotEqualTo(originalConceptSet.getConceptSetId());
-
-    List<DbCohort> cohorts = dataSetService.getCohortsForDataset(dataSets.get(0));
-    assertThat(cohorts).hasSize(1);
-    assertThat(cohorts.get(0).getName()).isEqualTo(expectedCohortName);
-    assertThat(cohorts.get(0).getDescription()).isEqualTo(expectedCohortDescription);
-    assertThat(cohorts.get(0).getCohortId()).isNotEqualTo(originalCohort.getCohortId());
-
-    Set<DbCohortReview> cohortReviews =
-        cohortReviewDao.findAllByCohortId(cohorts.get(0).getCohortId());
-    assertThat(cohortReviews).hasSize(1);
-    assertThat(cohortReviews.iterator().next().getCohortName()).isEqualTo(expectedCohortReviewName);
-    assertThat(cohortReviews.iterator().next().getCohortDefinition())
-        .isEqualTo(expectedCohortReviewDefinition);
-    assertThat(cohortReviews.iterator().next().getCohortReviewId())
-        .isNotEqualTo(originalCohortReview.getCohortReviewId());
-  }
-
-  private void assertConceptSetClone(
-      ConceptSet clonedConceptSet,
-      ConceptSet originalConceptSet,
-      Workspace clonedWorkspace,
-      long participantCount) {
-    // Get the full concept set in order to retrieve the concepts.
-    clonedConceptSet =
-        conceptSetsController
-            .getConceptSet(
-                clonedWorkspace.getNamespace(),
-                clonedWorkspace.getTerraName(),
-                clonedConceptSet.getId())
-            .getBody();
-    assertThat(clonedConceptSet.getName()).isEqualTo(originalConceptSet.getName());
-    assertThat(clonedConceptSet.getDomain()).isEqualTo(originalConceptSet.getDomain());
-    assertThat(clonedConceptSet.getCriteriums()).isEqualTo(originalConceptSet.getCriteriums());
-    assertThat(clonedConceptSet.getCreator())
-        .isEqualTo(clonedWorkspace.getCreatorUser().getUserName());
-    assertThat(clonedConceptSet.getCreationTime()).isEqualTo(clonedWorkspace.getCreationTime());
-    assertThat(clonedConceptSet.getLastModifiedTime())
-        .isEqualTo(clonedWorkspace.getLastModifiedTime());
-    assertThat(clonedConceptSet.getEtag()).isEqualTo(Etags.fromVersion(1));
-    assertThat(clonedConceptSet.getParticipantCount()).isEqualTo(participantCount);
-  }
-
-  private void assertCohortAnnotationDefinitions(
-      CohortAnnotationDefinitionListResponse responseList,
-      List<CohortAnnotationDefinition> expectedCads,
-      Long cohortId) {
-    assertThat(responseList.getItems().size()).isEqualTo(expectedCads.size());
-    int i = 0;
-    for (CohortAnnotationDefinition clonedDefinition : responseList.getItems()) {
-      CohortAnnotationDefinition expectedCad = expectedCads.get(i++);
-      assertThat(clonedDefinition.getCohortAnnotationDefinitionId())
-          .isNotEqualTo(expectedCad.getCohortAnnotationDefinitionId());
-      assertThat(clonedDefinition.getCohortId()).isEqualTo(cohortId);
-      assertThat(clonedDefinition.getColumnName()).isEqualTo(expectedCad.getColumnName());
-      assertThat(clonedDefinition.getAnnotationType()).isEqualTo(expectedCad.getAnnotationType());
-      assertThat(clonedDefinition.getEnumValues()).isEqualTo(expectedCad.getEnumValues());
-    }
-  }
-
-  private void assertParticipantCohortAnnotation(
-      ParticipantCohortAnnotationListResponse pcaResponseList,
-      CohortAnnotationDefinitionListResponse cadResponseList,
-      List<ParticipantCohortAnnotation> expectedPcas,
-      Long cohortReviewId,
-      Long participantId) {
-    assertThat(pcaResponseList.getItems().size()).isEqualTo(expectedPcas.size());
-    int i = 0;
-    for (ParticipantCohortAnnotation clonedAnnotation : pcaResponseList.getItems()) {
-      ParticipantCohortAnnotation expectedPca = expectedPcas.get(i);
-      assertThat(clonedAnnotation.getAnnotationId()).isNotEqualTo(expectedPca.getAnnotationId());
-      assertThat(clonedAnnotation.getAnnotationValueEnum())
-          .isEqualTo(expectedPca.getAnnotationValueEnum());
-      assertThat(clonedAnnotation.getCohortAnnotationDefinitionId())
-          .isEqualTo(cadResponseList.getItems().get(i++).getCohortAnnotationDefinitionId());
-      assertThat(clonedAnnotation.getCohortReviewId()).isEqualTo(cohortReviewId);
-      assertThat(clonedAnnotation.getParticipantId()).isEqualTo(participantId);
-    }
   }
 
   @Test
@@ -2868,159 +2181,6 @@ public class WorkspacesControllerTest {
     WorkspaceBillingUsageResponse workspaceBillingUsageResponse =
         workspacesController.getBillingUsage(ws.getNamespace(), ws.getTerraName()).getBody();
     assertThat(workspaceBillingUsageResponse.getCost()).isEqualTo(0.0d);
-  }
-
-  @Test
-  public void getUserRecentWorkspaces() {
-    Workspace workspace = createWorkspace();
-    workspace = workspacesController.createWorkspace(workspace).getBody();
-    stubGetWorkspace(
-        workspace.getNamespace(),
-        workspace.getTerraName(),
-        LOGGED_IN_USER_EMAIL,
-        WorkspaceAccessLevel.OWNER);
-    DbWorkspace dbWorkspace =
-        workspaceDao.getRequired(workspace.getNamespace(), workspace.getTerraName());
-    workspaceService.updateRecentWorkspaces(dbWorkspace);
-    ResponseEntity<RecentWorkspaceResponse> recentWorkspaceResponseEntity =
-        workspacesController.getUserRecentWorkspaces();
-    RecentWorkspace recentWorkspace = recentWorkspaceResponseEntity.getBody().get(0);
-    assertThat(recentWorkspace.getWorkspace().getNamespace())
-        .isEqualTo(dbWorkspace.getWorkspaceNamespace());
-    assertThat(recentWorkspace.getWorkspace().getName()).isEqualTo(dbWorkspace.getName());
-  }
-
-  @Test
-  public void updateRecentWorkspaces_nullWorkspace() {
-    assertThrows(
-        NotFoundException.class, () -> workspacesController.updateRecentWorkspaces("foo", "bar"));
-  }
-
-  // Does not compare: etag, lastModifiedTime, page, pageSize, participantCohortStatuses,
-  // queryResultSize, reviewedCount, reviewSize, reviewStatus, sortColumn, sortOrder
-  private void compareCohortReviewFields(
-      CohortReview observedCohortReview, CohortReview expectedCohortReview) {
-    assertThat(observedCohortReview.getCdrVersionId())
-        .isEqualTo(expectedCohortReview.getCdrVersionId());
-    assertThat(observedCohortReview.getCohortDefinition())
-        .isEqualTo(expectedCohortReview.getCohortDefinition());
-    assertThat(observedCohortReview.getCohortId()).isEqualTo(expectedCohortReview.getCohortId());
-    assertThat(observedCohortReview.getCohortName())
-        .isEqualTo(expectedCohortReview.getCohortName());
-    assertThat(observedCohortReview.getCohortReviewId())
-        .isEqualTo(expectedCohortReview.getCohortReviewId());
-    assertThat(observedCohortReview.getCreationTime())
-        .isEqualTo(expectedCohortReview.getCreationTime());
-    assertThat(observedCohortReview.getDescription())
-        .isEqualTo(expectedCohortReview.getDescription());
-    assertThat(observedCohortReview.getMatchedParticipantCount())
-        .isEqualTo(expectedCohortReview.getMatchedParticipantCount());
-  }
-
-  private void compareDatasetMetadata(DataSet observedDataSet, DataSet expectedDataSet) {
-    assertThat(observedDataSet.getDescription()).isEqualTo(expectedDataSet.getDescription());
-    assertThat(observedDataSet.getEtag()).isEqualTo(expectedDataSet.getEtag());
-    assertThat(observedDataSet.getId()).isEqualTo(expectedDataSet.getId());
-    assertThat(observedDataSet.isIncludesAllParticipants())
-        .isEqualTo(expectedDataSet.isIncludesAllParticipants());
-    assertThat(observedDataSet.getLastModifiedTime())
-        .isEqualTo(expectedDataSet.getLastModifiedTime());
-    assertThat(observedDataSet.getName()).isEqualTo(expectedDataSet.getName());
-    assertThat(observedDataSet.getPrePackagedConceptSet())
-        .isEqualTo(expectedDataSet.getPrePackagedConceptSet());
-  }
-
-  @Test
-  public void getWorkspaceResources() {
-    CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
-    Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
-
-    Cohort cohort =
-        cohortsController
-            .createCohort(
-                workspace.getNamespace(), workspace.getTerraName(), createDefaultCohort("cohort"))
-            .getBody();
-    stubBigQueryCohortCalls();
-    CohortReview cohortReview =
-        cohortReviewController
-            .createCohortReview(
-                workspace.getNamespace(),
-                workspace.getTerraName(),
-                cohort.getId(),
-                new CreateReviewRequest().size(1).name("review1"))
-            .getBody();
-
-    ConceptSetConceptId conceptSetConceptId1 = new ConceptSetConceptId();
-    conceptSetConceptId1.setConceptId(CLIENT_CONCEPT_1.getConceptId());
-    conceptSetConceptId1.setStandard(true);
-    ConceptSet conceptSet =
-        conceptSetsController
-            .createConceptSet(
-                workspace.getNamespace(),
-                workspace.getTerraName(),
-                new CreateConceptSetRequest()
-                    .conceptSet(
-                        new ConceptSet().name("cs1").description("d1").domain(Domain.CONDITION))
-                    .addAddedConceptSetConceptIdsItem(conceptSetConceptId1))
-            .getBody();
-    DataSet dataSet =
-        dataSetController
-            .createDataSet(
-                workspace.getNamespace(),
-                workspace.getTerraName(),
-                new DataSetRequest()
-                    .prePackagedConceptSet(ImmutableList.of(PrePackagedConceptSetEnum.NONE))
-                    .addConceptSetIdsItem(conceptSet.getId())
-                    .addCohortIdsItem(cohort.getId())
-                    .name("dataset")
-                    .domainValuePairs(
-                        ImmutableList.of(
-                            new DomainValuePair().value("VALUE").domain(Domain.CONDITION))))
-            .getBody();
-
-    List<String> typesToFetch =
-        ImmutableList.of(
-            ResourceType.COHORT.toString(),
-            ResourceType.COHORT_REVIEW.toString(),
-            ResourceType.CONCEPT_SET.toString(),
-            ResourceType.DATASET.toString());
-
-    WorkspaceResourceResponse workspaceResourceResponse =
-        workspacesController
-            .getWorkspaceResourcesV2(
-                workspace.getNamespace(), workspace.getTerraName(), typesToFetch)
-            .getBody();
-    assertThat(workspaceResourceResponse).hasSize(4);
-
-    List<Cohort> cohorts =
-        workspaceResourceResponse.stream()
-            .map(WorkspaceResource::getCohort)
-            .filter(Objects::nonNull)
-            .collect(Collectors.toList());
-    List<CohortReview> cohortReviews =
-        workspaceResourceResponse.stream()
-            .map(WorkspaceResource::getCohortReview)
-            .filter(Objects::nonNull)
-            .collect(Collectors.toList());
-    List<ConceptSet> conceptSets =
-        workspaceResourceResponse.stream()
-            .map(WorkspaceResource::getConceptSet)
-            .filter(Objects::nonNull)
-            .collect(Collectors.toList());
-    List<DataSet> dataSets =
-        workspaceResourceResponse.stream()
-            .map(WorkspaceResource::getDataSet)
-            .filter(Objects::nonNull)
-            .collect(Collectors.toList());
-    assertThat(cohorts).hasSize(1);
-    assertThat(cohorts.get(0)).isEqualTo(cohort);
-    assertThat(cohortReviews).hasSize(1);
-    compareCohortReviewFields(cohortReviews.get(0), cohortReview);
-    assertThat(conceptSets).hasSize(1);
-    // Ignore arrays in subtables.
-    assertThat(conceptSets.get(0)).isEqualTo(conceptSet);
-    assertThat(dataSets).hasSize(1);
-    compareDatasetMetadata(dataSets.get(0), dataSet);
   }
 
   @Test

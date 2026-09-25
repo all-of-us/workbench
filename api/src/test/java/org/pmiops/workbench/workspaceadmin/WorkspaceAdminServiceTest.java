@@ -2,10 +2,8 @@ package org.pmiops.workbench.workspaceadmin;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -13,9 +11,6 @@ import static org.pmiops.workbench.utils.TestMockFactory.DEFAULT_GOOGLE_PROJECT;
 import static org.pmiops.workbench.utils.TestMockFactory.createDefaultCdrVersion;
 
 import com.google.cloud.Date;
-import com.google.cloud.storage.Blob;
-import com.google.cloud.storage.BlobId;
-import com.google.common.collect.ImmutableList;
 import com.google.monitoring.v3.Point;
 import com.google.monitoring.v3.TimeInterval;
 import com.google.monitoring.v3.TimeSeries;
@@ -25,7 +20,6 @@ import jakarta.mail.MessagingException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,11 +30,7 @@ import org.pmiops.workbench.access.VwbAccessService;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
 import org.pmiops.workbench.actionaudit.auditors.AdminAuditor;
 import org.pmiops.workbench.actionaudit.auditors.LeonardoRuntimeAuditor;
-import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapper;
-import org.pmiops.workbench.cohorts.CohortMapperImpl;
-import org.pmiops.workbench.conceptset.mapper.ConceptSetMapper;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.dataset.mapper.DataSetMapper;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
@@ -60,7 +50,6 @@ import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.google.CloudMonitoringService;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
-import org.pmiops.workbench.lab.notebooks.NotebookUtils;
 import org.pmiops.workbench.lab.notebooks.NotebooksService;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoAuditInfo;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoCloudContext;
@@ -68,7 +57,6 @@ import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoCloudProvider;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeStatus;
-import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AdminLockingRequest;
 import org.pmiops.workbench.model.AdminWorkspaceCloudStorageCounts;
@@ -76,7 +64,6 @@ import org.pmiops.workbench.model.AdminWorkspaceObjectsCounts;
 import org.pmiops.workbench.model.AdminWorkspaceResources;
 import org.pmiops.workbench.model.CloudStorageTraffic;
 import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
-import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.PublishWorkspaceRequest;
 import org.pmiops.workbench.model.TimeSeriesPoint;
 import org.pmiops.workbench.model.Workspace;
@@ -87,7 +74,6 @@ import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.FeaturedWorkspaceMapper;
 import org.pmiops.workbench.utils.mappers.FirecloudMapper;
-import org.pmiops.workbench.utils.mappers.LeonardoMapperImpl;
 import org.pmiops.workbench.utils.mappers.UserMapper;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
@@ -106,12 +92,9 @@ public class WorkspaceAdminServiceTest {
 
   @MockitoBean private ActionAuditQueryService actionAuditQueryService;
   @MockitoBean private CohortDao cohortDao;
-  @MockitoBean private CohortReviewMapper cohortReviewMapper;
   @MockitoBean private CommonMappers commonMappers;
   @MockitoBean private ConceptSetDao conceptSetDao;
-  @MockitoBean private ConceptSetMapper conceptSetMapper;
   @MockitoBean private DataSetDao dataSetDao;
-  @MockitoBean private DataSetMapper dataSetMapper;
   @MockitoBean private FirecloudMapper firecloudMapper;
   @MockitoBean private InitialCreditsService initialCreditsService;
   @MockitoBean private ReportingQueryService reportingQueryService;
@@ -137,7 +120,6 @@ public class WorkspaceAdminServiceTest {
   @MockitoBean private FeaturedWorkspaceMapper mockFeaturedWorkspaceMapper;
   @MockitoBean private FireCloudService mockFirecloudService;
   @MockitoBean private VwbAccessService mockVwbAccessService;
-  @MockitoBean private LeonardoApiClient mockLeonardoApiClient;
   @MockitoBean private LeonardoRuntimeAuditor mockLeonardoRuntimeAuditor;
   @MockitoBean private MailService mailService;
   @MockitoBean private NotebooksService mockNotebooksService;
@@ -154,9 +136,7 @@ public class WorkspaceAdminServiceTest {
   @TestConfiguration
   @Import({
     AccessTierServiceImpl.class,
-    CohortMapperImpl.class,
     FakeClockConfiguration.class,
-    LeonardoMapperImpl.class,
     WorkspaceAdminServiceImpl.class,
     WorkspaceMapperImpl.class,
   })
@@ -306,112 +286,6 @@ public class WorkspaceAdminServiceTest {
   }
 
   private final long dummyTime = Instant.now().toEpochMilli();
-
-  private Blob mockBlob(String bucket, String path, Long size) {
-    Blob blob = mock(Blob.class);
-    when(blob.getBlobId()).thenReturn(BlobId.of(bucket, path));
-    when(blob.getBucket()).thenReturn(bucket);
-    when(blob.getName()).thenReturn(path);
-    when(blob.getSize()).thenReturn(size);
-    when(blob.getUpdateTime()).thenReturn(dummyTime);
-    return blob;
-  }
-
-  @Test
-  public void testListFilesJustAppFiles() {
-    final List<Blob> blobs =
-        ImmutableList.of(
-            mockBlob("bucket", NotebookUtils.withNotebookPath("test.ipynb"), 1000L),
-            mockBlob("bucket", NotebookUtils.withNotebookPath("test2.ipynb"), 2000L),
-            mockBlob("bucket", NotebookUtils.withNotebookPath("scratch.txt"), 123L),
-            mockBlob(
-                "bucket", NotebookUtils.withNotebookPath("hidden/sneaky.ipynb"), 1000L * 1000L));
-    when(mockCloudStorageClient.getBlobPage("bucket")).thenReturn(blobs);
-
-    final List<FileDetail> expectedNotebookFiles =
-        ImmutableList.of(
-            new FileDetail()
-                .name("test.ipynb")
-                .path("gs://bucket/notebooks/test.ipynb")
-                .sizeInBytes(1000L)
-                .lastModifiedTime(dummyTime),
-            new FileDetail()
-                .name("test2.ipynb")
-                .path("gs://bucket/notebooks/test2.ipynb")
-                .sizeInBytes(2000L)
-                .lastModifiedTime(dummyTime),
-            new FileDetail()
-                .name("sneaky.ipynb")
-                .path("gs://bucket/notebooks/hidden/sneaky.ipynb")
-                .sizeInBytes(1000L * 1000L)
-                .lastModifiedTime(dummyTime));
-
-    when(mockNotebooksService.getNotebooksAsService(anyString(), anyString(), anyString()))
-        .thenReturn(expectedNotebookFiles);
-
-    final List<FileDetail> files = workspaceAdminService.listFiles(WORKSPACE_NAMESPACE, true);
-    assertThat(files).containsExactlyElementsIn(expectedNotebookFiles);
-  }
-
-  @Test
-  public void testListFilesAllFilesInBucket() {
-    final List<Blob> blobs =
-        ImmutableList.of(
-            mockBlob("bucket", NotebookUtils.withNotebookPath("test.ipynb"), 1000L),
-            mockBlob("bucket", NotebookUtils.withNotebookPath("test2.ipynb"), 2000L),
-            mockBlob("bucket", NotebookUtils.withNotebookPath("scratch.txt"), 123L),
-            mockBlob(
-                "bucket", NotebookUtils.withNotebookPath("hidden/sneaky.ipynb"), 1000L * 1000L));
-    when(mockCloudStorageClient.getBlobPage("bucket")).thenReturn(blobs);
-
-    final List<FileDetail> expectedAllfiles =
-        ImmutableList.of(
-            new FileDetail()
-                .name("test.ipynb")
-                .path("gs://bucket/notebooks/test.ipynb")
-                .sizeInBytes(1000L)
-                .lastModifiedTime(dummyTime),
-            new FileDetail()
-                .name("test2.ipynb")
-                .path("gs://bucket/notebooks/test2.ipynb")
-                .sizeInBytes(2000L)
-                .lastModifiedTime(dummyTime),
-            new FileDetail()
-                .name("sneaky.ipynb")
-                .path("gs://bucket/notebooks/hidden/sneaky.ipynb")
-                .sizeInBytes(1000L * 1000L)
-                .lastModifiedTime(dummyTime),
-            new FileDetail()
-                .name("scratch.txt")
-                .path("gs://bucket/notebooks/hidden/scratch.txt")
-                .sizeInBytes(1000L * 1000L)
-                .lastModifiedTime(dummyTime));
-
-    when(mockCloudStorageClient.blobToFileDetail(any(), anyString(), anySet()))
-        .thenReturn(
-            expectedAllfiles.get(0),
-            expectedAllfiles.get(1),
-            expectedAllfiles.get(2),
-            expectedAllfiles.get(3));
-
-    final List<FileDetail> files = workspaceAdminService.listFiles(WORKSPACE_NAMESPACE, false);
-    assertThat(files).containsExactlyElementsIn(expectedAllfiles);
-  }
-
-  @Test
-  public void testDeleteRuntime() {
-    when(mockLeonardoApiClient.getRuntimeAsService(
-            GOOGLE_PROJECT_ID, testLeoRuntime.getRuntimeName()))
-        .thenReturn(testLeoRuntime);
-
-    workspaceAdminService.deleteRuntime(WORKSPACE_NAMESPACE, testLeoRuntime.getRuntimeName());
-
-    verify(mockLeonardoApiClient)
-        .deleteRuntimeAsService(
-            GOOGLE_PROJECT_ID, testLeoRuntime.getRuntimeName(), /* deleteDisk */ false);
-    verify(mockLeonardoRuntimeAuditor)
-        .fireDeleteRuntime(GOOGLE_PROJECT_ID, testLeoListRuntimeResponse.getRuntimeName());
-  }
 
   @Test
   public void testSetAdminLockedStateCallsAuditor() {

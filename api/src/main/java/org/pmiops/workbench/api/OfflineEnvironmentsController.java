@@ -1,22 +1,8 @@
 package org.pmiops.workbench.api;
 
-import jakarta.inject.Provider;
-import java.time.Clock;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
-import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.exceptions.ServerErrorException;
-import org.pmiops.workbench.exceptions.WorkbenchException;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGetRuntimeResponse;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListRuntimeResponse;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeStatus;
-import org.pmiops.workbench.leonardo.LeonardoApiClient;
-import org.pmiops.workbench.model.Disk;
-import org.pmiops.workbench.utils.mappers.LeonardoMapper;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -30,32 +16,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class OfflineEnvironmentsController implements OfflineEnvironmentsApiDelegate {
   private static final Logger log = Logger.getLogger(OfflineEnvironmentsController.class.getName());
-
-  // This is temporary while we wait for Leonardo autopause to rollout. Once
-  // available, we should instead take a runtime status of STOPPED to trigger
-  // idle deletion.
-  private static final int IDLE_AFTER_HOURS = 3;
-
-  private final Provider<WorkbenchConfig> configProvider;
-  private final Clock clock;
-
-  private final LeonardoApiClient leonardoApiClient;
-  private final LeonardoMapper leonardoMapper;
   private final TaskQueueService taskQueueService;
   private final WorkspaceService workspaceService;
 
   @Autowired
   OfflineEnvironmentsController(
-      Clock clock,
-      LeonardoApiClient leonardoApiClient,
-      LeonardoMapper leonardoMapper,
-      Provider<WorkbenchConfig> configProvider,
-      TaskQueueService taskQueueService,
-      WorkspaceService workspaceService) {
-    this.clock = clock;
-    this.configProvider = configProvider;
-    this.leonardoApiClient = leonardoApiClient;
-    this.leonardoMapper = leonardoMapper;
+      TaskQueueService taskQueueService, WorkspaceService workspaceService) {
     this.taskQueueService = taskQueueService;
     this.workspaceService = workspaceService;
   }
@@ -78,114 +44,13 @@ public class OfflineEnvironmentsController implements OfflineEnvironmentsApiDele
    */
   @Override
   public ResponseEntity<Void> deleteOldRuntimes() {
-    final Instant now = clock.instant();
-    final WorkbenchConfig config = configProvider.get();
-    final Duration maxAge = Duration.ofDays(config.firecloud.notebookRuntimeMaxAgeDays);
-    final Duration idleMaxAge = Duration.ofDays(config.firecloud.notebookRuntimeIdleMaxAgeDays);
-
-    final List<LeonardoListRuntimeResponse> responses = leonardoApiClient.listRuntimesAsService();
-
-    log.info(String.format("Checking %d runtimes for age and idleness...", responses.size()));
-
-    int idles = 0;
-    int activeDeletes = 0;
-    int unusedDeletes = 0;
-    List<String> failedDeletions = new ArrayList<>();
-    for (LeonardoListRuntimeResponse listRuntimeResponse : responses) {
-      final String googleProject =
-          leonardoMapper.toGoogleProject(listRuntimeResponse.getCloudContext());
-      final String runtimeId =
-          String.format("%s/%s", googleProject, listRuntimeResponse.getRuntimeName());
-
-      // Refetch the runtime to ensure freshness,
-      // as this iteration may take some time.
-      final LeonardoGetRuntimeResponse runtime;
-      try {
-        runtime =
-            leonardoApiClient.getRuntimeAsService(
-                googleProject, listRuntimeResponse.getRuntimeName());
-      } catch (WorkbenchException e) {
-        log.warning(String.format("error refetching runtime '%s': %s", runtimeId, e.getMessage()));
-        continue;
-      }
-
-      if (LeonardoRuntimeStatus.UNKNOWN.equals(runtime.getStatus())
-          || runtime.getStatus() == null) {
-        log.warning(String.format("unknown runtime status for runtime '%s'", runtimeId));
-        continue;
-      }
-      if (!LeonardoRuntimeStatus.RUNNING.equals(runtime.getStatus())
-          && !LeonardoRuntimeStatus.STOPPED.equals(runtime.getStatus())) {
-        // For now, we only handle running or stopped (suspended) runtimes.
-        continue;
-      }
-
-      final Instant lastUsed = Instant.parse(runtime.getAuditInfo().getDateAccessed());
-      final boolean isIdle = Duration.between(lastUsed, now).toHours() > IDLE_AFTER_HOURS;
-      if (isIdle) {
-        idles++;
-      }
-
-      final Instant created = Instant.parse(runtime.getAuditInfo().getCreatedDate());
-      final Duration age = Duration.between(created, now);
-      if (age.toMillis() > maxAge.toMillis()) {
-        log.info(
-            String.format(
-                "deleting runtime '%s', exceeded max lifetime @ %s (>%s). latest accessed time: %s",
-                runtimeId,
-                formatDuration(age),
-                formatDuration(maxAge),
-                runtime.getAuditInfo().getDateAccessed()));
-        activeDeletes++;
-      } else if (isIdle && age.toMillis() > idleMaxAge.toMillis()) {
-        log.info(
-            String.format(
-                "deleting runtime '%s', idle with age %s (>%s)",
-                runtimeId, formatDuration(age), formatDuration(idleMaxAge)));
-        unusedDeletes++;
-      } else {
-        // Don't delete.
-        continue;
-      }
-
-      try {
-        leonardoApiClient.deleteRuntimeAsService(
-            googleProject, runtime.getRuntimeName(), /* deleteDisk */ false);
-      } catch (WorkbenchException e) {
-        log.warning(String.format("error deleting runtime '%s': %s", runtimeId, e.getMessage()));
-        failedDeletions.add(runtimeId);
-      }
-    }
-
-    log.info(
-        String.format(
-            "Deleted %d old runtimes and %d idle runtimes of %d total runtimes (%d of which were idle).",
-            activeDeletes, unusedDeletes, responses.size(), idles));
-
-    if (!failedDeletions.isEmpty()) {
-      throw new ServerErrorException(
-          String.format(
-              "Failed to delete these runtimes: %s",
-              failedDeletions.size(), String.join(", ", failedDeletions)));
-    }
-
+    log.info("deleteOldRuntimes endpoint is decommissioned");
     return ResponseEntity.noContent().build();
-  }
-
-  private static String formatDuration(Duration d) {
-    if ((d.toHours() % 24) == 0) {
-      return String.format("%dd", d.toDays());
-    }
-    return String.format("%dd %dh", d.toDays(), d.toHours() % 24);
   }
 
   @Override
   public ResponseEntity<Void> checkPersistentDisks() {
-    // Fetch disks as the service, which gets all disks for all workspaces.
-    final List<Disk> disks =
-        leonardoApiClient.listDisksAsService().stream().map(leonardoMapper::toApiDisk).toList();
-    log.info(String.format("Queueing %d persistent disks for idleness check.", disks.size()));
-    taskQueueService.groupAndPushCheckPersistentDiskTasks(disks);
+    log.info("checkPersistentDisks endpoint is decommissioned");
     return ResponseEntity.noContent().build();
   }
 

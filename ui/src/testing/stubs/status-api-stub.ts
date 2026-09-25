@@ -6,7 +6,7 @@ export class StatusApiStub extends StatusApi {
 
   getStatus(): Promise<StatusResponse> {
     return new Promise<StatusResponse>((resolve) => {
-      resolve({ firecloudStatus: false, notebooksStatus: false });
+      resolve({ firecloudStatus: false });
     });
   }
 }

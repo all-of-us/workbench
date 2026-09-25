@@ -77,7 +77,6 @@ import org.pmiops.workbench.institution.InstitutionMapperImpl;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.InstitutionServiceImpl;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapperImpl;
-import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AccessBypassRequest;
 import org.pmiops.workbench.model.AccessModule;
@@ -141,7 +140,6 @@ public class ProfileControllerTest extends BaseControllerTest {
   @MockitoBean private BigQueryService bigQueryService;
   @MockitoBean private NewUserSatisfactionSurveyService newUserSatisfactionSurveyService;
   @MockitoBean private TaskQueueService taskQueueService;
-  @MockitoBean private LeonardoApiClient leonardoApiClient;
   @MockitoBean private VwbAccessService vwbAccessService;
   @MockitoBean private VwbUserManagerClient vwbUserManagerClient;
   @MockitoBean private WorkspaceMapper workspaceMapper;

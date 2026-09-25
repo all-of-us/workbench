@@ -1,29 +1,16 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 
-import {
-  ResourceType,
-  WorkspaceAccessLevel,
-  WorkspaceRecoveryStatus,
-} from 'generated/fetch';
+import { WorkspaceAccessLevel, WorkspaceRecoveryStatus } from 'generated/fetch';
 
-import {
-  CardButton,
-  StyledExternalLink,
-  TabButton,
-} from 'app/components/buttons';
-import { FadeBox } from 'app/components/containers';
+import { CardButton, StyledExternalLink } from 'app/components/buttons';
 import { ClrIcon } from 'app/components/icons';
 import { CheckBox } from 'app/components/inputs';
 import { TooltipTrigger } from 'app/components/popups';
-import { ResourceList } from 'app/components/resources/resource-list';
-import { SpinnerOverlay } from 'app/components/spinners';
 import { AoU } from 'app/components/text-wrappers';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
-import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { withCurrentWorkspace } from 'app/utils';
-import { AnalyticsTracker } from 'app/utils/analytics';
 import { useNavigation } from 'app/utils/navigation';
 import { serverConfigStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
@@ -73,14 +60,6 @@ const styles = {
   },
 };
 
-enum Tabs {
-  SHOWALL = 'SHOW ALL',
-  DATASETS = 'DATASETS',
-  COHORTS = 'COHORTS',
-  COHORTREVIEWS = 'COHORT REVIEWS',
-  CONCEPTSETS = 'CONCEPT SETS',
-}
-
 const descriptions = {
   datasets: `A dataset is a table containing data about a cohort that can
   be exported for analysis. `,
@@ -94,12 +73,6 @@ const VWB_USER_SUPPORT_BILLING_URL =
   'https://support.researchallofus.org/hc/en-us/articles/' +
   '41981050556564-Getting-Started-in-new-Researcher-Workbench-2-0' +
   '#h_01KDR2615S4SGFD62K5MJ4VKPA';
-const resourceTypesToFetch = [
-  ResourceType.COHORT.toString(),
-  ResourceType.COHORT_REVIEW.toString(),
-  ResourceType.CONCEPT_SET.toString(),
-  ResourceType.DATASET.toString(),
-];
 
 interface Props extends WithSpinnerOverlayProps {
   workspace: WorkspaceData;
@@ -115,9 +88,6 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
     step3: false,
     step4: false,
   });
-  const [activeTab, setActiveTab] = useState(Tabs.SHOWALL);
-  const [resourceList, setResourceList] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
   const allChecked = Object.values(checks).every(Boolean);
   const {
     cdrVersionsForMigration,
@@ -130,557 +100,424 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
     return;
   }
 
-  const loadResources = async () => {
-    try {
-      setIsLoading(true);
-      setResourceList(
-        await workspacesApi().getWorkspaceResourcesV2(
-          workspace.namespace,
-          workspace.terraName,
-          resourceTypesToFetch
-        )
-      );
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadResources();
-  }, [workspace.namespace, workspace.terraName]);
-
   const ownerPermission = workspace.accessLevel === WorkspaceAccessLevel.OWNER;
 
   const writePermission =
     ownerPermission || workspace.accessLevel === WorkspaceAccessLevel.WRITER;
 
-  const filteredList = resourceList.filter((resource) => {
-    switch (activeTab) {
-      case Tabs.SHOWALL:
-        return true;
-      case Tabs.COHORTS:
-        return resource.cohort;
-      case Tabs.COHORTREVIEWS:
-        return resource.cohortReview;
-      case Tabs.CONCEPTSETS:
-        return resource.conceptSet;
-      case Tabs.DATASETS:
-        return resource.dataSet;
-    }
-  });
-
   return (
-    <React.Fragment>
-      <div style={{ paddingLeft: '2.25rem' }}>
-        <div style={styles.cardButtonArea}>
-          {enableVwbMigration &&
-            cdrVersionsForMigration.some(
-              (c) => +workspace.cdrVersionId === c.cdrVersionId
-            ) && (
-              <TooltipTrigger
-                content={
-                  !writePermission &&
-                  'Owner permission required to perform migration'
-                }
-                side='top'
+    <div style={{ paddingLeft: '2.25rem' }}>
+      <div style={styles.cardButtonArea}>
+        {enableVwbMigration &&
+          cdrVersionsForMigration.some(
+            (c) => +workspace.cdrVersionId === c.cdrVersionId
+          ) && (
+            <TooltipTrigger
+              content={
+                !writePermission &&
+                'Owner permission required to perform migration'
+              }
+              side='top'
+            >
+              <CardButton
+                style={{
+                  ...styles.resourceTypeButton,
+                  backgroundColor: '#E9EDF5', // light bluish background
+                  border: `1px solid ${colorWithWhiteness(colors.dark, 0.7)}`,
+                  boxShadow: 'none',
+                  padding: '16px',
+                  cursor: 'default',
+                }}
+                disabled={!ownerPermission}
               >
-                <CardButton
-                  style={{
-                    ...styles.resourceTypeButton,
-                    backgroundColor: '#E9EDF5', // light bluish background
-                    border: `1px solid ${colorWithWhiteness(colors.dark, 0.7)}`,
-                    boxShadow: 'none',
-                    padding: '16px',
-                    cursor: 'default',
-                  }}
-                  disabled={!ownerPermission}
-                >
-                  {workspace.migratedVwbWorkspaceId ? (
-                    /* Folder Sync for re-migration */
-                    <>
-                      {/* Title */}
+                {workspace.migratedVwbWorkspaceId ? (
+                  /* Folder Sync for re-migration */
+                  <>
+                    {/* Title */}
+                    <div
+                      style={{
+                        fontSize: '20px',
+                        fontWeight: 600,
+                        color: colors.primary,
+                        marginBottom: '4px',
+                      }}
+                    >
+                      Folder Sync
+                    </div>
+
+                    {/* Description */}
+                    <div
+                      style={{
+                        fontSize: '12.5px',
+                        lineHeight: '20px',
+                        color: colors.dark,
+                      }}
+                    >
+                      This workspace has already been migrated to Researcher
+                      Workbench 2.0. However, any new folders can be moved to
+                      the corresponding Researcher Workbench 2.0 workspace.{' '}
+                      <StyledExternalLink
+                        href={VWB_USER_SUPPORT_MIGRATION_URL}
+                        style={{
+                          color: colors.accent,
+                          textDecoration: 'underline',
+                        }}
+                        target='_blank'
+                      >
+                        Learn more
+                      </StyledExternalLink>
+                    </div>
+
+                    {/* CTA */}
+                    <div style={{ marginTop: 'auto' }}>
                       <div
                         style={{
-                          fontSize: '20px',
-                          fontWeight: 600,
-                          color: colors.primary,
-                          marginBottom: '4px',
+                          marginTop: '4px',
+                          backgroundColor: colors.primary,
+                          color: colors.white,
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          padding: '4px 16px',
+                          borderRadius: '4px',
+                          fontSize: '13px',
+                          fontWeight: 500,
+                          cursor: 'pointer',
+                          height: '30px',
                         }}
-                      >
-                        Folder Sync
-                      </div>
-
-                      {/* Description */}
-                      <div
-                        style={{
-                          fontSize: '12.5px',
-                          lineHeight: '20px',
-                          color: colors.dark,
-                        }}
-                      >
-                        This workspace has already been migrated to Researcher
-                        Workbench 2.0. However, any new folders can be moved to
-                        the corresponding Researcher Workbench 2.0 workspace.{' '}
-                        <StyledExternalLink
-                          href={VWB_USER_SUPPORT_MIGRATION_URL}
-                          style={{
-                            color: colors.accent,
-                            textDecoration: 'underline',
-                          }}
-                          target='_blank'
-                        >
-                          Learn more
-                        </StyledExternalLink>
-                      </div>
-
-                      {/* CTA */}
-                      <div style={{ marginTop: 'auto' }}>
-                        <div
-                          style={{
-                            marginTop: '4px',
-                            backgroundColor: colors.primary,
-                            color: colors.white,
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            padding: '4px 16px',
-                            borderRadius: '4px',
-                            fontSize: '13px',
-                            fontWeight: 500,
-                            cursor: 'pointer',
-                            height: '30px',
-                          }}
-                          onClick={() => {
-                            if (ownerPermission) {
-                              navigate([
-                                'workspaces',
-                                workspace.namespace,
-                                workspace.terraName,
-                                'folder-sync',
-                              ]);
-                            }
-                          }}
-                        >
-                          Get started
-                          <ClrIcon
-                            shape='arrow right'
-                            size={12}
-                            style={{ marginLeft: '6px' }}
-                          />
-                        </div>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      {/* Title */}
-                      <div
-                        style={{
-                          fontSize: '20px',
-                          fontWeight: 600,
-                          color: colors.primary,
-                          marginBottom: '4px',
-                        }}
-                      >
-                        Workspace Migration
-                      </div>
-
-                      {/* Description */}
-                      <div
-                        style={{
-                          fontSize: '12.5px',
-                          lineHeight: '20px',
-                          color: colors.dark,
-                        }}
-                      >
-                        The <AoU /> Researcher Workbench is moving to a new
-                        platform. Please migrate your workspaces. Any workspace
-                        not migrated will be archived.{' '}
-                        <StyledExternalLink
-                          href={VWB_USER_SUPPORT_MIGRATION_URL}
-                          style={{
-                            color: colors.accent,
-                            textDecoration: 'underline',
-                          }}
-                          target='_blank'
-                        >
-                          Learn more
-                        </StyledExternalLink>
-                      </div>
-
-                      {/* Section Title */}
-                      <div
-                        style={{
-                          fontSize: '12.5px',
-                          fontWeight: 600,
-                          color: colors.primary,
-                        }}
-                      >
-                        Prepare for Migration:
-                      </div>
-
-                      {/* List */}
-                      <div
-                        style={{
-                          fontSize: '11.5px',
-                          lineHeight: '18px',
-                          color: colors.primary,
-                        }}
-                      >
-                        <div>
-                          <CheckBox
-                            checked={checks.step1}
-                            disabled={!ownerPermission}
-                            onChange={(checked) =>
-                              setChecks({ ...checks, step1: checked })
-                            }
-                            style={{ marginRight: '4px' }}
-                          />
-                          Review your workspaces to decide which ones to migrate
-                        </div>
-                        <div>
-                          <CheckBox
-                            checked={checks.step2}
-                            disabled={!ownerPermission}
-                            onChange={(checked) =>
-                              setChecks({ ...checks, step2: checked })
-                            }
-                          />
-                          Delete any inactive workspaces or stored files no
-                          longer applicable to your work
-                        </div>
-                        <div>
-                          <CheckBox
-                            checked={checks.step3}
-                            disabled={!ownerPermission}
-                            onChange={(checked) =>
-                              setChecks({ ...checks, step3: checked })
-                            }
-                          />
-                          Migrate files from your persistent disk (if
-                          applicable) to the workspace bucket{' '}
-                          <StyledExternalLink
-                            href={VWB_USER_SUPPORT_MIGRATION_URL}
-                            style={{
-                              color: colors.accent,
-                              textDecoration: 'underline',
-                            }}
-                            target='_blank'
-                          >
-                            Learn more
-                          </StyledExternalLink>
-                        </div>
-                        <div>
-                          <CheckBox
-                            checked={checks.step4}
-                            disabled={!ownerPermission}
-                            onChange={(checked) =>
-                              setChecks({ ...checks, step4: checked })
-                            }
-                          />
-                          Set up billing in the new Researcher Workbench 2.0 if
-                          initial credits have been used{' '}
-                          <StyledExternalLink
-                            href={VWB_USER_SUPPORT_BILLING_URL}
-                            style={{
-                              color: colors.accent,
-                              textDecoration: 'underline',
-                            }}
-                            target='_blank'
-                          >
-                            Learn more
-                          </StyledExternalLink>
-                        </div>
-                      </div>
-
-                      {/* CTA */}
-                      <div style={{ marginTop: 'auto' }}>
-                        <div
-                          style={{
-                            marginTop: '4px',
-                            backgroundColor: allChecked
-                              ? colors.primary
-                              : '#C4C4C4',
-                            color: colors.white,
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            padding: '4px 16px',
-                            borderRadius: '4px',
-                            fontSize: '13px',
-                            fontWeight: 500,
-                            cursor: allChecked ? 'pointer' : 'not-allowed',
-                            height: '30px',
-                            opacity: allChecked ? 1 : 0.6,
-                          }}
-                          onClick={() => {
-                            if (!allChecked || !ownerPermission) {
-                              return;
-                            }
+                        onClick={() => {
+                          if (ownerPermission) {
                             navigate([
                               'workspaces',
                               workspace.namespace,
                               workspace.terraName,
-                              'migration',
+                              'folder-sync',
                             ]);
-                          }}
-                        >
-                          Get started
-                          <ClrIcon
-                            shape='arrow right'
-                            size={12}
-                            style={{ marginLeft: '6px' }}
-                          />
-                        </div>
+                          }
+                        }}
+                      >
+                        Get started
+                        <ClrIcon
+                          shape='arrow right'
+                          size={12}
+                          style={{ marginLeft: '6px' }}
+                        />
                       </div>
-                    </>
-                  )}
-                </CardButton>
-              </TooltipTrigger>
-            )}
-          {enableWorkspaceArchiveRecovery &&
-            workspace.recoveryState === WorkspaceRecoveryStatus.NOT_STARTED && (
-              <TooltipTrigger
-                content={
-                  !writePermission &&
-                  'Write permission required to recover archived workspace'
-                }
-                side='top'
-              >
-                <CardButton
-                  style={{
-                    ...styles.resourceTypeButton,
-                    backgroundColor: colors.white,
-                    border: `1px solid ${colorWithWhiteness(colors.dark, 0.7)}`,
-                    padding: '24px',
-                    cursor: 'default',
-                  }}
-                  disabled={!writePermission}
-                >
-                  <div
-                    style={{
-                      fontSize: '32px',
-                      fontWeight: 500,
-                      color: colors.primary,
-                      marginBottom: '18px',
-                    }}
-                  >
-                    Data Recovery
-                  </div>
-
-                  <div
-                    style={{
-                      fontSize: '16px',
-                      lineHeight: '26px',
-                      color: colors.dark,
-                    }}
-                  >
-                    The data in this workspace has been archived in cold
-                    storage. To retrieve this data and initiate its transfer to
-                    Verily Workbench click get started.
-                  </div>
-
-                  <div style={{ marginTop: 'auto' }}>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    {/* Title */}
                     <div
                       style={{
-                        marginTop: '24px',
-                        backgroundColor: colors.select,
-                        color: colors.white,
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        padding: '10px 22px',
-                        borderRadius: '6px',
-                        fontSize: '15px',
+                        fontSize: '20px',
                         fontWeight: 600,
-                        cursor: 'pointer',
-                      }}
-                      onClick={() => {
-                        navigate([
-                          'workspaces',
-                          workspace.namespace,
-                          workspace.terraName,
-                          'recovery',
-                        ]);
+                        color: colors.primary,
+                        marginBottom: '4px',
                       }}
                     >
-                      Get started
-                      <ClrIcon
-                        shape='export'
-                        size={14}
-                        style={{ marginLeft: '8px' }}
-                      />
+                      Workspace Migration
                     </div>
+
+                    {/* Description */}
+                    <div
+                      style={{
+                        fontSize: '12.5px',
+                        lineHeight: '20px',
+                        color: colors.dark,
+                      }}
+                    >
+                      The <AoU /> Researcher Workbench is moving to a new
+                      platform. Please migrate your workspaces. Any workspace
+                      not migrated will be archived.{' '}
+                      <StyledExternalLink
+                        href={VWB_USER_SUPPORT_MIGRATION_URL}
+                        style={{
+                          color: colors.accent,
+                          textDecoration: 'underline',
+                        }}
+                        target='_blank'
+                      >
+                        Learn more
+                      </StyledExternalLink>
+                    </div>
+
+                    {/* Section Title */}
+                    <div
+                      style={{
+                        fontSize: '12.5px',
+                        fontWeight: 600,
+                        color: colors.primary,
+                      }}
+                    >
+                      Prepare for Migration:
+                    </div>
+
+                    {/* List */}
+                    <div
+                      style={{
+                        fontSize: '11.5px',
+                        lineHeight: '18px',
+                        color: colors.primary,
+                      }}
+                    >
+                      <div>
+                        <CheckBox
+                          checked={checks.step1}
+                          disabled={!ownerPermission}
+                          onChange={(checked) =>
+                            setChecks({ ...checks, step1: checked })
+                          }
+                          style={{ marginRight: '4px' }}
+                        />
+                        Review your workspaces to decide which ones to migrate
+                      </div>
+                      <div>
+                        <CheckBox
+                          checked={checks.step2}
+                          disabled={!ownerPermission}
+                          onChange={(checked) =>
+                            setChecks({ ...checks, step2: checked })
+                          }
+                        />
+                        Delete any inactive workspaces or stored files no longer
+                        applicable to your work
+                      </div>
+                      <div>
+                        <CheckBox
+                          checked={checks.step3}
+                          disabled={!ownerPermission}
+                          onChange={(checked) =>
+                            setChecks({ ...checks, step3: checked })
+                          }
+                        />
+                        Migrate files from your persistent disk (if applicable)
+                        to the workspace bucket{' '}
+                        <StyledExternalLink
+                          href={VWB_USER_SUPPORT_MIGRATION_URL}
+                          style={{
+                            color: colors.accent,
+                            textDecoration: 'underline',
+                          }}
+                          target='_blank'
+                        >
+                          Learn more
+                        </StyledExternalLink>
+                      </div>
+                      <div>
+                        <CheckBox
+                          checked={checks.step4}
+                          disabled={!ownerPermission}
+                          onChange={(checked) =>
+                            setChecks({ ...checks, step4: checked })
+                          }
+                        />
+                        Set up billing in the new Researcher Workbench 2.0 if
+                        initial credits have been used{' '}
+                        <StyledExternalLink
+                          href={VWB_USER_SUPPORT_BILLING_URL}
+                          style={{
+                            color: colors.accent,
+                            textDecoration: 'underline',
+                          }}
+                          target='_blank'
+                        >
+                          Learn more
+                        </StyledExternalLink>
+                      </div>
+                    </div>
+
+                    {/* CTA */}
+                    <div style={{ marginTop: 'auto' }}>
+                      <div
+                        style={{
+                          marginTop: '4px',
+                          backgroundColor: allChecked
+                            ? colors.primary
+                            : '#C4C4C4',
+                          color: colors.white,
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          padding: '4px 16px',
+                          borderRadius: '4px',
+                          fontSize: '13px',
+                          fontWeight: 500,
+                          cursor: allChecked ? 'pointer' : 'not-allowed',
+                          height: '30px',
+                          opacity: allChecked ? 1 : 0.6,
+                        }}
+                        onClick={() => {
+                          if (!allChecked || !ownerPermission) {
+                            return;
+                          }
+                          navigate([
+                            'workspaces',
+                            workspace.namespace,
+                            workspace.terraName,
+                            'migration',
+                          ]);
+                        }}
+                      >
+                        Get started
+                        <ClrIcon
+                          shape='arrow right'
+                          size={12}
+                          style={{ marginLeft: '6px' }}
+                        />
+                      </div>
+                    </div>
+                  </>
+                )}
+              </CardButton>
+            </TooltipTrigger>
+          )}
+        {enableWorkspaceArchiveRecovery &&
+          workspace.recoveryState === WorkspaceRecoveryStatus.NOT_STARTED && (
+            <TooltipTrigger
+              content={
+                !writePermission &&
+                'Write permission required to recover archived workspace'
+              }
+              side='top'
+            >
+              <CardButton
+                style={{
+                  ...styles.resourceTypeButton,
+                  backgroundColor: colors.white,
+                  border: `1px solid ${colorWithWhiteness(colors.dark, 0.7)}`,
+                  padding: '24px',
+                  cursor: 'default',
+                }}
+                disabled={!writePermission}
+              >
+                <div
+                  style={{
+                    fontSize: '32px',
+                    fontWeight: 500,
+                    color: colors.primary,
+                    marginBottom: '18px',
+                  }}
+                >
+                  Data Recovery
+                </div>
+
+                <div
+                  style={{
+                    fontSize: '16px',
+                    lineHeight: '26px',
+                    color: colors.dark,
+                  }}
+                >
+                  The data in this workspace has been archived in cold storage.
+                  To retrieve this data and initiate its transfer to Verily
+                  Workbench click get started.
+                </div>
+
+                <div style={{ marginTop: 'auto' }}>
+                  <div
+                    style={{
+                      marginTop: '24px',
+                      backgroundColor: colors.select,
+                      color: colors.white,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      padding: '10px 22px',
+                      borderRadius: '6px',
+                      fontSize: '15px',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                    }}
+                    onClick={() => {
+                      navigate([
+                        'workspaces',
+                        workspace.namespace,
+                        workspace.terraName,
+                        'recovery',
+                      ]);
+                    }}
+                  >
+                    Get started
+                    <ClrIcon
+                      shape='export'
+                      size={14}
+                      style={{ marginLeft: '8px' }}
+                    />
                   </div>
-                </CardButton>
-              </TooltipTrigger>
-            )}
-          <TooltipTrigger
-            content={
-              !writePermission && 'Write permission required to create cohorts'
-            }
-            side='top'
-          >
-            <CardButton
-              style={styles.resourceTypeButton}
-              disabled={!writePermission}
-              onClick={() => {
-                navigate([
-                  'workspaces',
-                  workspace.namespace,
-                  workspace.terraName,
-                  'data',
-                  'cohorts',
-                  'build',
-                ]);
-              }}
-            >
-              <div style={styles.cardHeader}>
-                <h2 style={styles.cardHeaderText(!writePermission)}>Cohorts</h2>
-                <ClrIcon
-                  shape='plus-circle'
-                  class='is-solid'
-                  size={18}
-                  style={{ marginTop: 5 }}
-                />
-              </div>
-              <div style={styles.cardText}>{descriptions.cohorts}</div>
-              {/* Because the container can stretch based on window size, but the height
-              can't we set a max width to cap the height based on aspect ratio*/}
-              <div
-                style={{
-                  width: '100%',
-                  maxWidth: '425px',
-                  paddingTop: '1.5rem',
-                }}
-              >
-                <img data-test-id={'cohort-diagram'} src={cohortImg} />
-              </div>
-            </CardButton>
-          </TooltipTrigger>
-          <TooltipTrigger
-            content={
-              !writePermission && 'Write permission required to create datasets'
-            }
-            side='top'
-          >
-            <CardButton
-              style={{
-                ...styles.resourceTypeButton,
-                ...styles.resourceTypeButtonLast,
-              }}
-              disabled={!writePermission}
-              onClick={() => {
-                AnalyticsTracker.DatasetBuilder.OpenCreatePage();
-                navigate([
-                  'workspaces',
-                  workspace.namespace,
-                  workspace.terraName,
-                  'data',
-                  'data-sets',
-                ]);
-              }}
-            >
-              <div style={styles.cardHeader}>
-                <h2 style={styles.cardHeaderText(!writePermission)}>
-                  Datasets
-                </h2>
-                <ClrIcon
-                  shape='plus-circle'
-                  class='is-solid'
-                  size={18}
-                  style={{ marginTop: 5 }}
-                />
-              </div>
-              <div style={styles.cardText}>{descriptions.datasets}</div>
-              {/* Because the container can stretch based on window size, but the height
-               can't we set a max width to cap the height based on aspect ratio*/}
-              <div
-                style={{
-                  width: '100%',
-                  maxWidth: '425px',
-                  paddingTop: '2.25rem',
-                }}
-              >
-                <img data-test-id={'dataset-diagram'} src={dataSetImg} />
-              </div>
-            </CardButton>
-          </TooltipTrigger>
-        </div>
-      </div>
-      <FadeBox style={{ marginTop: '1.5rem' }}>
-        <div style={styles.tabContainer}>
-          <h2
-            style={{
-              margin: 0,
-              color: colors.primary,
-              fontSize: '16px',
-              fontWeight: 600,
-            }}
-          >
-            Show:
-          </h2>
-          <TabButton
-            active={activeTab === Tabs.SHOWALL}
-            onClick={() => setActiveTab(Tabs.SHOWALL)}
-          >
-            Show All
-          </TabButton>
-          <TabButton
-            active={activeTab === Tabs.COHORTS}
-            onClick={() => setActiveTab(Tabs.COHORTS)}
-            data-test-id='view-only-cohorts'
-          >
-            Cohorts
-          </TabButton>
-          <TabButton
-            active={activeTab === Tabs.COHORTREVIEWS}
-            onClick={() => setActiveTab(Tabs.COHORTREVIEWS)}
-            data-test-id='view-only-cohort-reviews'
-          >
-            Cohort Reviews
-          </TabButton>
-          <TabButton
-            active={activeTab === Tabs.CONCEPTSETS}
-            onClick={() => setActiveTab(Tabs.CONCEPTSETS)}
-            data-test-id='view-only-concept-sets'
-          >
-            Concept Sets
-          </TabButton>
-          <TabButton
-            active={activeTab === Tabs.DATASETS}
-            onClick={() => setActiveTab(Tabs.DATASETS)}
-            data-test-id='view-only-data-sets'
-          >
-            Datasets
-          </TabButton>
-        </div>
-        <div
-          style={{
-            borderBottom: `1px solid ${colors.dark}`,
-            marginLeft: '-1.5rem',
-            marginRight: '-1.5rem',
-            opacity: 0.24,
-          }}
-        ></div>
-        <div
-          style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            position: 'relative',
-            minHeight: 247,
-            padding: '0 0.75rem 1.5rem',
-            paddingTop: '2.25rem',
-          }}
-        >
-          {
-            <ResourceList
-              workspaces={[workspace]}
-              workspaceResources={filteredList}
-              onUpdate={() => loadResources()}
-            />
+                </div>
+              </CardButton>
+            </TooltipTrigger>
+          )}
+        <TooltipTrigger
+          content={
+            !writePermission && 'Write permission required to create cohorts'
           }
-          {isLoading && <SpinnerOverlay />}
-        </div>
-      </FadeBox>
-    </React.Fragment>
+          side='top'
+        >
+          <CardButton
+            style={styles.resourceTypeButton}
+            disabled={!writePermission}
+            onClick={() => console.log('Cohort builder is decommissioned')}
+          >
+            <div style={styles.cardHeader}>
+              <h2 style={styles.cardHeaderText(!writePermission)}>Cohorts</h2>
+              <ClrIcon
+                shape='plus-circle'
+                class='is-solid'
+                size={18}
+                style={{ marginTop: 5 }}
+              />
+            </div>
+            <div style={styles.cardText}>{descriptions.cohorts}</div>
+            {/* Because the container can stretch based on window size, but the height
+              can't we set a max width to cap the height based on aspect ratio*/}
+            <div
+              style={{
+                width: '100%',
+                maxWidth: '425px',
+                paddingTop: '1.5rem',
+              }}
+            >
+              <img data-test-id={'cohort-diagram'} src={cohortImg} />
+            </div>
+          </CardButton>
+        </TooltipTrigger>
+        <TooltipTrigger
+          content={
+            !writePermission && 'Write permission required to create datasets'
+          }
+          side='top'
+        >
+          <CardButton
+            style={{
+              ...styles.resourceTypeButton,
+              ...styles.resourceTypeButtonLast,
+            }}
+            disabled={!writePermission}
+            onClick={() => console.log('Dataset builder is decommissioned')}
+          >
+            <div style={styles.cardHeader}>
+              <h2 style={styles.cardHeaderText(!writePermission)}>Datasets</h2>
+              <ClrIcon
+                shape='plus-circle'
+                class='is-solid'
+                size={18}
+                style={{ marginTop: 5 }}
+              />
+            </div>
+            <div style={styles.cardText}>{descriptions.datasets}</div>
+            {/* Because the container can stretch based on window size, but the height
+               can't we set a max width to cap the height based on aspect ratio*/}
+            <div
+              style={{
+                width: '100%',
+                maxWidth: '425px',
+                paddingTop: '2.25rem',
+              }}
+            >
+              <img data-test-id={'dataset-diagram'} src={dataSetImg} />
+            </div>
+          </CardButton>
+        </TooltipTrigger>
+      </div>
+    </div>
   );
 });

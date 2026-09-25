@@ -26,12 +26,6 @@ import org.pmiops.workbench.actionaudit.ActionType;
 import org.pmiops.workbench.actionaudit.TargetType;
 import org.pmiops.workbench.actionaudit.targetproperties.AclTargetProperty;
 import org.pmiops.workbench.actionaudit.targetproperties.WorkspaceTargetProperty;
-import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapperImpl;
-import org.pmiops.workbench.cohorts.CohortMapperImpl;
-import org.pmiops.workbench.cohorts.CohortService;
-import org.pmiops.workbench.conceptset.ConceptSetService;
-import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
-import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -52,8 +46,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 public class WorkspaceAuditorTest {
 
   @MockitoBean private UserDao userDao;
-  @MockitoBean private ConceptSetService conceptSetService;
-  @MockitoBean private CohortService cohortService;
   private static final long WORKSPACE_1_DB_ID = 101L;
   private static final long WORKSPACE_2_DB_ID = 201L;
   private static final long REMOVED_USER_ID = 301L;
@@ -73,11 +65,7 @@ public class WorkspaceAuditorTest {
   @TestConfiguration
   @Import({
     ActionAuditTestConfig.class,
-    CohortMapperImpl.class,
-    CohortReviewMapperImpl.class,
-    ConceptSetMapperImpl.class,
     CommonMappers.class,
-    DataSetMapperImpl.class,
     FirecloudMapperImpl.class,
     WorkspaceAuditorImpl.class,
     WorkspaceMapperImpl.class

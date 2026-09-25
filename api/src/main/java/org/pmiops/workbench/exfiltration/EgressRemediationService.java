@@ -28,7 +28,6 @@ import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.jira.ApiException;
-import org.pmiops.workbench.leonardo.LeonardoApiClient;
 
 /** Service for automated egress alert remediation. */
 public abstract class EgressRemediationService {
@@ -45,7 +44,6 @@ public abstract class EgressRemediationService {
   private final Clock clock;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final UserService userService;
-  private final LeonardoApiClient leonardoNotebooksClient;
   private final EgressEventAuditor egressEventAuditor;
   private final EgressEventDao egressEventDao;
 
@@ -53,13 +51,11 @@ public abstract class EgressRemediationService {
       Clock clock,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       UserService userService,
-      LeonardoApiClient leonardoNotebooksClient,
       EgressEventAuditor egressEventAuditor,
       EgressEventDao egressEventDao) {
     this.clock = clock;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.userService = userService;
-    this.leonardoNotebooksClient = leonardoNotebooksClient;
     this.egressEventAuditor = egressEventAuditor;
     this.egressEventDao = egressEventDao;
   }
@@ -261,8 +257,6 @@ public abstract class EgressRemediationService {
         },
         user,
         Agent.asSystem());
-
-    stopUserRuntimesAndApps(user.getUsername());
   }
 
   protected void disableUser(DbUser user) {
@@ -273,9 +267,6 @@ public abstract class EgressRemediationService {
         },
         user,
         Agent.asSystem());
-
-    // also stop any running compute, killing any active egress processes the user may have
-    stopUserRuntimesAndApps(user.getUsername());
   }
 
   protected void disableUserVwbDataAccess(DbUser user) {
@@ -288,14 +279,5 @@ public abstract class EgressRemediationService {
         Agent.asSystem());
 
     // TODO: Lock user access in VWB.
-  }
-
-  private void stopUserRuntimesAndApps(String userEmail) {
-    int stoppedRuntimeCount = leonardoNotebooksClient.stopAllUserRuntimesAsService(userEmail);
-    int stoppedAppCount = leonardoNotebooksClient.deleteUserAppsAsService(userEmail);
-    log.info(
-        String.format(
-            "stopped %d runtimes and %d apps for user %s",
-            stoppedRuntimeCount, stoppedAppCount, userEmail));
   }
 }

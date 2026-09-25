@@ -120,9 +120,6 @@ export const SystemErrorHandler = fp.flow(
           if (statusResponse.firecloudStatus === false) {
             serverDownStatus.firecloudDown = true;
           }
-          if (statusResponse.notebooksStatus === false) {
-            serverDownStatus.notebooksDown = true;
-          }
         })
         .catch(() => {
           serverDownStatus.apiDown = true;

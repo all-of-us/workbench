@@ -57,6 +57,4 @@ public interface CloudStorageClient {
   FileDetail blobToFileDetail(Blob blob, String bucketName, Set<String> workspaceUsers);
 
   String getGoogleOAuthClientSecret();
-
-  String getNotebookLastModifiedBy(String notebookUri, Set<String> workspaceUsers);
 }

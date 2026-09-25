@@ -1,12 +1,7 @@
 import '@testing-library/jest-dom';
 
 import { ProfileApi } from 'generated/fetch';
-import {
-  CohortsApi,
-  ConceptSetsApi,
-  UserMetricsApi,
-  WorkspacesApi,
-} from 'generated/fetch';
+import { WorkspacesApi } from 'generated/fetch';
 
 import { screen } from '@testing-library/react';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
@@ -18,14 +13,11 @@ import {
 
 import { renderWithRouter } from 'testing/react-test-helpers';
 import { cdrVersionTiersResponse } from 'testing/stubs/cdr-versions-api-stub';
-import { CohortsApiStub } from 'testing/stubs/cohorts-api-stub';
-import { ConceptSetsApiStub } from 'testing/stubs/concept-sets-api-stub';
 import {
   ProfileApiStub,
   ProfileStubVariables,
 } from 'testing/stubs/profile-api-stub';
 import { stubResource } from 'testing/stubs/resources-stub';
-import { UserMetricsApiStub } from 'testing/stubs/user-metrics-api-stub';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
 import { Homepage } from './homepage';
@@ -46,10 +38,7 @@ describe('HomepageComponent', () => {
     profileApi = new ProfileApiStub();
 
     registerApiClient(ProfileApi, profileApi);
-    registerApiClient(CohortsApi, new CohortsApiStub());
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());
-    registerApiClient(ConceptSetsApi, new ConceptSetsApiStub());
-    registerApiClient(UserMetricsApi, new UserMetricsApiStub());
 
     // mocking because we don't have access to the angular service
     reload.mockImplementation(async () => {
