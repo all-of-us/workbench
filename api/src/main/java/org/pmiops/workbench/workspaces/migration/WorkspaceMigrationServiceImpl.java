@@ -1304,7 +1304,8 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
       wsmClient.shareWorkspaceAsService(
           workspaceId.toString(), creator.getUsername(), IamRole.OWNER);
 
-      logger.log(Level.INFO, namespace + ": Fetching existing collaborators from Terra");
+      logger.log(
+          Level.INFO, namespace + ": Fetching existing collaborators from action audit data");
 
       List<ActionAuditQueryService.UserIdWithRoleImpl> collaborators =
           actionAuditQueryService.getWorkspaceUsersById(dbWorkspace.getWorkspaceId());
@@ -1312,6 +1313,9 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
         collaborators.forEach(
             c -> {
               DbUser collaborator = userDao.findUserByUserId(c.userId());
+              if (collaborator == null) {
+                return;
+              }
               String collaboratorEmail = collaborator.getUsername();
 
               // Skip creator, already shared above

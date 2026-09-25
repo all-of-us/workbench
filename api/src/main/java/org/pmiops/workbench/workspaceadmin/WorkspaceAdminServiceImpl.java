@@ -11,6 +11,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -599,12 +600,22 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
         .map(
             c -> {
               WorkspaceUserAdminView adminUser = new WorkspaceUserAdminView();
-              DbUser dbUser = userDao.findUserByUserId(c.userId());
+              DbUser dbUser;
+              try {
+                dbUser = userDao.findUserByUserId(c.userId());
+              } catch (Exception e) {
+                log.info("Exception while fetching user: " + e.getMessage());
+                return null;
+              }
+              if (dbUser == null) {
+                return null;
+              }
               adminUser.setUserModel(userMapper.toApiUser(dbUser));
               adminUser.setRole(WorkspaceAccessLevel.valueOf(c.role()));
               adminUser.setUserDatabaseId(dbUser.getUserId());
               return adminUser;
             })
+        .filter(Objects::nonNull)
         .toList();
   }
 }
