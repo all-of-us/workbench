@@ -105,7 +105,7 @@ public class VwbUserService {
     // Check if pod already exists and has a pod_id (not just a lock) and is using initial credits
     if (existingPod != null
         && existingPod.getVwbPodId() != null
-        && existingPod.isInitialCreditsActive()) {
+        && isPodUsingInitialCredits(existingPod)) {
       logger.info("User already has a pod with email {}", email);
       return existingPod;
     }
