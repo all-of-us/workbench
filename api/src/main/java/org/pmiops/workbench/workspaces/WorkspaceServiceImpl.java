@@ -19,6 +19,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.pmiops.workbench.access.AccessTierService;
+import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cohorts.CohortCloningService;
@@ -29,7 +30,6 @@ import org.pmiops.workbench.db.dao.FeaturedWorkspaceDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentWorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.jdbc.ReportingQueryService;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
@@ -86,6 +86,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   private static final Logger log = Logger.getLogger(WorkspaceServiceImpl.class.getName());
 
   private final AccessTierService accessTierService;
+  private final ActionAuditQueryService actionAuditQueryService;
   private final BillingProjectAuditor billingProjectAuditor;
   private final Clock clock;
   private final CloudBillingClient cloudBillingClient;
@@ -102,7 +103,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   private final Provider<Stopwatch> stopwatchProvider;
   private final Provider<TanagraApi> tanagraApiProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
-  private final ReportingQueryService reportingQueryService;
   private final UserDao userDao;
   private final UserMapper userMapper;
   private final UserRecentWorkspaceDao userRecentWorkspaceDao;
@@ -113,6 +113,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   @Autowired
   public WorkspaceServiceImpl(
       AccessTierService accessTierService,
+      ActionAuditQueryService actionAuditQueryService,
       BillingProjectAuditor billingProjectAuditor,
       Clock clock,
       CloudBillingClient cloudBillingClient,
@@ -129,7 +130,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       Provider<Stopwatch> stopwatchProvider,
       Provider<TanagraApi> tanagraApiProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider,
-      ReportingQueryService reportingQueryService,
       UserDao userDao,
       UserMapper userMapper,
       UserRecentWorkspaceDao userRecentWorkspaceDao,
@@ -137,6 +137,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       WorkspaceDao workspaceDao,
       WorkspaceMapper workspaceMapper) {
     this.accessTierService = accessTierService;
+    this.actionAuditQueryService = actionAuditQueryService;
     this.billingProjectAuditor = billingProjectAuditor;
     this.clock = clock;
     this.cloudBillingClient = cloudBillingClient;
@@ -149,7 +150,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     this.firecloudMapper = firecloudMapper;
     this.initialCreditsService = initialCreditsService;
     this.mailService = mailService;
-    this.reportingQueryService = reportingQueryService;
     this.stopwatchProvider = stopwatchProvider;
     this.tanagraApiProvider = tanagraApiProvider;
     this.userDao = userDao;
@@ -164,13 +164,29 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
   @Override
   public List<WorkspaceResponse> listWorkspaces() {
-    // Get all deleted workspaces that have been archived and add them to the list of workspaces
-    // returned to the user
-    List<ReportingQueryService.WorkspaceIdWithRoleImpl> workspaceIdsWithRole =
-        reportingQueryService.getWorkspaceIdsAndRolesByCollaboratorId(
+    // Get ids and roles for all workspaces that have been shared with the current user
+    List<ActionAuditQueryService.WorkspaceIdWithRoleImpl> collaboratorWorkspaceIdsWithRole =
+        actionAuditQueryService.getWorkspaceIdsAndRolesByCollaboratorId(
             userProvider.get().getUserId());
+
+    List<Long> creatorWorkspaceIds =
+        workspaceDao
+            .findAllWorkspaceIdsByCreatorAndActiveStatus(
+                userProvider.get(),
+                DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.DELETED))
+            .stream()
+            .toList();
+    List<ActionAuditQueryService.WorkspaceIdWithRoleImpl> allWorkspaceIdsWithRole =
+        new ArrayList<>();
+    creatorWorkspaceIds.forEach(
+        workspaceId -> {
+          allWorkspaceIdsWithRole.add(
+              new ActionAuditQueryService.WorkspaceIdWithRoleImpl(workspaceId, "OWNER"));
+        });
+    allWorkspaceIdsWithRole.addAll(collaboratorWorkspaceIdsWithRole);
+
     List<WorkspaceResponse> allWorkspaces = new ArrayList<>();
-    workspaceIdsWithRole.forEach(
+    allWorkspaceIdsWithRole.forEach(
         workspaceIdWithRole -> {
           if (workspaceIdWithRole.workspaceId() != null) {
             DbWorkspace workspace =

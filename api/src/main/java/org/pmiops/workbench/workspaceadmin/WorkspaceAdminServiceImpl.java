@@ -11,6 +11,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -29,7 +30,6 @@ import org.pmiops.workbench.db.dao.FeaturedWorkspaceDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.jdbc.ReportingQueryService;
 import org.pmiops.workbench.db.model.DbFeaturedWorkspace;
 import org.pmiops.workbench.db.model.DbFeaturedWorkspace.DbFeaturedCategory;
 import org.pmiops.workbench.db.model.DbUser;
@@ -56,7 +56,6 @@ import org.pmiops.workbench.model.CloudStorageTraffic;
 import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.PublishWorkspaceRequest;
-import org.pmiops.workbench.model.ReportingWorkspaceCollaborator;
 import org.pmiops.workbench.model.TimeSeriesPoint;
 import org.pmiops.workbench.model.UserAppEnvironment;
 import org.pmiops.workbench.model.UserRole;
@@ -98,7 +97,6 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   private final LeonardoRuntimeAuditor leonardoRuntimeAuditor;
   private final MailService mailService;
   private final NotebooksService notebooksService;
-  private final ReportingQueryService reportingQueryService;
   private final UserMapper userMapper;
   private final UserDao userDao;
   private final UserService userService;
@@ -126,7 +124,6 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
       LeonardoRuntimeAuditor leonardoRuntimeAuditor,
       MailService mailService,
       NotebooksService notebooksService,
-      ReportingQueryService reportingQueryService,
       UserMapper userMapper,
       UserDao userDao,
       UserService userService,
@@ -151,7 +148,6 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     this.leonardoRuntimeAuditor = leonardoRuntimeAuditor;
     this.mailService = mailService;
     this.notebooksService = notebooksService;
-    this.reportingQueryService = reportingQueryService;
     this.userMapper = userMapper;
     this.userDao = userDao;
     this.userService = userService;
@@ -597,18 +593,29 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
 
   @Override
   public List<WorkspaceUserAdminView> getWorkspaceCollaborators(String namespace) {
-    List<ReportingWorkspaceCollaborator> collaborators =
-        reportingQueryService.getWorkspaceUsersByNamespace(namespace);
+    DbWorkspace workspace = workspaceDao.findByWorkspaceNamespace(namespace);
+    List<ActionAuditQueryService.UserIdWithRoleImpl> collaborators =
+        actionAuditQueryService.getWorkspaceUsersById(workspace.getWorkspaceId());
     return collaborators.stream()
         .map(
             c -> {
               WorkspaceUserAdminView adminUser = new WorkspaceUserAdminView();
-              DbUser dbUser = userDao.findUserByUserId(c.getUserId());
+              DbUser dbUser;
+              try {
+                dbUser = userDao.findUserByUserId(c.userId());
+              } catch (Exception e) {
+                log.info("Exception while fetching user: " + e.getMessage());
+                return null;
+              }
+              if (dbUser == null) {
+                return null;
+              }
               adminUser.setUserModel(userMapper.toApiUser(dbUser));
-              adminUser.setRole(WorkspaceAccessLevel.valueOf(c.getRole()));
+              adminUser.setRole(WorkspaceAccessLevel.valueOf(c.role()));
               adminUser.setUserDatabaseId(dbUser.getUserId());
               return adminUser;
             })
+        .filter(Objects::nonNull)
         .toList();
   }
 }

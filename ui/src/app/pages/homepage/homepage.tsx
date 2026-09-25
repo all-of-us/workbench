@@ -347,10 +347,7 @@ export const Homepage = fp.flow(
 
     componentDidMount() {
       this.props.hideSpinner();
-      // Only call for workspaces if the user is registered in Terra
-      if (this.props.profileState.profile.terraUser) {
-        this.fetchWorkspaces();
-      }
+      this.fetchWorkspaces();
       this.callProfile();
     }
 
@@ -397,9 +394,9 @@ export const Homepage = fp.flow(
     }
 
     async fetchWorkspaces() {
-      return fetchWithSystemErrorHandler(() =>
-        workspacesApi().getWorkspaces()
-      ).then((response) => this.setState({ userWorkspacesResponse: response }));
+      return fetchWithSystemErrorHandler(() => workspacesApi().getWorkspaces())
+        .then((response) => this.setState({ userWorkspacesResponse: response }))
+        .catch(() => this.setState({ userWorkspacesResponse: { items: [] } }));
     }
 
     closeMigrationModal = () => {

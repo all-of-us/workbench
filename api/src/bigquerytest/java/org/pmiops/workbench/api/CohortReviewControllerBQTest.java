@@ -21,6 +21,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.access.AccessTierService;
+import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderServiceImpl;
@@ -50,7 +51,6 @@ import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.jdbc.ReportingQueryService;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbCohortReview;
@@ -115,7 +115,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
   @MockitoBean private InitialCreditsService initialCreditsService;
   @MockitoBean private MailService mailService;
-  @MockitoBean private ReportingQueryService reportingQueryService;
+  @MockitoBean private ActionAuditQueryService actionAuditQueryService;
   @MockitoBean private UserRecentResourceService userRecentResourceService;
   @MockitoBean private UserService userService;
 

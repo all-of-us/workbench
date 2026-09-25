@@ -10,6 +10,7 @@ import java.time.Duration;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.VwbConfig.CdrVersionForMigration;
@@ -17,7 +18,6 @@ import org.pmiops.workbench.db.dao.FolderSyncTransferDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceBucketArchiveDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.jdbc.ReportingQueryService;
 import org.pmiops.workbench.db.model.*;
 import org.pmiops.workbench.db.model.DbFolderSyncTransfer.TransferState;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -74,7 +74,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
   private final Provider<DbUser> userProvider;
   private final Clock clock;
   private final WorkspaceBucketArchiveDao workspaceBucketArchiveDao;
-  private final ReportingQueryService reportingQueryService;
+  private final ActionAuditQueryService actionAuditQueryService;
   private static final String CONTROLLED_TIER_ARCHIVE_BUCKET =
       "all-of-us-archive-ct-bucket-wb-blazing-lime-5817";
 
@@ -101,7 +101,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
       Provider<DbUser> userProvider,
       Clock clock,
       WorkspaceBucketArchiveDao workspaceBucketArchiveDao,
-      ReportingQueryService reportingQueryService) {
+      ActionAuditQueryService actionAuditQueryService) {
 
     this.wsmClient = wsmClient;
     this.workspaceDao = workspaceDao;
@@ -121,7 +121,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
     this.userProvider = userProvider;
     this.clock = clock;
     this.workspaceBucketArchiveDao = workspaceBucketArchiveDao;
-    this.reportingQueryService = reportingQueryService;
+    this.actionAuditQueryService = actionAuditQueryService;
   }
 
   @Override
@@ -1304,14 +1304,19 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
       wsmClient.shareWorkspaceAsService(
           workspaceId.toString(), creator.getUsername(), IamRole.OWNER);
 
-      logger.log(Level.INFO, namespace + ": Fetching existing collaborators from Terra");
+      logger.log(
+          Level.INFO, namespace + ": Fetching existing collaborators from action audit data");
 
-      List<ReportingWorkspaceCollaborator> collaborators =
-          reportingQueryService.getWorkspaceUsersByNamespace(namespace);
+      List<ActionAuditQueryService.UserIdWithRoleImpl> collaborators =
+          actionAuditQueryService.getWorkspaceUsersById(dbWorkspace.getWorkspaceId());
       if (collaborators != null) {
         collaborators.forEach(
             c -> {
-              String collaboratorEmail = c.getUsername();
+              DbUser collaborator = userDao.findUserByUserId(c.userId());
+              if (collaborator == null) {
+                return;
+              }
+              String collaboratorEmail = collaborator.getUsername();
 
               // Skip creator, already shared above
               if (collaboratorEmail.equals(creator.getUsername())) {
@@ -1342,7 +1347,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
                 }
 
                 // Map Terra role to VWB IamRole
-                IamRole vwbRole = mapTerraRoleToVwbRole(c.getRole());
+                IamRole vwbRole = mapTerraRoleToVwbRole(c.role());
                 if (vwbRole == null) {
                   logger.log(
                       Level.INFO,
