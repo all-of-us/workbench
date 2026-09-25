@@ -394,9 +394,9 @@ export const Homepage = fp.flow(
     }
 
     async fetchWorkspaces() {
-      return fetchWithSystemErrorHandler(() =>
-        workspacesApi().getWorkspaces()
-      ).then((response) => this.setState({ userWorkspacesResponse: response }));
+      return fetchWithSystemErrorHandler(() => workspacesApi().getWorkspaces())
+        .then((response) => this.setState({ userWorkspacesResponse: response }))
+        .catch(() => this.setState({ userWorkspacesResponse: { items: [] } }));
     }
 
     closeMigrationModal = () => {
