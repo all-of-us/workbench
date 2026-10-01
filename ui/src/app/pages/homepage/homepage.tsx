@@ -316,6 +316,7 @@ interface Props
 interface State {
   firstVisit: boolean;
   firstVisitTraining: boolean;
+  loadingWorkspaces: boolean;
   userWorkspacesResponse: WorkspaceResponseListResponse;
   showMigrationModal: boolean;
   showCreateWorkspaceModal: boolean;
@@ -335,6 +336,7 @@ export const Homepage = fp.flow(
       this.state = {
         firstVisit: undefined,
         firstVisitTraining: true,
+        loadingWorkspaces: true,
         userWorkspacesResponse: undefined,
         showMigrationModal: false,
         showCreateWorkspaceModal: false,
@@ -396,7 +398,8 @@ export const Homepage = fp.flow(
     async fetchWorkspaces() {
       return fetchWithSystemErrorHandler(() => workspacesApi().getWorkspaces())
         .then((response) => this.setState({ userWorkspacesResponse: response }))
-        .catch(() => this.setState({ userWorkspacesResponse: { items: [] } }));
+        .catch(() => this.setState({ userWorkspacesResponse: { items: [] } }))
+        .finally(() => this.setState({ loadingWorkspaces: false }));
     }
 
     closeMigrationModal = () => {
@@ -407,7 +410,7 @@ export const Homepage = fp.flow(
       const {
         profileState: { profile },
       } = this.props;
-      const { userWorkspacesResponse } = this.state;
+      const { loadingWorkspaces, userWorkspacesResponse } = this.state;
       const { enableVWBHomepageBanner, latestDuccVersion } =
         serverConfigStore.get().config;
       const showDuccBanner = shouldShowDuccUpdateBanner(
@@ -429,7 +432,10 @@ export const Homepage = fp.flow(
 
             <FlexRow style={styles.contentGrid}>
               <FlexColumn style={styles.leftColumn}>
-                <ActiveWorkspaces workspaces={workspaces} />
+                <ActiveWorkspaces
+                  loading={loadingWorkspaces}
+                  workspaces={workspaces}
+                />
                 <TutorialVideoPanel />
               </FlexColumn>
 

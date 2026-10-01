@@ -102,12 +102,21 @@ public class VwbUserService {
     // Get the latest pod state from database (not from the passed-in user object)
     DbVwbUserPod existingPod = vwbUserPodDao.findByUserUserId(dbUser.getUserId());
 
-    // Check if pod already exists and has a pod_id (not just a lock) and is using initial credits
-    if (existingPod != null
-        && existingPod.getVwbPodId() != null
-        && isPodUsingInitialCredits(existingPod)) {
-      logger.info("User already has a pod with email {}", email);
-      return existingPod;
+    // Check if pod already exists and has a pod_id (not just a lock)
+    if (existingPod != null && existingPod.getVwbPodId() != null) {
+      try {
+        // Check if pod is using initial credits
+        if (isPodUsingInitialCredits(existingPod)) {
+          logger.info("User already has a pod with email {}", email);
+          return existingPod;
+        }
+      } catch (Exception e) {
+        // Pod likely deleted if call failed. Don't throw exception, continue to pod creation
+        logger.error(
+            "Error checking if pod is using initial credits for user with email {}: {}",
+            email,
+            e.getMessage());
+      }
     }
 
     // If there's a lock row but no pod yet, we need to create the pod

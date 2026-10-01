@@ -11,11 +11,16 @@ import { Button } from 'app/components/buttons';
 import { WorkspaceInfoField } from './workspace-info-field';
 
 interface Props {
+  loadingCollaborators: boolean;
   workspace: Workspace;
   onRecover?: () => void;
 }
 
-export const WorkspaceArchiveInfo = ({ workspace, onRecover }: Props) => {
+export const WorkspaceArchiveInfo = ({
+  loadingCollaborators,
+  workspace,
+  onRecover,
+}: Props) => {
   const migrated = workspace.migrationState === MigrationState.FINISHED;
 
   const archiveStatus =
@@ -67,9 +72,10 @@ export const WorkspaceArchiveInfo = ({ workspace, onRecover }: Props) => {
               <Button
                 type='primary'
                 disabled={
-                  workspace.recoveryState !==
+                  loadingCollaborators ||
+                  (workspace.recoveryState !==
                     WorkspaceRecoveryStatus.REQUESTED &&
-                  workspace.recoveryState !== WorkspaceRecoveryStatus.FAILED
+                    workspace.recoveryState !== WorkspaceRecoveryStatus.FAILED)
                 }
                 onClick={onRecover}
                 style={{
