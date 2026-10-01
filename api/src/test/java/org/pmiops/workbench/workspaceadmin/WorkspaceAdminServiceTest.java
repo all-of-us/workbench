@@ -42,7 +42,6 @@ import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.google.CloudMonitoringService;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
-import org.pmiops.workbench.lab.notebooks.NotebooksService;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoAuditInfo;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoCloudContext;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoCloudProvider;
@@ -111,7 +110,6 @@ public class WorkspaceAdminServiceTest {
   @MockitoBean private VwbAccessService mockVwbAccessService;
   @MockitoBean private LeonardoRuntimeAuditor mockLeonardoRuntimeAuditor;
   @MockitoBean private MailService mailService;
-  @MockitoBean private NotebooksService mockNotebooksService;
   @MockitoBean private WorkspaceService mockWorkspaceService;
 
   @Autowired private CdrVersionDao cdrVersionDao;

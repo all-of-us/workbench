@@ -38,13 +38,6 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
     return ResponseEntity.ok(workspaceAdminService.getWorkspaceAdminView(workspaceNamespace));
   }
 
-  @Override
-  @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
-  public ResponseEntity<Void> updateBillingToCredits(String workspaceNamespace, String terraName) {
-    workspaceAdminService.updateBillingToCredits(workspaceNamespace, terraName);
-    return ResponseEntity.noContent().build();
-  }
-
   /**
    * Get all audit log entries for this workspace
    *
@@ -75,15 +68,6 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
             .items(workspaceAdminService.getWorkspacesWaitingForRetrieval()));
   }
 
-  @Override
-  @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
-  public ResponseEntity<ReadOnlyNotebookResponse> adminReadOnlyNotebook(
-      String workspaceNamespace, String notebookNameWithFileExtension, AccessReason accessReason) {
-    final String notebookHtml =
-        workspaceAdminService.getReadOnlyNotebook(
-            workspaceNamespace, notebookNameWithFileExtension, accessReason);
-    return ResponseEntity.ok(new ReadOnlyNotebookResponse().html(notebookHtml));
-  }
 
   @Override
   @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})

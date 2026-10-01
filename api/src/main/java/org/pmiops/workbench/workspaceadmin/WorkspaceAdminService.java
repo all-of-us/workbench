@@ -4,8 +4,6 @@ import jakarta.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.model.AccessReason;
-import org.pmiops.workbench.model.AdminLockingRequest;
 import org.pmiops.workbench.model.AdminWorkspaceObjectsCounts;
 import org.pmiops.workbench.model.CloudStorageTraffic;
 import org.pmiops.workbench.model.WorkspaceAdminView;
@@ -29,15 +27,6 @@ public interface WorkspaceAdminService {
       @Nullable Long beforeMillisNullable);
 
   List<WorkspaceWaitingForRetrieval> getWorkspacesWaitingForRetrieval();
-
-  String getReadOnlyNotebook(
-      String workspaceNamespace, String notebookName, AccessReason accessReason);
-
-  void setAdminLockedState(String workspaceNamespace, AdminLockingRequest adminLockingRequest);
-
-  void setAdminUnlockedState(String workspaceNamespace);
-
-  void updateBillingToCredits(String workspaceNamespace, String terraName);
 
   List<WorkspaceUserAdminView> getWorkspaceCollaborators(String namespace);
 }

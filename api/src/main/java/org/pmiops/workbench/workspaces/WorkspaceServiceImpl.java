@@ -1,6 +1,5 @@
 package org.pmiops.workbench.workspaces;
 
-import com.google.common.base.Stopwatch;
 import jakarta.inject.Provider;
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -12,9 +11,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
-import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
-import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.db.dao.FeaturedWorkspaceDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentWorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
@@ -23,14 +19,9 @@ import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
-import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.*;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
-import org.pmiops.workbench.utils.mappers.FeaturedWorkspaceMapper;
-import org.pmiops.workbench.utils.mappers.FirecloudMapper;
 import org.pmiops.workbench.utils.mappers.UserMapper;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,18 +44,9 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
   private final AccessTierService accessTierService;
   private final ActionAuditQueryService actionAuditQueryService;
-  private final BillingProjectAuditor billingProjectAuditor;
   private final Clock clock;
-  private final CloudBillingClient cloudBillingClient;
-  private final FeaturedWorkspaceDao featuredWorkspaceDao;
-  private final FeaturedWorkspaceMapper featuredWorkspaceMapper;
-  private final FireCloudService fireCloudService;
-  private final FirecloudMapper firecloudMapper;
   private final InitialCreditsService initialCreditsService;
-  private final MailService mailService;
   private final Provider<DbUser> userProvider;
-  private final Provider<Stopwatch> stopwatchProvider;
-  private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final UserDao userDao;
   private final UserMapper userMapper;
   private final UserRecentWorkspaceDao userRecentWorkspaceDao;
@@ -76,18 +58,9 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   public WorkspaceServiceImpl(
       AccessTierService accessTierService,
       ActionAuditQueryService actionAuditQueryService,
-      BillingProjectAuditor billingProjectAuditor,
       Clock clock,
-      CloudBillingClient cloudBillingClient,
-      FeaturedWorkspaceDao featuredWorkspaceDao,
-      FeaturedWorkspaceMapper featuredWorkspaceMapper,
-      FireCloudService fireCloudService,
-      FirecloudMapper firecloudMapper,
       InitialCreditsService initialCreditsService,
-      MailService mailService,
       Provider<DbUser> userProvider,
-      Provider<Stopwatch> stopwatchProvider,
-      Provider<WorkbenchConfig> workbenchConfigProvider,
       UserDao userDao,
       UserMapper userMapper,
       UserRecentWorkspaceDao userRecentWorkspaceDao,
@@ -96,21 +69,12 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       WorkspaceMapper workspaceMapper) {
     this.accessTierService = accessTierService;
     this.actionAuditQueryService = actionAuditQueryService;
-    this.billingProjectAuditor = billingProjectAuditor;
     this.clock = clock;
-    this.cloudBillingClient = cloudBillingClient;
-    this.featuredWorkspaceDao = featuredWorkspaceDao;
-    this.featuredWorkspaceMapper = featuredWorkspaceMapper;
-    this.fireCloudService = fireCloudService;
-    this.firecloudMapper = firecloudMapper;
     this.initialCreditsService = initialCreditsService;
-    this.mailService = mailService;
-    this.stopwatchProvider = stopwatchProvider;
     this.userDao = userDao;
     this.userMapper = userMapper;
     this.userProvider = userProvider;
     this.userRecentWorkspaceDao = userRecentWorkspaceDao;
-    this.workbenchConfigProvider = workbenchConfigProvider;
     this.workspaceAuthService = workspaceAuthService;
     this.workspaceDao = workspaceDao;
     this.workspaceMapper = workspaceMapper;
@@ -219,15 +183,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         .toList();
   }
 
-  @Override
-  @Transactional
-  public List<DbUserRecentWorkspace> getRecentWorkspaces() {
-    long userId = userProvider.get().getUserId();
-    List<DbUserRecentWorkspace> userRecentWorkspaces =
-        userRecentWorkspaceDao.findByUserIdOrderByLastAccessDateDesc(userId);
-    return pruneInaccessibleRecentWorkspaces(userRecentWorkspaces, userId);
-  }
-
   private List<DbUserRecentWorkspace> pruneInaccessibleRecentWorkspaces(
       List<DbUserRecentWorkspace> recentWorkspaces, long userId) {
     List<DbWorkspace> dbWorkspaces =
@@ -313,11 +268,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       userRecentWorkspaces.remove(userRecentWorkspaces.size() - 1);
     }
     userRecentWorkspaceDao.deleteByUserIdAndWorkspaceIdIn(userId, idsToDelete);
-  }
-
-  @Override
-  public void updateWorkspaceBillingAccount(DbWorkspace workspace, String newBillingAccountName) {
-    updateWorkspaceBillingAccount(workspace, newBillingAccountName, false);
   }
 
   @Override

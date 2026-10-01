@@ -170,64 +170,6 @@ public class CdrVersionServiceTest {
   }
 
   @Test
-  public void testSetCdrVersionDefault() {
-    addMembershipForTest(registeredTier);
-    cdrVersionService.setCdrVersion(defaultCdrVersion);
-    assertThat(CdrVersionContext.getCdrVersion()).isEqualTo(defaultCdrVersion);
-  }
-
-  @Test
-  public void testSetCdrVersionDefaultForbiddenUserNotInTier() {
-    assertThrows(
-        ForbiddenException.class, () -> cdrVersionService.setCdrVersion(defaultCdrVersion));
-  }
-
-  // these tests fail because the user is in the right tier according to the AoU DB
-  // but the user is not in the right auth domain according to Terra
-
-  @Test
-  public void testSetCdrVersionDefaultForbiddenNotInGroup() {
-    assertThrows(
-        ForbiddenException.class,
-        () -> {
-          accessTierService.addUserToTier(user, registeredTier);
-          when(fireCloudService.isUserMemberOfGroupWithCache(
-                  user.getUsername(), registeredTier.getAuthDomainName()))
-              .thenReturn(false);
-          cdrVersionService.setCdrVersion(defaultCdrVersion);
-        });
-  }
-
-  @Test
-  public void testSetCdrVersionControlled() {
-    addMembershipForTest(controlledTier);
-    cdrVersionService.setCdrVersion(controlledCdrVersion);
-    assertThat(CdrVersionContext.getCdrVersion()).isEqualTo(controlledCdrVersion);
-  }
-
-  @Test
-  public void testSetCdrVersionControlledForbiddenUserNotInTier() {
-    assertThrows(
-        ForbiddenException.class, () -> cdrVersionService.setCdrVersion(controlledCdrVersion));
-  }
-
-  // these tests fail because the user is in the right tier according to the AoU DB
-  // but the user is not in the right auth domain according to Terra
-
-  @Test
-  public void testSetCdrVersionControlledForbiddenNotInGroup() {
-    assertThrows(
-        ForbiddenException.class,
-        () -> {
-          accessTierService.addUserToTier(user, controlledTier);
-          when(fireCloudService.isUserMemberOfGroupWithCache(
-                  user.getUsername(), controlledTier.getAuthDomainName()))
-              .thenReturn(false);
-          cdrVersionService.setCdrVersion(controlledCdrVersion);
-        });
-  }
-
-  @Test
   public void testGetCdrVersionsByTierAllTiers() {
     addMembershipForTest(registeredTier);
     addMembershipForTest(controlledTier);

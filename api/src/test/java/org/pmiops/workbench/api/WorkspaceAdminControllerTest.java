@@ -16,7 +16,6 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudMonitoringService;
 import org.pmiops.workbench.google.CloudStorageClient;
-import org.pmiops.workbench.lab.notebooks.NotebooksService;
 import org.pmiops.workbench.model.AdminWorkspaceObjectsCounts;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
@@ -41,7 +40,6 @@ public class WorkspaceAdminControllerTest {
   @MockitoBean private ActionAuditQueryService actionAuditQueryService;
   @MockitoBean private CloudMonitoringService cloudMonitoringService;
   @MockitoBean private CloudStorageClient cloudStorageClient;
-  @MockitoBean private NotebooksService notebooksService;
   private static final long DB_WORKSPACE_ID = 2222L;
   private static final String FIRECLOUD_WORKSPACE_CREATOR_USERNAME = "jay@allofus.biz";
   private static final String WORKSPACE_DISPLAY_NAME = "Work It !";
