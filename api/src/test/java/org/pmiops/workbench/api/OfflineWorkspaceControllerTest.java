@@ -14,7 +14,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceUserCacheService;
 import org.pmiops.workbench.workspaces.migration.WorkspaceMigrationService;
 import org.springframework.http.HttpStatus;
@@ -25,7 +24,6 @@ public class OfflineWorkspaceControllerTest {
   private static final String NAMESPACE = "test-ns";
   private static final String TERRA_NAME = "test-ws";
 
-  @Mock private WorkspaceService workspaceService;
   @Mock private WorkspaceDao workspaceDao;
   @Mock private WorkspaceMigrationService workspaceMigrationService;
   @Mock private WorkspaceUserCacheService mockWorkspaceUserCacheService;
@@ -45,7 +43,6 @@ public class OfflineWorkspaceControllerTest {
     offlineWorkspaceController =
         new OfflineWorkspaceController(
             mockTaskQueueService,
-            workspaceService,
             workspaceDao,
             mockWorkspaceUserCacheService,
             workspaceMigrationService,

@@ -289,14 +289,6 @@ public class WorkspaceMigrationServiceImplTest {
   }
 
   @Test
-  void deleteNextLegacyWorkspace_deletesSelectedWorkspace() {
-    service.deleteNextLegacyWorkspace(NAMESPACE, TERRA_NAME);
-
-    verify(workspaceDao).getRequired(NAMESPACE, TERRA_NAME);
-    verify(workspaceService).deleteWorkspaceAsService(dbWorkspace);
-  }
-
-  @Test
   void startWorkspaceArchive_startsArchiveSuccessfully() {
 
     when(fireCloudService.getWorkspaceAsService(NAMESPACE, TERRA_NAME))

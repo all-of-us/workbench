@@ -17,30 +17,6 @@ export class UserApiStub extends UserApi {
     }
   }
 
-  userSearch(
-    accessTierShortName: string,
-    searchTerm: string
-  ): Promise<UserResponse> {
-    return new Promise<UserResponse>((resolve) => {
-      let usersToReturn: User[] = [];
-      if (this.existingUsers) {
-        usersToReturn = this.existingUsers.filter((userRole) => {
-          return fp.includes(searchTerm, fp.values(userRole).join(' '));
-        });
-      } else {
-        usersToReturn.push({
-          familyName: 'User4',
-          email: 'sampleuser4@fake-research-aou.org',
-          givenName: 'Sample',
-        } as User);
-      }
-      const userResponse: UserResponse = {
-        users: usersToReturn,
-      };
-      resolve(userResponse);
-    });
-  }
-
   listBillingAccounts(): Promise<WorkbenchListBillingAccountsResponse> {
     return new Promise<WorkbenchListBillingAccountsResponse>((resolve) => {
       resolve({

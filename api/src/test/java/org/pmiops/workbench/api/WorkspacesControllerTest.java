@@ -5,7 +5,6 @@ import static com.google.common.truth.Truth.assertWithMessage;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -78,16 +77,12 @@ import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.db.model.DbWorkspaceOperation;
-import org.pmiops.workbench.db.model.DbWorkspaceOperation.DbWorkspaceOperationStatus;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exfiltration.EgressRemediationService;
-import org.pmiops.workbench.exfiltration.ObjectNameLengthService;
-import org.pmiops.workbench.exfiltration.ObjectNameLengthServiceImpl;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
@@ -135,7 +130,6 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
@@ -239,7 +233,6 @@ public class WorkspacesControllerTest {
   @Autowired DataSetDao dataSetDao;
   @Autowired FakeClock fakeClock;
   @Autowired FirecloudMapper firecloudMapper;
-  @Autowired ObjectNameLengthService objectNameLengthService;
   @Autowired UserDao userDao;
   @Autowired UserRecentWorkspaceDao userRecentWorkspaceDao;
   @Autowired WorkspaceAdminService workspaceAdminService;
@@ -265,7 +258,6 @@ public class WorkspacesControllerTest {
     FakeClockConfiguration.class,
     FirecloudMapperImpl.class,
     LeonardoMapperImpl.class,
-    ObjectNameLengthServiceImpl.class,
     UserMapperImpl.class,
     WorkspaceAdminServiceImpl.class,
     WorkspaceAuthService.class,
@@ -742,66 +734,6 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testGetWorkspaceOperation() {
-    DbWorkspaceOperation dbOperation =
-        workspaceOperationDao.save(
-            new DbWorkspaceOperation()
-                .setCreatorId(currentUser.getUserId())
-                .setStatus(DbWorkspaceOperationStatus.SUCCESS));
-    assertThat(dbOperation.getId()).isNotNull();
-    assertThat(dbOperation.getStatus()).isEqualTo(DbWorkspaceOperationStatus.SUCCESS);
-    assertThat(dbOperation.getWorkspaceId()).isNull();
-
-    WorkspaceOperation operation =
-        workspacesController.getWorkspaceOperation(dbOperation.getId()).getBody();
-    assertThat(operation.getId()).isEqualTo(dbOperation.getId());
-    assertThat(operation.getStatus()).isEqualTo(WorkspaceOperationStatus.SUCCESS);
-    assertThat(operation.getWorkspace()).isNull();
-  }
-
-  @Test
-  public void testGetWorkspaceOperation_withWorkspace() {
-    Workspace workspace = createWorkspace();
-    DbWorkspace dbWorkspace =
-        workspaceDao.save(
-            new DbWorkspace()
-                .setWorkspaceNamespace(workspace.getNamespace())
-                .setName(workspace.getDisplayName())
-                .setFirecloudName(workspace.getTerraName()));
-    DbWorkspaceOperation dbOperation =
-        workspaceOperationDao.save(
-            new DbWorkspaceOperation()
-                .setCreatorId(currentUser.getUserId())
-                .setStatus(DbWorkspaceOperationStatus.SUCCESS)
-                .setWorkspaceId(dbWorkspace.getWorkspaceId()));
-    assertThat(dbOperation.getId()).isNotNull();
-    assertThat(dbOperation.getStatus()).isEqualTo(DbWorkspaceOperationStatus.SUCCESS);
-    assertThat(dbOperation.getWorkspaceId()).isEqualTo(dbWorkspace.getWorkspaceId());
-
-    // mocks Terra returning workspace info
-    stubGetWorkspace(
-        workspace.getNamespace(),
-        workspace.getTerraName(),
-        workspace.getCreatorUser().getUserName(),
-        WorkspaceAccessLevel.READER);
-
-    WorkspaceOperation operation =
-        workspacesController.getWorkspaceOperation(dbOperation.getId()).getBody();
-    assertThat(operation.getId()).isEqualTo(dbOperation.getId());
-    assertThat(operation.getStatus()).isEqualTo(WorkspaceOperationStatus.SUCCESS);
-    assertThat(operation.getWorkspace()).isNotNull();
-    assertThat(operation.getWorkspace().getNamespace()).isEqualTo(workspace.getNamespace());
-    assertThat(operation.getWorkspace().getDisplayName()).isEqualTo(workspace.getDisplayName());
-    assertThat(operation.getWorkspace().getTerraName()).isEqualTo(workspace.getTerraName());
-  }
-
-  @Test
-  public void testGetWorkspaceOperation_notFound() {
-    assertThat(workspacesController.getWorkspaceOperation(-1L).getStatusCode())
-        .isEqualTo(HttpStatus.NOT_FOUND);
-  }
-
-  @Test
   public void testProcessCreateWorkspaceTask_notFound() {
     Workspace workspace = createWorkspace();
     CreateWorkspaceTaskRequest request =
@@ -830,10 +762,6 @@ public class WorkspacesControllerTest {
     assertThat(operation.getId()).isNotNull();
     assertThat(operation.getStatus()).isEqualTo(WorkspaceOperationStatus.QUEUED);
     assertThat(operation.getWorkspace()).isNull();
-
-    WorkspaceOperation operation2 =
-        workspacesController.getWorkspaceOperation(operation.getId()).getBody();
-    assertThat(operation2).isEqualTo(operation);
   }
 
   @Test
@@ -841,43 +769,10 @@ public class WorkspacesControllerTest {
     Workspace workspace = createWorkspace().name("a new name for this test");
 
     WorkspaceOperation operation = workspacesController.createWorkspaceAsync(workspace).getBody();
-    WorkspaceOperation operation2 =
-        workspacesController.getWorkspaceOperation(operation.getId()).getBody();
-    assertThat(operation2).isEqualTo(operation);
 
     CreateWorkspaceTaskRequest request =
         new CreateWorkspaceTaskRequest().operationId(operation.getId()).workspace(workspace);
     workspacesController.processCreateWorkspaceTask(request);
-
-    WorkspaceOperation operation3 =
-        workspacesController.getWorkspaceOperation(operation.getId()).getBody();
-    assertThat(operation3.getId()).isEqualTo(operation.getId());
-    assertThat(operation3.getStatus()).isEqualTo(WorkspaceOperationStatus.SUCCESS);
-    assertThat(operation3.getWorkspace()).isNotNull();
-    assertThat(operation3.getWorkspace().getName()).isEqualTo(workspace.getName());
-  }
-
-  @Test
-  public void testDuplicateWorkspaceAsync_and_get_operation() {
-    Workspace workspace = createWorkspace();
-    CloneWorkspaceRequest request =
-        new CloneWorkspaceRequest().workspace(workspace).includeUserRoles(true);
-
-    // mocks Terra returning workspace info
-    stubGetWorkspace(
-        workspace.getNamespace(),
-        workspace.getTerraName(),
-        currentUser.getUsername(),
-        WorkspaceAccessLevel.READER);
-
-    WorkspaceOperation operation =
-        workspacesController
-            .duplicateWorkspaceAsync(workspace.getNamespace(), workspace.getTerraName(), request)
-            .getBody();
-
-    WorkspaceOperation operation2 =
-        workspacesController.getWorkspaceOperation(operation.getId()).getBody();
-    assertThat(operation2).isEqualTo(operation);
   }
 
   @Test
@@ -912,9 +807,6 @@ public class WorkspacesControllerTest {
 
     WorkspaceOperation operation =
         workspacesController.duplicateWorkspaceAsync(fromWsNs, fromFcName, request).getBody();
-    WorkspaceOperation operation2 =
-        workspacesController.getWorkspaceOperation(operation.getId()).getBody();
-    assertThat(operation2).isEqualTo(operation);
 
     // mocks Terra returning workspace duplication info
     stubCloneWorkspace(workspace.getNamespace(), workspace.getTerraName(), LOGGED_IN_USER_EMAIL);
@@ -926,13 +818,6 @@ public class WorkspacesControllerTest {
             .fromWorkspaceFirecloudName(fromFcName)
             .workspace(workspace);
     workspacesController.processDuplicateWorkspaceTask(request2);
-
-    WorkspaceOperation operation3 =
-        workspacesController.getWorkspaceOperation(operation.getId()).getBody();
-    assertThat(operation3.getId()).isEqualTo(operation.getId());
-    assertThat(operation3.getStatus()).isEqualTo(WorkspaceOperationStatus.SUCCESS);
-    assertThat(operation3.getWorkspace()).isNotNull();
-    assertThat(operation3.getWorkspace().getName()).isEqualTo(workspace.getName());
   }
 
   @Test
@@ -2203,16 +2088,6 @@ public class WorkspacesControllerTest {
         () -> {
           workspacesController.publishCommunityWorkspace(wsNamespace);
         });
-  }
-
-  @Test
-  public void testPublishCommunityWorkspace() {
-    Workspace ws = createWorkspaceAndGrantAccess(WorkspaceAccessLevel.OWNER);
-    String wsNamespace = ws.getNamespace();
-    doNothing().when(workspaceService).publishCommunityWorkspace(any(DbWorkspace.class));
-    workspacesController.publishCommunityWorkspace(wsNamespace);
-    verify(workspaceService).publishCommunityWorkspace(any(DbWorkspace.class));
-    verify(mockWorkspaceAuditor).firePublishAction(anyLong());
   }
 
   @Test

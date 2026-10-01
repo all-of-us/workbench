@@ -8,7 +8,6 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.WorkspaceArchiveStatus;
-import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceUserCacheService;
 import org.pmiops.workbench.workspaces.migration.WorkspaceMigrationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +19,6 @@ public class OfflineWorkspaceController implements OfflineWorkspaceApiDelegate {
   private static final Logger log = Logger.getLogger(OfflineWorkspaceController.class.getName());
 
   private final TaskQueueService taskQueueService;
-  private final WorkspaceService workspaceService;
   private final WorkspaceDao workspaceDao;
   private final WorkspaceUserCacheService workspaceUserCacheService;
   private final WorkspaceMigrationService workspaceMigrationService;
@@ -29,13 +27,11 @@ public class OfflineWorkspaceController implements OfflineWorkspaceApiDelegate {
   @Autowired
   public OfflineWorkspaceController(
       TaskQueueService taskQueueService,
-      WorkspaceService workspaceService,
       WorkspaceDao workspaceDao,
       WorkspaceUserCacheService workspaceUserCacheService,
       WorkspaceMigrationService workspaceMigrationService,
       Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.taskQueueService = taskQueueService;
-    this.workspaceService = workspaceService;
     this.workspaceDao = workspaceDao;
     this.workspaceUserCacheService = workspaceUserCacheService;
     this.workspaceMigrationService = workspaceMigrationService;
@@ -44,9 +40,7 @@ public class OfflineWorkspaceController implements OfflineWorkspaceApiDelegate {
 
   @Override
   public ResponseEntity<Void> cleanupOrphanedWorkspaces() {
-    List<String> orphanedNamespaces = workspaceService.getOrphanedWorkspaceNamespacesAsService();
-    taskQueueService.groupAndPushCleanupOrphanedWorkspacesTasks(orphanedNamespaces);
-
+    log.info("cleanupOrphanedWorkspaces is decommissioned");
     return ResponseEntity.noContent().build();
   }
 

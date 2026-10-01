@@ -1,7 +1,6 @@
 package org.pmiops.workbench.db.dao;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth.assertWithMessage;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -22,7 +21,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
-import java.util.function.Supplier;
 import java.util.stream.StreamSupport;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,7 +47,6 @@ import org.pmiops.workbench.db.model.DbUserTermsOfService;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.institution.InstitutionService;
@@ -187,52 +184,6 @@ public class UserServiceTest {
   }
 
   @Test
-  public void testClearsEraCommonsStatus() {
-    // Put the test user in a state where eRA commons is completed.
-    DbUser testUser = userDao.findUserByUsername(USERNAME);
-    testUser.setEraCommonsLinkedNihUsername("nih-user");
-    testUser = userDao.save(testUser);
-
-    accessModuleService.updateCompletionTime(
-        testUser, DbAccessModuleName.ERA_COMMONS, Timestamp.from(START_INSTANT));
-
-    userService.syncEraCommonsStatus();
-
-    DbUser retrievedUser = userDao.findUserByUsername(USERNAME);
-    assertModuleCompletionNull(DbAccessModuleName.ERA_COMMONS, retrievedUser);
-  }
-
-  @Test
-  public void testSyncEraCommonsStatus_lastModified() {
-    // User starts without eRA commons.
-    Supplier<Timestamp> getLastModified =
-        () -> userDao.findUserByUsername(USERNAME).getLastModifiedTime();
-    Timestamp modifiedTime0 = getLastModified.get();
-
-    when(mockFireCloudService.getNihStatus())
-        .thenReturn(
-            new FirecloudNihStatus()
-                .linkedNihUsername("nih-user")
-                // FireCloud stores the NIH status in seconds, not msecs.
-                .linkExpireTime(START_INSTANT.toEpochMilli() / 1000));
-
-    tick();
-    userService.syncEraCommonsStatus();
-    Timestamp modifiedTime1 = getLastModified.get();
-    assertWithMessage(
-            "modified time should change when eRA commons status changes, want %s < %s",
-            modifiedTime0, modifiedTime1)
-        .that(modifiedTime0.before(modifiedTime1))
-        .isTrue();
-
-    userService.syncEraCommonsStatus();
-    assertWithMessage(
-            "modified time should not change on sync, if eRA commons status doesn't change")
-        .that(modifiedTime1)
-        .isEqualTo(getLastModified.get());
-  }
-
-  @Test
   public void testUpdateRasLinkIdMeStatus() {
     String idMeName = "idMe@email.com";
     userService.updateIdentityStatus(idMeName);
@@ -315,14 +266,9 @@ public class UserServiceTest {
     userService.submitAouTermsOfService(
         user, providedWorkbenchConfig.termsOfService.minimumAcceptedAouVersion);
 
-    // to be replaced as part of RW-11416
-    userService.acceptTerraTermsOfServiceDeprecated(userDao.findUserByUsername(USERNAME));
-    verify(mockFireCloudService).acceptTermsOfServiceDeprecated();
-
     Optional<DbUserTermsOfService> tosMaybe =
         userTermsOfServiceDao.findFirstByUserIdOrderByTosVersionDesc(user.getUserId());
     assertThat(tosMaybe).isPresent();
-    assertThat(tosMaybe.get().getTerraAgreementTime()).isNotNull();
   }
 
   @Test
@@ -565,58 +511,6 @@ public class UserServiceTest {
   public void test_hasSignedLatestAoUTermsOfService_missing() {
     DbUser dbUser = userDao.findUserByUsername(USERNAME);
     assertThat(userService.hasSignedLatestAoUTermsOfService(dbUser)).isFalse();
-  }
-
-  @Test
-  public void test_hasSignedLatestTermsOfServiceBoth() {
-    DbUser user =
-        createUserWithAoUTOSVersion(
-            providedWorkbenchConfig.termsOfService.minimumAcceptedAouVersion);
-    when(mockFireCloudService.hasUserAcceptedLatestTerraToS()).thenReturn(true);
-    assertThat(userService.hasSignedLatestTermsOfServiceForBoth(user)).isTrue();
-  }
-
-  @Test
-  public void test_hasSignedLatestTermsOfServiceBoth_has_not_accepted_terra() {
-    DbUser user =
-        createUserWithAoUTOSVersion(
-            providedWorkbenchConfig.termsOfService.minimumAcceptedAouVersion);
-    when(mockFireCloudService.hasUserAcceptedLatestTerraToS()).thenReturn(false);
-    assertThat(userService.hasSignedLatestTermsOfServiceForBoth(user)).isFalse();
-  }
-
-  @Test
-  public void test_hasSignedLatestTermsOfServiceBoth_missing_aou_version_has_accepted_terra() {
-    DbUser user = userDao.findUserByUsername(USERNAME);
-    when(mockFireCloudService.hasUserAcceptedLatestTerraToS()).thenReturn(true);
-    userTermsOfServiceDao.save(new DbUserTermsOfService().setUserId(user.getUserId()));
-    assertThat(userService.hasSignedLatestTermsOfServiceForBoth(user)).isFalse();
-  }
-
-  @Test
-  public void test_hasSignedLatestTermsOfServiceBoth_missing_aou_version_has_not_accepted_terra() {
-    DbUser user = userDao.findUserByUsername(USERNAME);
-    when(mockFireCloudService.hasUserAcceptedLatestTerraToS()).thenReturn(false);
-    userTermsOfServiceDao.save(new DbUserTermsOfService().setUserId(user.getUserId()));
-    assertThat(userService.hasSignedLatestTermsOfServiceForBoth(user)).isFalse();
-  }
-
-  @Test
-  public void test_hasSignedLatestTermsOfServiceBoth_wrong_aou_version_has_accepted_terra() {
-    DbUser user =
-        createUserWithAoUTOSVersion(
-            providedWorkbenchConfig.termsOfService.minimumAcceptedAouVersion - 1);
-    when(mockFireCloudService.hasUserAcceptedLatestTerraToS()).thenReturn(true);
-    assertThat(userService.hasSignedLatestTermsOfServiceForBoth(user)).isFalse();
-  }
-
-  @Test
-  public void test_hasSignedLatestTermsOfServiceBoth_wrong_aou_version_has_not_accepted_terra() {
-    DbUser user =
-        createUserWithAoUTOSVersion(
-            providedWorkbenchConfig.termsOfService.minimumAcceptedAouVersion - 1);
-    when(mockFireCloudService.hasUserAcceptedLatestTerraToS()).thenReturn(false);
-    assertThat(userService.hasSignedLatestTermsOfServiceForBoth(user)).isFalse();
   }
 
   @Test

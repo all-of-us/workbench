@@ -36,15 +36,12 @@ import { AdminWorkspacesWaitingForRetrieval } from 'app/pages/admin/workspace/ad
 import { DemographicSurvey } from 'app/pages/demographic-survey';
 import { Homepage } from 'app/pages/homepage/homepage';
 import { ProfileComponent } from 'app/pages/profile/profile-component';
-import { RuntimesList } from 'app/pages/runtimes-list';
-import { FeaturedWorkspaces } from 'app/pages/workspace/featured-workspaces';
 import {
   WorkspaceEdit,
   WorkspaceEditMode,
 } from 'app/pages/workspace/workspace-edit';
 import { WorkspaceList } from 'app/pages/workspace/workspace-list';
 import { WorkspaceRecovery } from 'app/pages/workspace/workspace-recovery';
-import { WorkspaceWrapper } from 'app/pages/workspace/workspace-wrapper';
 import {
   DARPageMode,
   DATA_ACCESS_REQUIREMENTS_PATH,
@@ -93,10 +90,6 @@ const DemographicSurveyPage = fp.flow(
   withRouteData,
   withRoutingSpinner
 )(DemographicSurvey);
-const FeaturedWorkspacesPage = fp.flow(
-  withRouteData,
-  withRoutingSpinner
-)(FeaturedWorkspaces);
 const HomepagePage = fp.flow(withRouteData, withRoutingSpinner)(Homepage);
 const InstitutionAdminPage = fp.flow(
   withRouteData,
@@ -110,10 +103,6 @@ const ProfilePage = fp.flow(
   withRouteData,
   withRoutingSpinner
 )(ProfileComponent);
-const RuntimesListPage = fp.flow(
-  withRouteData,
-  withRoutingSpinner
-)(RuntimesList);
 const UserAdminProfilePage = fp.flow(
   withRouteData,
   withRoutingSpinner
@@ -123,7 +112,6 @@ const UserAdminTablePage = fp.flow(
   withRoutingSpinner
 )(AdminUserTable);
 const UserAuditPage = fp.flow(withRouteData, withRoutingSpinner)(UserAudit);
-const WorkspaceWrapperPage = fp.flow(withRouteData)(WorkspaceWrapper);
 const WorkspaceAdminPage = fp.flow(
   withRouteData,
   withRoutingSpinner
@@ -437,14 +425,6 @@ export const SignedInRoutes = () => {
           routeData={{ title: 'Data Access Requirements' }}
         />
       </AppRoute>
-      <AppRoute exact path='/runtimes'>
-        <RuntimesListPage routeData={{ title: 'Runtimes' }} />
-      </AppRoute>
-      <AppRoute exact path='/library' guards={[getAccessModuleGuard()]}>
-        <FeaturedWorkspacesPage
-          routeData={{ title: 'Workspace Library', minimizeChrome: false }}
-        />
-      </AppRoute>
       <AppRoute exact path='/workspaces' guards={[getAccessModuleGuard()]}>
         <WorkspaceListPage
           routeData={{
@@ -474,13 +454,6 @@ export const SignedInRoutes = () => {
             breadcrumb: BreadcrumbType.Workspace,
           }}
         />
-      </AppRoute>
-      <AppRoute
-        path='/workspaces/:ns/:terraName'
-        exact={false}
-        guards={[getAccessModuleGuard()]}
-      >
-        <WorkspaceWrapperPage intermediaryRoute={true} routeData={{}} />
       </AppRoute>
       <AppRoute
         path={DEMOGRAPHIC_SURVEY_V2_PATH}

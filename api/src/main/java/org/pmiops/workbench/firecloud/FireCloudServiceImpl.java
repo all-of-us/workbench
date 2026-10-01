@@ -37,7 +37,6 @@ import org.pmiops.workbench.firecloud.model.FirecloudMe;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.firecloud.model.FirecloudProfile;
 import org.pmiops.workbench.lab.notebooks.NotebookUtils;
-import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.RawlsConfig;
 import org.pmiops.workbench.rawls.RawlsRetryHandler;
 import org.pmiops.workbench.rawls.api.BillingV2Api;
@@ -431,17 +430,6 @@ public class FireCloudServiceImpl implements FireCloudService {
    * @param publish true if we want to publish the workspace, false if we are unpublishing it
    * @return
    */
-  @Override
-  public void updateWorkspaceAclForPublishing(
-      String workspaceNamespace, String firecloudName, boolean publish) {
-    final WorkspaceAccessLevel accessLevel =
-        publish ? WorkspaceAccessLevel.READER : WorkspaceAccessLevel.NO_ACCESS;
-
-    String publishGroupEmail = workspaceService.getPublishedWorkspacesGroupEmail();
-    var aclUpdate = FirecloudTransforms.buildAclUpdate(publishGroupEmail, accessLevel);
-    updateWorkspaceACLAsService(workspaceNamespace, firecloudName, List.of(aclUpdate));
-  }
-
   @Override
   public RawlsWorkspaceACLUpdateResponseList updateWorkspaceACLAsService(
       String workspaceNamespace, String firecloudName, List<RawlsWorkspaceACLUpdate> aclUpdates) {

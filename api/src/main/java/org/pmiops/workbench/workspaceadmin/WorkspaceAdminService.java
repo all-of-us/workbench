@@ -6,10 +6,8 @@ import java.util.Optional;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.AccessReason;
 import org.pmiops.workbench.model.AdminLockingRequest;
-import org.pmiops.workbench.model.AdminWorkspaceCloudStorageCounts;
 import org.pmiops.workbench.model.AdminWorkspaceObjectsCounts;
 import org.pmiops.workbench.model.CloudStorageTraffic;
-import org.pmiops.workbench.model.PublishWorkspaceRequest;
 import org.pmiops.workbench.model.WorkspaceAdminView;
 import org.pmiops.workbench.model.WorkspaceAuditLogQueryResponse;
 import org.pmiops.workbench.model.WorkspaceUserAdminView;
@@ -19,9 +17,6 @@ public interface WorkspaceAdminService {
   Optional<DbWorkspace> getFirstWorkspaceByNamespace(String workspaceNamespace);
 
   AdminWorkspaceObjectsCounts getAdminWorkspaceObjects(long workspaceId);
-
-  AdminWorkspaceCloudStorageCounts getAdminWorkspaceCloudStorageCounts(
-      String workspaceNamespace, String workspaceTerraName);
 
   CloudStorageTraffic getCloudStorageTraffic(String workspaceNamespace);
 
@@ -41,11 +36,6 @@ public interface WorkspaceAdminService {
   void setAdminLockedState(String workspaceNamespace, AdminLockingRequest adminLockingRequest);
 
   void setAdminUnlockedState(String workspaceNamespace);
-
-  void publishWorkspaceViaDB(
-      String workspaceNamespace, PublishWorkspaceRequest publishWorkspaceRequest);
-
-  void unpublishWorkspaceViaDB(String workspaceNamespace);
 
   void updateBillingToCredits(String workspaceNamespace, String terraName);
 

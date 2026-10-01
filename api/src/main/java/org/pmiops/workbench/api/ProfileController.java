@@ -200,8 +200,6 @@ public class ProfileController implements ProfileApiDelegate {
   public ResponseEntity<Void> acceptTermsOfService(Integer termsOfServiceVersion) {
     DbUser loggedInUser = userAuthenticationProvider.get().getUser();
     userService.submitAouTermsOfService(loggedInUser, termsOfServiceVersion);
-    // to be replaced as part of RW-11416
-    userService.acceptTerraTermsOfServiceDeprecated(loggedInUser);
     return ResponseEntity.ok().build();
   }
 
@@ -361,12 +359,6 @@ public class ProfileController implements ProfileApiDelegate {
     } catch (ApiException e) {
       throw new ServerErrorException(e);
     }
-    return getProfileResponse(userProvider.get());
-  }
-
-  @Override
-  public ResponseEntity<Profile> syncEraCommonsStatus() {
-    userService.syncEraCommonsStatus();
     return getProfileResponse(userProvider.get());
   }
 

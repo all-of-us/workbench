@@ -78,6 +78,23 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
           + "AND jsonPayload.target_property = 'ACCESS_LEVEL'\n"
           + "AND jsonPayload.new_value != 'NO ACCESS'\n"
           + "GROUP BY waa.jsonPayload.target_id, waa.jsonPayload.new_value";
+  private static final String ACCESS_QUERY =
+      "CREATE TEMP TABLE action_ids AS\n"
+          + "SELECT \n"
+          + "  jsonPayload.action_id as action_id,\n"
+          + "  timestamp\n"
+          + "FROM %s\n"
+          + "WHERE jsonPayload.target_type = 'WORKSPACE'\n"
+          + "AND jsonPayload.action_type = 'COLLABORATE'\n"
+          + "AND jsonPayload.target_id = @workspace_id;\n"
+          + "\n"
+          + "select waa.jsonPayload.new_value as role, MAX(waa.timestamp) AS most_recent_action\n"
+          + "from %s waa\n"
+          + "JOIN action_ids ai on waa.jsonPayload.action_id = ai.action_id\n"
+          + "WHERE jsonPayload.target_property = 'ACCESS_LEVEL'\n"
+          + "AND jsonPayload.target_type = 'USER'\n"
+          + "AND jsonPayload.target_id = @user_id\n"
+          + "GROUP BY waa.jsonPayload.new_value";
 
   private final AuditLogEntryMapper auditLogEntryMapper;
   private final BigQueryService bigQueryService;
@@ -152,6 +169,28 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
     final QueryJobConfiguration queryJobConfiguration =
         QueryJobConfiguration.newBuilder(queryString)
             .addNamedParameter("workspace_id", QueryParameterValue.int64(workspaceId))
+            .build();
+
+    List<ActionAuditQueryService.UserIdWithRoleImpl> userIdsWithRoles = new ArrayList<>();
+    for (FieldValueList row : bigQueryService.executeQuery(queryJobConfiguration).getValues()) {
+      ActionAuditQueryService.UserIdWithRoleImpl userIdWithRole =
+          new ActionAuditQueryService.UserIdWithRoleImpl(
+              row.get("user_id").getLongValue(), row.get("role").getStringValue());
+      userIdsWithRoles.add(userIdWithRole);
+    }
+
+    return userIdsWithRoles;
+  }
+
+  @Override
+  public List<ActionAuditQueryService.UserIdWithRoleImpl> getUserWorkspaceAccessLevel(
+      long workspaceId, long userId) {
+    final String queryString = String.format(ACCESS_QUERY, getTableName(), getTableName());
+
+    final QueryJobConfiguration queryJobConfiguration =
+        QueryJobConfiguration.newBuilder(queryString)
+            .addNamedParameter("workspace_id", QueryParameterValue.int64(workspaceId))
+            .addNamedParameter("user_id", QueryParameterValue.int64(userId))
             .build();
 
     List<ActionAuditQueryService.UserIdWithRoleImpl> userIdsWithRoles = new ArrayList<>();

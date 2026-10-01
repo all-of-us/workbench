@@ -28,7 +28,6 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.SumologicEgressEvent;
 import org.pmiops.workbench.model.SumologicEgressEventRequest;
-import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.VwbEgressEventRequest;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,53 +62,6 @@ public class EgressEventAuditorImpl implements EgressEventAuditor {
     this.userDao = userDao;
     this.clock = clock;
     this.actionIdProvider = actionIdProvider;
-  }
-
-  @Override
-  public void fireEgressEvent(SumologicEgressEvent event) {
-    DbWorkspace dbWorkspace = getDbWorkspace(event);
-
-    String agentEmail = null;
-    long agentId = 0;
-
-    // Using service-level creds, load the FireCloud workspace ACLs to find all members
-    // of the workspace. Then attempt to find the user who aligns with the named VM.
-    // This logic is applicable in case of Runtimes only and not Apps, since Apps are designed
-    // differently.
-    // Apps use a shared GKE cluster and nodes, and therefore it's not possible to find the App
-    // owner.
-    var usernames =
-        workspaceService
-            .getFirecloudUserRoles(
-                dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName())
-            .stream()
-            .map(UserRole::getEmail)
-            .toList();
-
-    // The user's runtime name is used as a common VM prefix across all Leo machine types, and
-    // covers the following situations:
-    // 1. GCE VMs: all-of-us-<user_id>
-    // 2. Dataproc master nodes: all-of-us-<user_id>-m
-    // 3. Dataproc worker nodes: all-of-us-<user_id>-w-<index>
-    var vmOwner =
-        userDao.findUsersByUsernameIn(usernames).stream()
-            .filter(user -> user.getRuntimeName().equals(event.getVmPrefix()))
-            .findFirst()
-            .orElse(null);
-
-    if (vmOwner != null) {
-      agentEmail = vmOwner.getUsername();
-      agentId = vmOwner.getUserId();
-    } else {
-      // If the VM prefix doesn't match a user on the workspace, we'll still log an
-      // event in the target workspace, but with nulled-out user info.
-      logger.warning(
-          String.format(
-              "Could not find a user for VM name %s in namespace %s",
-              event.getVmName(), dbWorkspace.getWorkspaceNamespace()));
-    }
-
-    fireEvent(agentId, agentEmail, dbWorkspace, event);
   }
 
   @Override

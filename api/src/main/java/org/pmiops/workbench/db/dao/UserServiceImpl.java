@@ -466,19 +466,6 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public boolean hasSignedLatestTermsOfServiceForBoth(@Nonnull DbUser dbUser) {
-    boolean hasSignedLatestAouTos = hasSignedLatestAoUTermsOfService(dbUser);
-    boolean hasSignedLatestTerraTos = fireCloudService.hasUserAcceptedLatestTerraToS();
-
-    log.log(
-        Level.INFO,
-        String.format(
-            "User %s has signed latest AoU TOS: %s, and latest Terra TOS: %s",
-            dbUser.getUsername(), hasSignedLatestAouTos, hasSignedLatestTerraTos));
-    return hasSignedLatestAouTos && hasSignedLatestTerraTos;
-  }
-
-  @Override
   @Transactional
   public void submitAouTermsOfService(@Nonnull DbUser dbUser, @Nonnull Integer tosVersion) {
     long userId = dbUser.getUserId();
@@ -490,16 +477,6 @@ public class UserServiceImpl implements UserService {
             .setTosVersion(tosVersion)
             .setAouAgreementTime(clockNow()));
     userServiceAuditor.fireAcknowledgeTermsOfService(dbUser, tosVersion);
-  }
-
-  @Override
-  @Deprecated // to be replaced as part of RW-11416
-  public void acceptTerraTermsOfServiceDeprecated(@Nonnull DbUser dbUser) {
-    fireCloudService.acceptTermsOfServiceDeprecated();
-    userTermsOfServiceDao.save(
-        userTermsOfServiceDao
-            .findByUserIdOrThrow(dbUser.getUserId())
-            .setTerraAgreementTime(clockNow()));
   }
 
   @Override
@@ -614,14 +591,6 @@ public class UserServiceImpl implements UserService {
         },
         targetUser,
         agent);
-  }
-
-  /** Syncs the eraCommons access module status for the current user. */
-  @Override
-  public DbUser syncEraCommonsStatus() {
-    DbUser user = userProvider.get();
-    FirecloudNihStatus nihStatus = fireCloudService.getNihStatus();
-    return setEraCommonsStatus(user, nihStatus, Agent.asUser(user));
   }
 
   @Override

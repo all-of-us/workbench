@@ -13,6 +13,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.pmiops.workbench.access.AccessTierService;
+import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.RdrExportDao;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -26,6 +27,7 @@ import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.model.RdrEntity;
 import org.pmiops.workbench.model.UserRole;
+import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.rdr.api.RdrApi;
 import org.pmiops.workbench.rdr.model.RdrResearcher;
@@ -52,6 +54,7 @@ public class RdrExportServiceImpl implements RdrExportService {
 
   private final InstitutionService institutionService;
   private final AccessTierService accessTierService;
+  private final ActionAuditQueryService actionAuditQueryService;
   private final WorkspaceService workspaceService;
   private final VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
   private final RdrMapper rdrMapper;
@@ -67,6 +70,7 @@ public class RdrExportServiceImpl implements RdrExportService {
       WorkspaceDao workspaceDao,
       InstitutionService institutionService,
       AccessTierService accessTierService,
+      ActionAuditQueryService actionAuditQueryService,
       WorkspaceService workspaceService,
       UserDao userDao,
       VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao) {
@@ -78,6 +82,7 @@ public class RdrExportServiceImpl implements RdrExportService {
     this.workspaceDao = workspaceDao;
     this.institutionService = institutionService;
     this.accessTierService = accessTierService;
+    this.actionAuditQueryService = actionAuditQueryService;
     this.workspaceService = workspaceService;
     this.userDao = userDao;
     this.verifiedInstitutionalAffiliationDao = verifiedInstitutionalAffiliationDao;
@@ -228,10 +233,16 @@ public class RdrExportServiceImpl implements RdrExportService {
 
     if (WorkspaceActiveStatus.ACTIVE.equals(dbWorkspace.getWorkspaceActiveStatusEnum())) {
       try {
-        // Call Firecloud to get a list of Collaborators
+        List<ActionAuditQueryService.UserIdWithRoleImpl> workspaceUsers =
+            actionAuditQueryService.getWorkspaceUsersById(dbWorkspace.getWorkspaceId());
         List<UserRole> collaborators =
-            workspaceService.getFirecloudUserRoles(
-                dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
+            workspaceUsers.stream()
+                .map(
+                    userIdWithRole ->
+                        new UserRole()
+                            .email(userDao.findUsernameByUserId(userIdWithRole.userId()))
+                            .role(WorkspaceAccessLevel.valueOf(userIdWithRole.role())))
+                .toList();
 
         var userMap =
             userDao.getUsersMappedByUsernames(
