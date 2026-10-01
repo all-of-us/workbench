@@ -8,11 +8,13 @@ import { environment } from 'environments/environment';
 import { StyledExternalLink, StyledRouterLink } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { ClrIcon } from 'app/components/icons';
+import { Spinner } from 'app/components/spinners';
 import colors, { addOpacity } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import { badgeForTier, displayNameForTier } from 'app/utils/access-tiers';
 
 interface Props {
+  loading: boolean;
   workspaces: WorkspaceResponse[];
 }
 
@@ -140,7 +142,7 @@ const getAccessTierBadge = (shortName?: string) => {
   return <div style={styles.accessTierFallbackBadge}>{shortName}</div>;
 };
 
-export const ActiveWorkspaces = ({ workspaces }: Props) => {
+export const ActiveWorkspaces = ({ loading, workspaces }: Props) => {
   const archivedCount = workspaces.filter(isArchivedWorkspace).length;
   const activeWorkspaces = workspaces
     .filter(
@@ -159,21 +161,27 @@ export const ActiveWorkspaces = ({ workspaces }: Props) => {
     <div style={styles.panel} data-test-id='active-workspaces-panel'>
       <FlexRow style={styles.headerRow}>
         <h2 style={styles.title}>Active Workspaces</h2>
-        <StyledRouterLink
-          path='/workspaces'
-          style={styles.archivedLink}
-          aria-label={`View ${archivedCount} archived workspace${
-            archivedCount === 1 ? '' : 's'
-          }`}
-        >
-          <ClrIcon shape='archive' size={16} />
-          {archivedCount === 1
-            ? 'You have 1 archived workspace'
-            : `You have ${archivedCount} archived workspaces`}
-        </StyledRouterLink>
+        {!loading && (
+          <StyledRouterLink
+            path='/workspaces'
+            style={styles.archivedLink}
+            aria-label={`View ${archivedCount} archived workspace${
+              archivedCount === 1 ? '' : 's'
+            }`}
+          >
+            <ClrIcon shape='archive' size={16} />
+            {archivedCount === 1
+              ? 'You have 1 archived workspace'
+              : `You have ${archivedCount} archived workspaces`}
+          </StyledRouterLink>
+        )}
       </FlexRow>
 
-      {activeWorkspaces.length > 0 ? (
+      {loading ? (
+        <div style={{ display: 'flex', justifyContent: 'center' }}>
+          <Spinner />
+        </div>
+      ) : activeWorkspaces.length > 0 ? (
         <div style={styles.rowsContainer}>
           {activeWorkspaces.map((workspaceResponse) => {
             const { workspace, accessLevel } = workspaceResponse;
