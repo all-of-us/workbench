@@ -67,21 +67,8 @@ public interface UserService {
    */
   boolean hasSignedLatestAoUTermsOfService(@Nonnull DbUser dbUser);
 
-  /**
-   * Is the user up-to-date with both AoU and Terra Terms of Service?
-   *
-   * @param dbUser the current user - used only to generate error messages
-   * @return true only if the user has accepted the latest version of both AoU and Terra Terms of
-   *     Service
-   */
-  boolean hasSignedLatestTermsOfServiceForBoth(@Nonnull DbUser dbUser);
-
   // Registers that a user has agreed to a given version of the AoU Terms of Service.
   void submitAouTermsOfService(@Nonnull DbUser dbUser, @Nonnull Integer tosVersion);
-
-  // Registers that a user has accepted the latest version of the Terra Terms of Service.
-  @Deprecated // to be replaced as part of RW-11416
-  void acceptTerraTermsOfServiceDeprecated(@Nonnull DbUser dbUser);
 
   DbUser setDisabledStatus(Long userId, boolean disabled);
 
@@ -116,8 +103,6 @@ public interface UserService {
   Set<DbUser> findActiveUsersByUsernames(List<String> usernames);
 
   List<DbUser> findUsersById(List<Long> ids);
-
-  DbUser syncEraCommonsStatus();
 
   /**
    * Synchronize the 2FA enablement status of the currently signed-in user between the Workbench

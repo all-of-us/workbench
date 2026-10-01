@@ -168,10 +168,6 @@ const homeActive = () => {
   return window.location.pathname === '/';
 };
 
-const libraryActive = () => {
-  return window.location.pathname === '/library';
-};
-
 const workspacesActive = () => {
   return window.location.pathname === '/workspaces';
 };
@@ -182,10 +178,6 @@ const profileActive = () => {
 
 const DARActive = () => {
   return window.location.pathname === DATA_ACCESS_REQUIREMENTS_PATH;
-};
-
-const cloudEnvironmentsActive = () => {
-  return window.location.pathname === '/runtimes';
 };
 
 const institutionAdminActive = () => {
@@ -305,11 +297,6 @@ export const SideNav = (props: SideNavProps) => {
       href: DATA_ACCESS_REQUIREMENTS_PATH,
       active: DARActive(),
     },
-    {
-      label: 'Cloud Environments (BETA)',
-      href: '/runtimes',
-      active: cloudEnvironmentsActive(),
-    },
   ];
 
   return (
@@ -362,14 +349,6 @@ export const SideNav = (props: SideNavProps) => {
             onToggleSideNav={() => onToggleSideNav()}
             href='/workspaces'
             active={workspacesActive()}
-            disabled={!hasRegisteredTierAccess(profile)}
-          />
-          <SideNavItem
-            icon='star'
-            content='Featured Workspaces'
-            onToggleSideNav={() => onToggleSideNav()}
-            href='/library'
-            active={libraryActive()}
             disabled={!hasRegisteredTierAccess(profile)}
           />
         </>

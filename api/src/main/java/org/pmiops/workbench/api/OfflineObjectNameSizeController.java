@@ -1,8 +1,6 @@
 package org.pmiops.workbench.api;
 
 import java.util.logging.Logger;
-import org.pmiops.workbench.exfiltration.ObjectNameLengthService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -13,19 +11,10 @@ public class OfflineObjectNameSizeController implements OfflineObjectNameSizeApi
   private static final Logger logger =
       Logger.getLogger(OfflineObjectNameSizeController.class.getName());
 
-  private final ObjectNameLengthService objectNameLengthService;
-
-  @Autowired
-  public OfflineObjectNameSizeController(ObjectNameLengthService objectNameLengthService) {
-    this.objectNameLengthService = objectNameLengthService;
-  }
+  public OfflineObjectNameSizeController() {}
 
   public ResponseEntity<Void> checkObjectNameSize() {
-    logger.info("Starting checking object lengths audit job");
-
-    objectNameLengthService.calculateObjectNameLength();
-
-    logger.info("Finished checking object lengths audit job");
+    logger.info("checkObjectNameSize is decommissioned");
     return ResponseEntity.noContent().build();
   }
 }

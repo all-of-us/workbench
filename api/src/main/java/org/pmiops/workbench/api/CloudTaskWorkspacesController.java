@@ -201,8 +201,8 @@ public class CloudTaskWorkspacesController implements CloudTaskWorkspacesApiDele
 
   @Override
   public ResponseEntity<Void> deleteLegacyWorkspace(DeleteLegacyWorkspaceRequest request) {
-    workspaceMigrationService.deleteNextLegacyWorkspace(
-        request.getWorkspaceNamespace(), request.getTerraName());
+    LOGGER.info(
+        "deleteLegacyWorkspace has been decommissioned: " + request.getWorkspaceNamespace());
     return ResponseEntity.ok().build();
   }
 }

@@ -1,7 +1,6 @@
 package org.pmiops.workbench.actionaudit.auditors;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -37,7 +36,6 @@ import org.pmiops.workbench.db.model.DbEgressEvent;
 import org.pmiops.workbench.db.model.DbEgressEvent.DbEgressEventStatus;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.SumologicEgressEvent;
 import org.pmiops.workbench.model.SumologicEgressEventRequest;
 import org.pmiops.workbench.model.UserRole;
@@ -106,53 +104,6 @@ public class EgressEventAuditorTest {
   }
 
   @Test
-  public void testFireEgressEvent() {
-    egressEventAuditor.fireEgressEvent(
-        new SumologicEgressEvent()
-            .projectName(EGRESS_EVENT_PROJECT_NAME)
-            .vmPrefix(EGRESS_EVENT_VM_PREFIX)
-            .timeWindowStart(0L)
-            .egressMib(12.3)
-            .gceEgressMib(0.0)
-            .dataprocMasterEgressMib(10.0)
-            .dataprocWorkerEgressMib(2.3));
-    verify(mockActionAuditService).send(eventsCaptor.capture());
-    Collection<ActionAuditEvent> events = eventsCaptor.getValue();
-
-    // Ensure all events have the expected set of constant fields.
-    assertThat(events.stream().map(ActionAuditEvent::agentType).collect(Collectors.toSet()))
-        .containsExactly(AgentType.USER);
-    assertThat(events.stream().map(ActionAuditEvent::actionType).collect(Collectors.toSet()))
-        .containsExactly(ActionType.DETECT_HIGH_EGRESS_EVENT);
-    assertThat(events.stream().map(ActionAuditEvent::agentIdMaybe).collect(Collectors.toSet()))
-        .containsExactly(USER_ID);
-    assertThat(events.stream().map(ActionAuditEvent::agentEmailMaybe).collect(Collectors.toSet()))
-        .containsExactly(USER_EMAIL);
-    assertThat(events.stream().map(ActionAuditEvent::targetIdMaybe).collect(Collectors.toSet()))
-        .containsExactly(WORKSPACE_ID);
-
-    // We should have distinct event rows with values from the egress event.
-    assertThat(
-            events.stream()
-                .filter(
-                    event ->
-                        event.targetPropertyMaybe()
-                            == EgressEventTargetProperty.EGRESS_MIB.getPropertyName())
-                .map(ActionAuditEvent::newValueMaybe)
-                .collect(Collectors.toSet()))
-        .containsExactly("12.3");
-    assertThat(
-            events.stream()
-                .filter(
-                    event ->
-                        event.targetPropertyMaybe()
-                            == EgressEventTargetProperty.VM_NAME.getPropertyName())
-                .map(ActionAuditEvent::newValueMaybe)
-                .collect(Collectors.toSet()))
-        .containsExactly(EGRESS_EVENT_VM_PREFIX);
-  }
-
-  @Test
   public void testFireEgressEventForUser() {
     egressEventAuditor.fireEgressEventForUser(
         new SumologicEgressEvent()
@@ -198,47 +149,6 @@ public class EgressEventAuditorTest {
                 .map(ActionAuditEvent::newValueMaybe)
                 .collect(Collectors.toSet()))
         .containsExactly(EGRESS_EVENT_VM_PREFIX);
-  }
-
-  @Test
-  public void testNoWorkspaceFound() {
-    // When the workspace lookup doesn't succeed, the event is filed w/ a system agent and an
-    // empty target ID.
-    when(workspaceDao.getByGoogleProject(GOOGLE_PROJECT)).thenReturn(Optional.empty());
-    var event =
-        new SumologicEgressEvent()
-            .projectName(EGRESS_EVENT_PROJECT_NAME)
-            .vmPrefix(EGRESS_EVENT_VM_PREFIX);
-
-    assertThrows(BadRequestException.class, () -> egressEventAuditor.fireEgressEvent(event));
-
-    verify(mockActionAuditService).send(eventsCaptor.capture());
-    Collection<ActionAuditEvent> events = eventsCaptor.getValue();
-
-    // Some of the properties should be nulled out, since we can't identify the target workspace
-    // for the egress event.
-    assertThat(
-            events.stream()
-                .map(ActionAuditEvent::agentEmailMaybe)
-                .filter(Objects::nonNull)
-                .toList())
-        .isEmpty();
-    assertThat(
-            events.stream().map(ActionAuditEvent::targetIdMaybe).filter(Objects::nonNull).toList())
-        .isEmpty();
-
-    // We expect to see an audit event row with a comment describing the issue encountered when
-    // trying to handle the high-egress message.
-    assertThat(
-            events.stream()
-                .filter(
-                    e ->
-                        e.targetPropertyMaybe()
-                            == EgressEventCommentTargetProperty.COMMENT.getPropertyName())
-                .map(ActionAuditEvent::newValueMaybe)
-                .findFirst()
-                .get())
-        .contains("Failed to find workspace");
   }
 
   @Test

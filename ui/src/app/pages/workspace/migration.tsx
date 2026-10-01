@@ -60,13 +60,10 @@ export const Migration = withCurrentWorkspace()(({ workspace }: Props) => {
   }
 
   const checkWorkspaceMigrationStatus = async () => {
-    const workspaceStatusCheck = await workspacesApi().getWorkspace(
-      workspace.namespace,
-      workspace.terraName
+    const workspaceStatusCheck = await workspacesApi().getWorkspaceByNamespace(
+      workspace.namespace
     );
-    if (
-      workspaceStatusCheck.workspace.migrationState === MigrationState.STARTING
-    ) {
+    if (workspaceStatusCheck.migrationState === MigrationState.STARTING) {
       if (!transferTimeoutId) {
         const timeoutId = setTimeout(
           checkWorkspaceMigrationStatus,
@@ -75,7 +72,7 @@ export const Migration = withCurrentWorkspace()(({ workspace }: Props) => {
         setTransferTimeoutId(timeoutId);
       }
     }
-    setMigrationState(workspaceStatusCheck.workspace.migrationState);
+    setMigrationState(workspaceStatusCheck.migrationState);
   };
 
   useEffect(() => {

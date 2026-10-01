@@ -683,25 +683,6 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
   }
 
   @Override
-  public void deleteNextLegacyWorkspace(String namespace, String terraName) {
-    logger.log(Level.INFO, "Deleting legacy workspace " + namespace + "/" + terraName);
-
-    try {
-      DbWorkspace dbWorkspace = workspaceDao.getRequired(namespace, terraName);
-      // Update last modified before deleting so failed deletion attempts are logged with the
-      // correct time. This is important for the legacy deletion queue so it doesn't retry failed
-      // attempts
-      dbWorkspace.setLastModifiedTime(new Timestamp(clock.instant().toEpochMilli()));
-      workspaceDao.save(dbWorkspace);
-      workspaceService.deleteWorkspaceAsService(dbWorkspace);
-      logger.log(Level.INFO, "Legacy workspace " + namespace + "/" + terraName + " deleted");
-    } catch (Exception e) {
-      throw new RuntimeException(
-          "Legacy workspace " + namespace + "/" + terraName + " deletion failed", e);
-    }
-  }
-
-  @Override
   public WorkspaceDao.WorkspaceArchiveView getNextArchiveToRetry(String status) {
     return workspaceDao.findNextArchiveToRetry(status);
   }

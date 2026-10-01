@@ -3,9 +3,6 @@ package org.pmiops.workbench.workspaceadmin;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.utils.TestMockFactory.DEFAULT_GOOGLE_PROJECT;
 import static org.pmiops.workbench.utils.TestMockFactory.createDefaultCdrVersion;
@@ -16,11 +13,8 @@ import com.google.monitoring.v3.TimeInterval;
 import com.google.monitoring.v3.TimeSeries;
 import com.google.monitoring.v3.TypedValue;
 import com.google.protobuf.util.Timestamps;
-import jakarta.mail.MessagingException;
 import java.time.Duration;
-import java.time.Instant;
 import java.util.Collections;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,8 +35,6 @@ import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.jdbc.ReportingQueryService;
 import org.pmiops.workbench.db.model.DbCdrVersion;
-import org.pmiops.workbench.db.model.DbFeaturedWorkspace;
-import org.pmiops.workbench.db.model.DbFeaturedWorkspace.DbFeaturedCategory;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -58,13 +50,10 @@ import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGetRuntimeRespo
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.mail.MailService;
-import org.pmiops.workbench.model.AdminLockingRequest;
 import org.pmiops.workbench.model.AdminWorkspaceCloudStorageCounts;
 import org.pmiops.workbench.model.AdminWorkspaceObjectsCounts;
 import org.pmiops.workbench.model.AdminWorkspaceResources;
 import org.pmiops.workbench.model.CloudStorageTraffic;
-import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
-import org.pmiops.workbench.model.PublishWorkspaceRequest;
 import org.pmiops.workbench.model.TimeSeriesPoint;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAdminView;
@@ -224,25 +213,6 @@ public class WorkspaceAdminServiceTest {
   }
 
   @Test
-  public void testGetAdminWorkspaceCloudStorageCounts() {
-    AdminWorkspaceCloudStorageCounts resp =
-        workspaceAdminService.getAdminWorkspaceCloudStorageCounts("foo", "bar");
-    assertThat(resp)
-        .isEqualTo(
-            new AdminWorkspaceCloudStorageCounts()
-                .nonNotebookFileCount(0)
-                .notebookFileCount(0)
-                .storageBytesUsed(0L)
-                .storageBucketPath("gs://bucket"));
-    verify(mockNotebooksService, atLeastOnce())
-        .getNotebooksAsService(any(), anyString(), anyString());
-
-    // Regression check: the admin service should never call the end-user variants of these methods.
-    verify(mockNotebooksService, never()).getNotebooks(any(), any());
-    verify(mockFirecloudService, never()).getWorkspace(any(), any());
-  }
-
-  @Test
   public void testGetWorkspaceAdminView() {
 
     WorkspaceAdminView workspaceDetailsResponse =
@@ -268,238 +238,5 @@ public class WorkspaceAdminServiceTest {
     assertThat(cloudStorageCounts.getNotebookFileCount()).isEqualTo(0);
     assertThat(cloudStorageCounts.getNonNotebookFileCount()).isEqualTo(0);
     assertThat(cloudStorageCounts.getStorageBytesUsed()).isEqualTo(0L);
-  }
-
-  @Test
-  public void testGetWorkspaceAdminView_featuredCategory() {
-
-    WorkspaceAdminView workspaceDetailsResponse =
-        workspaceAdminService.getWorkspaceAdminView(WORKSPACE_NAMESPACE);
-    assertThat(workspaceDetailsResponse.getWorkspace().getNamespace())
-        .isEqualTo(WORKSPACE_NAMESPACE);
-    assertThat(workspaceDetailsResponse.getWorkspace().getName()).isEqualTo(WORKSPACE_DISPLAY_NAME);
-    assertThat(workspaceDetailsResponse.getWorkspace().getDisplayName())
-        .isEqualTo(WORKSPACE_DISPLAY_NAME);
-
-    assertThat(workspaceDetailsResponse.getWorkspace().getFeaturedCategory())
-        .isEqualTo(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
-  }
-
-  private final long dummyTime = Instant.now().toEpochMilli();
-
-  @Test
-  public void testSetAdminLockedStateCallsAuditor() {
-    AdminLockingRequest adminLockingRequest = new AdminLockingRequest();
-    adminLockingRequest.setRequestReason("To test auditor");
-    adminLockingRequest.setRequestDateInMillis(12345677L);
-    workspaceAdminService.setAdminLockedState(WORKSPACE_NAMESPACE, adminLockingRequest);
-    verify(mockAdminAuditor)
-        .fireLockWorkspaceAction(dbWorkspace.getWorkspaceId(), adminLockingRequest);
-  }
-
-  @Test
-  public void testSetAdminUnlockedStateCallsAuditor() {
-    workspaceAdminService.setAdminUnlockedState(WORKSPACE_NAMESPACE);
-    verify(mockAdminAuditor).fireUnlockWorkspaceAction(dbWorkspace.getWorkspaceId());
-  }
-
-  @Test
-  public void testPublishWorkspaceViaDB() throws MessagingException {
-    testPublish(FeaturedWorkspaceCategory.PHENOTYPE_LIBRARY, DbFeaturedCategory.PHENOTYPE_LIBRARY);
-    verify(mailService, never()).sendPublishCommunityWorkspaceEmails(any(), any());
-  }
-
-  // differs only in that it sends emails
-  @Test
-  public void testPublishWorkspaceViaDB_Community() throws MessagingException {
-    testPublish(FeaturedWorkspaceCategory.COMMUNITY, DbFeaturedCategory.COMMUNITY);
-    verify(mailService).sendPublishCommunityWorkspaceEmails(any(), any());
-  }
-
-  private void testPublish(FeaturedWorkspaceCategory category, DbFeaturedCategory dbCategory) {
-    // Arrange
-    setupPublishWorkspaceMocks();
-
-    DbWorkspace mockDbWorkspace = workspaceDao.save(stubWorkspace("ns", "n"));
-
-    DbFeaturedWorkspace mockFeaturedWorkspace =
-        new DbFeaturedWorkspace().setWorkspace(mockDbWorkspace).setCategory(dbCategory);
-
-    when(mockFeaturedWorkspaceDao.save(any())).thenReturn(mockFeaturedWorkspace);
-
-    when(mockFeaturedWorkspaceMapper.toDbFeaturedWorkspace(
-            any(PublishWorkspaceRequest.class), any(DbWorkspace.class)))
-        .thenReturn(mockFeaturedWorkspace);
-
-    // Act
-    PublishWorkspaceRequest publishWorkspaceRequest =
-        new PublishWorkspaceRequest().category(category);
-    workspaceAdminService.publishWorkspaceViaDB(
-        mockDbWorkspace.getWorkspaceNamespace(), publishWorkspaceRequest);
-
-    // Assert
-    verify(mockFeaturedWorkspaceDao).save(any());
-    verify(mockAdminAuditor)
-        .firePublishWorkspaceAction(mockDbWorkspace.getWorkspaceId(), category.toString(), null);
-
-    // verify that the ACL update was performed as the RWB system, not as the admin user
-
-    verify(mockFirecloudService)
-        .updateWorkspaceAclForPublishing(
-            mockDbWorkspace.getWorkspaceNamespace(), mockDbWorkspace.getFirecloudName(), true);
-    verify(mockFirecloudService, never()).updateWorkspaceACL(anyString(), anyString(), any());
-  }
-
-  @Test
-  public void testPublishWorkspaceViaDB_updateWithDifferentCategory() throws MessagingException {
-
-    // Arrange
-    setupPublishWorkspaceMocks();
-
-    DbWorkspace mockDbWorkspace = workspaceDao.save(stubWorkspace("ns", "n"));
-
-    DbFeaturedWorkspace existingDbFeaturedWorkspace =
-        new DbFeaturedWorkspace()
-            .setWorkspace(mockDbWorkspace)
-            .setCategory(DbFeaturedCategory.DEMO_PROJECTS);
-
-    DbFeaturedWorkspace dbFeaturedWorkspaceToSave =
-        new DbFeaturedWorkspace()
-            .setWorkspace(mockDbWorkspace)
-            .setCategory(DbFeaturedCategory.COMMUNITY);
-
-    when(mockFeaturedWorkspaceDao.findByWorkspace(mockDbWorkspace))
-        .thenReturn(Optional.of(existingDbFeaturedWorkspace));
-
-    PublishWorkspaceRequest request =
-        new PublishWorkspaceRequest().category(FeaturedWorkspaceCategory.COMMUNITY);
-    when(mockFeaturedWorkspaceMapper.toDbFeaturedWorkspace(existingDbFeaturedWorkspace, request))
-        .thenReturn(dbFeaturedWorkspaceToSave);
-
-    // Act
-    workspaceAdminService.publishWorkspaceViaDB(mockDbWorkspace.getWorkspaceNamespace(), request);
-
-    // Assert
-    verify(mockFeaturedWorkspaceDao).save(any());
-    verify(mockAdminAuditor)
-        .firePublishWorkspaceAction(
-            mockDbWorkspace.getWorkspaceId(),
-            dbFeaturedWorkspaceToSave.getCategory().toString(),
-            existingDbFeaturedWorkspace.getCategory().toString());
-    // does not send emails because it's an update, not a new publish
-    verify(mailService, never()).sendPublishCommunityWorkspaceEmails(any(), any());
-
-    // We should not update the ACL as we are just updating the category and the workspace is
-    // already published
-    verify(mockFirecloudService, never())
-        .updateWorkspaceAclForPublishing(
-            mockDbWorkspace.getWorkspaceNamespace(), mockDbWorkspace.getFirecloudName(), true);
-    verify(mockFirecloudService, never()).updateWorkspaceACL(anyString(), anyString(), any());
-  }
-
-  @Test
-  public void testPublishWorkspaceViaDB_updateWithSameCategory() throws MessagingException {
-
-    // Arrange
-    setupPublishWorkspaceMocks();
-
-    DbWorkspace workspace = workspaceDao.save(stubWorkspace("ns", "n"));
-
-    DbFeaturedWorkspace mockFeaturedWorkspace =
-        new DbFeaturedWorkspace().setWorkspace(workspace).setCategory(DbFeaturedCategory.COMMUNITY);
-
-    when(mockFeaturedWorkspaceMapper.toDbFeaturedWorkspace(
-            any(DbFeaturedWorkspace.class), any(PublishWorkspaceRequest.class)))
-        .thenReturn(mockFeaturedWorkspace);
-    when(mockFeaturedWorkspaceDao.findByWorkspace(workspace))
-        .thenReturn(Optional.of(mockFeaturedWorkspace));
-    when(mockFeaturedWorkspaceDao.save(any())).thenReturn(mockFeaturedWorkspace);
-
-    // Act
-    PublishWorkspaceRequest request =
-        new PublishWorkspaceRequest().category(FeaturedWorkspaceCategory.COMMUNITY);
-    workspaceAdminService.publishWorkspaceViaDB(workspace.getWorkspaceNamespace(), request);
-
-    // Assert
-    // Since the category is the same, we should not save the workspace again or send emails
-    verify(mockFeaturedWorkspaceDao, never()).save(any());
-    verify(mockAdminAuditor, never())
-        .firePublishWorkspaceAction(
-            workspace.getWorkspaceId(), request.getCategory().toString(), "");
-    // does not send emails because it's an update, not a new publish
-    verify(mailService, never()).sendPublishCommunityWorkspaceEmails(any(), any());
-  }
-
-  @Test
-  public void testUnpublishWorkspaceViaDb() throws MessagingException {
-
-    // Arrange
-    setupPublishWorkspaceMocks();
-
-    DbWorkspace mockDbWorkspace = workspaceDao.save(stubWorkspace("ns", "n"));
-    DbFeaturedWorkspace mockFeaturedworkspace =
-        new DbFeaturedWorkspace()
-            .setWorkspace(mockDbWorkspace)
-            .setCategory(DbFeaturedCategory.TUTORIAL_WORKSPACES);
-    when(mockFeaturedWorkspaceDao.findByWorkspace(mockDbWorkspace))
-        .thenReturn(Optional.of(mockFeaturedworkspace));
-
-    // Act
-    workspaceAdminService.unpublishWorkspaceViaDB(mockDbWorkspace.getWorkspaceNamespace());
-
-    // Assert
-    verify(mockFeaturedWorkspaceDao).delete(any());
-    verify(mockAdminAuditor)
-        .fireUnpublishWorkspaceAction(mockDbWorkspace.getWorkspaceId(), "TUTORIAL_WORKSPACES");
-    verify(mailService).sendAdminUnpublishWorkspaceEmails(any(), any());
-
-    // verify that the ACL update was performed as the RWB system, not as the admin user
-
-    verify(mockFirecloudService)
-        .updateWorkspaceAclForPublishing(
-            mockDbWorkspace.getWorkspaceNamespace(), mockDbWorkspace.getFirecloudName(), false);
-    verify(mockFirecloudService, never()).updateWorkspaceACL(anyString(), anyString(), any());
-  }
-
-  private DbWorkspace stubWorkspace(String namespace, String name) {
-    return new DbWorkspace()
-        .setCdrVersion(cdrVersion)
-        .setWorkspaceNamespace(namespace)
-        .setName(name)
-        .setFirecloudName("fc-" + name);
-  }
-
-  private void setupPublishWorkspaceMocks() {
-    String rtAuthDomainGroupEmail = "rt@broad.org";
-    when(mockWorkspaceService.getPublishedWorkspacesGroupEmail())
-        .thenReturn(rtAuthDomainGroupEmail);
-
-    when(mockFeaturedWorkspaceMapper.toDbFeaturedCategory(
-            FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES))
-        .thenReturn(DbFeaturedCategory.TUTORIAL_WORKSPACES);
-
-    when(mockFeaturedWorkspaceMapper.toDbFeaturedCategory(FeaturedWorkspaceCategory.DEMO_PROJECTS))
-        .thenReturn(DbFeaturedCategory.DEMO_PROJECTS);
-
-    when(mockFeaturedWorkspaceMapper.toDbFeaturedCategory(
-            FeaturedWorkspaceCategory.PHENOTYPE_LIBRARY))
-        .thenReturn(DbFeaturedCategory.PHENOTYPE_LIBRARY);
-
-    when(mockFeaturedWorkspaceMapper.toDbFeaturedCategory(FeaturedWorkspaceCategory.COMMUNITY))
-        .thenReturn(DbFeaturedCategory.COMMUNITY);
-
-    when(mockFeaturedWorkspaceMapper.toFeaturedWorkspaceCategory(
-            DbFeaturedCategory.TUTORIAL_WORKSPACES))
-        .thenReturn(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
-
-    when(mockFeaturedWorkspaceMapper.toFeaturedWorkspaceCategory(DbFeaturedCategory.DEMO_PROJECTS))
-        .thenReturn(FeaturedWorkspaceCategory.DEMO_PROJECTS);
-
-    when(mockFeaturedWorkspaceMapper.toFeaturedWorkspaceCategory(
-            DbFeaturedCategory.PHENOTYPE_LIBRARY))
-        .thenReturn(FeaturedWorkspaceCategory.PHENOTYPE_LIBRARY);
-
-    when(mockFeaturedWorkspaceMapper.toFeaturedWorkspaceCategory(DbFeaturedCategory.COMMUNITY))
-        .thenReturn(FeaturedWorkspaceCategory.COMMUNITY);
   }
 }

@@ -909,14 +909,6 @@ describe(syncModulesExternal.name, () => {
     expect(syncModulesExternal([])).resolves.toBeTruthy();
   });
 
-  it('should return a successful promise when all externalSyncActions succeed ', () => {
-    const spyERA = jest.spyOn(profileApi(), 'syncEraCommonsStatus');
-    spyERA.mockImplementation(() => Promise.resolve(null));
-    expect(
-      syncModulesExternal([AccessModule.ERA_COMMONS])
-    ).resolves.toBeTruthy();
-  });
-
   it('should return a rejected promise when all externalSyncActions fail ', () => {
     const spyCompliance = jest.spyOn(
       profileApi(),
@@ -934,9 +926,6 @@ describe(syncModulesExternal.name, () => {
       'syncComplianceTrainingStatus'
     );
     spyCompliance.mockImplementation(() => Promise.reject(null));
-
-    const spyERA = jest.spyOn(profileApi(), 'syncEraCommonsStatus');
-    spyERA.mockImplementation(() => Promise.resolve(null));
 
     expect(
       syncModulesExternal([
