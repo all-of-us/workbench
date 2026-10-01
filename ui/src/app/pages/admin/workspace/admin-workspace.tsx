@@ -36,6 +36,8 @@ interface Props
 const AdminWorkspaceImpl = (props: Props) => {
   const [workspaceDetails, setWorkspaceDetails] =
     useState<WorkspaceAdminView>();
+  const [loadingCollaborators, setLoadingCollaborators] =
+    useState<boolean>(false);
   const [loadingWorkspace, setLoadingWorkspace] = useState<boolean>(false);
   const [dataLoadError, setDataLoadError] = useState<Response>();
   const [showRecoveryModal, setShowRecoveryModal] = useState(false);
@@ -51,12 +53,14 @@ const AdminWorkspaceImpl = (props: Props) => {
 
   const populateFederatedWorkspaceInformation = async () => {
     const { ns } = props.match.params;
+    setLoadingCollaborators(true);
     setLoadingWorkspace(true);
 
     workspaceAdminApi()
       .getWorkspaceCollaborators(ns)
       .then(setWorkspaceCollaborators)
-      .catch((e) => console.error(e));
+      .catch((e) => console.error(e))
+      .finally(() => setLoadingCollaborators(false));
 
     workspaceAdminApi()
       .getWorkspaceAdminView(ns)
@@ -115,6 +119,7 @@ const AdminWorkspaceImpl = (props: Props) => {
           />
           <WorkspaceMigrationInfo workspace={workspace} />
           <WorkspaceArchiveInfo
+            loadingCollaborators={loadingCollaborators}
             workspace={workspace}
             onRecover={() => setShowRecoveryModal(true)}
           />
