@@ -91,7 +91,6 @@ import org.pmiops.workbench.google.CloudMonitoringService;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.iam.IamService;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
-import org.pmiops.workbench.lab.notebooks.NotebooksService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.*;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
@@ -153,7 +152,6 @@ public class WorkspacesControllerTest {
 
   @MockitoBean private LeonardoRuntimeAuditor leonardoRuntimeAuditor;
   @MockitoBean private MailService mailService;
-  @MockitoBean private NotebooksService notebooksService;
   @MockitoBean private ReportingQueryService reportingQueryService;
   @MockitoBean private TanagraApi tanagraApi;
   @MockitoBean private TaskQueueService taskQueueService;

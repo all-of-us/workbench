@@ -3,7 +3,6 @@ package org.pmiops.workbench.workspaceadmin;
 import com.google.common.collect.Streams;
 import com.google.protobuf.util.Timestamps;
 import jakarta.annotation.Nullable;
-import jakarta.inject.Provider;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Comparator;
@@ -11,10 +10,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.logging.Logger;
-import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
-import org.pmiops.workbench.actionaudit.auditors.AdminAuditor;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
@@ -22,15 +18,9 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.google.CloudMonitoringService;
-import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
-import org.pmiops.workbench.lab.notebooks.NotebooksService;
-import org.pmiops.workbench.mail.MailService;
-import org.pmiops.workbench.model.AccessReason;
 import org.pmiops.workbench.model.AdminWorkspaceObjectsCounts;
 import org.pmiops.workbench.model.CloudStorageTraffic;
 import org.pmiops.workbench.model.TimeSeriesPoint;
@@ -44,7 +34,6 @@ import org.pmiops.workbench.model.WorkspaceWaitingForRetrieval;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.utils.mappers.UserMapper;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
-import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -54,56 +43,38 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   private static final Duration TRAILING_TIME_TO_QUERY = Duration.ofHours(6);
 
   private final ActionAuditQueryService actionAuditQueryService;
-  private final AdminAuditor adminAuditor;
   private final CloudMonitoringService cloudMonitoringService;
-  private final CloudStorageClient cloudStorageClient;
   private final CohortDao cohortDao;
   private final ConceptSetDao conceptSetDao;
   private final DataSetDao dataSetDao;
   private final InitialCreditsService initialCreditsService;
-  private final MailService mailService;
-  private final NotebooksService notebooksService;
   private final UserMapper userMapper;
   private final UserDao userDao;
   private final WorkspaceDao workspaceDao;
   private final WorkspaceMapper workspaceMapper;
-  private final WorkspaceService workspaceService;
-  private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   public WorkspaceAdminServiceImpl(
       ActionAuditQueryService actionAuditQueryService,
-      AdminAuditor adminAuditor,
       CloudMonitoringService cloudMonitoringService,
-      CloudStorageClient cloudStorageClient,
       CohortDao cohortDao,
       ConceptSetDao conceptSetDao,
       DataSetDao dataSetDao,
       InitialCreditsService initialCreditsService,
-      MailService mailService,
-      NotebooksService notebooksService,
       UserMapper userMapper,
       UserDao userDao,
       WorkspaceDao workspaceDao,
-      WorkspaceMapper workspaceMapper,
-      WorkspaceService workspaceService,
-      Provider<WorkbenchConfig> workbenchConfigProvider) {
+      WorkspaceMapper workspaceMapper) {
     this.actionAuditQueryService = actionAuditQueryService;
-    this.adminAuditor = adminAuditor;
     this.cloudMonitoringService = cloudMonitoringService;
-    this.cloudStorageClient = cloudStorageClient;
     this.cohortDao = cohortDao;
     this.conceptSetDao = conceptSetDao;
     this.dataSetDao = dataSetDao;
     this.initialCreditsService = initialCreditsService;
-    this.mailService = mailService;
-    this.notebooksService = notebooksService;
     this.userMapper = userMapper;
     this.userDao = userDao;
     this.workspaceDao = workspaceDao;
     this.workspaceMapper = workspaceMapper;
-    this.workspaceService = workspaceService;
-    this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
   @Override
@@ -216,35 +187,6 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
                             .map(ts -> ts.getTime())
                             .orElse(null)))
         .toList();
-  }
-
-  @Override
-  public String getReadOnlyNotebook(
-      String workspaceNamespace, String notebookNameWithFileExtension, AccessReason accessReason) {
-    if (StringUtils.isBlank(accessReason.getReason())) {
-      throw new BadRequestException("Notebook viewing access reason is required");
-    }
-
-    final String workspaceName =
-        getWorkspaceByNamespaceOrThrow(workspaceNamespace).getFirecloudName();
-    adminAuditor.fireViewNotebookAction(
-        workspaceNamespace, workspaceName, notebookNameWithFileExtension, accessReason);
-    return notebooksService.adminGetReadOnlyHtml(
-        workspaceNamespace, workspaceName, notebookNameWithFileExtension);
-  }
-
-  @Override
-  public void updateBillingToCredits(String workspaceNamespace, String terraName) {
-    try {
-      DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, terraName);
-      workspaceService.updateWorkspaceBillingAccount(
-          dbWorkspace,
-          workbenchConfigProvider.get().billing.initialCreditsBillingAccountName(),
-          true);
-    } catch (ServerErrorException e) {
-      throw new ServerErrorException(
-          "Could not update the billing account for " + workspaceNamespace, e);
-    }
   }
 
   @Override

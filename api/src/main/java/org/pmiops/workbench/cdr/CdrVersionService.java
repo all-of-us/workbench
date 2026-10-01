@@ -11,7 +11,6 @@ import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.ForbiddenException;
-import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.CdrVersion;
 import org.pmiops.workbench.model.CdrVersionTier;
 import org.pmiops.workbench.model.CdrVersionTiersResponse;
@@ -23,7 +22,6 @@ public class CdrVersionService {
   private final AccessTierService accessTierService;
   private final CdrVersionDao cdrVersionDao;
   private final CdrVersionMapper cdrVersionMapper;
-  private final FireCloudService fireCloudService;
   private final Provider<DbUser> userProvider;
 
   private static final Logger log = Logger.getLogger(CdrVersionService.class.getName());
@@ -33,12 +31,10 @@ public class CdrVersionService {
       AccessTierService accessTierService,
       CdrVersionDao cdrVersionDao,
       CdrVersionMapper cdrVersionMapper,
-      FireCloudService fireCloudService,
       Provider<DbUser> userProvider) {
     this.accessTierService = accessTierService;
     this.cdrVersionDao = cdrVersionDao;
     this.cdrVersionMapper = cdrVersionMapper;
-    this.fireCloudService = fireCloudService;
     this.userProvider = userProvider;
   }
 
@@ -51,23 +47,10 @@ public class CdrVersionService {
    * @param version
    */
   public void setCdrVersion(DbCdrVersion version) {
-    if (!accessTierService
-        .getAccessTiersForUser(userProvider.get())
-        .contains(version.getAccessTier())) {
-      throw new ForbiddenException(
-          "Requester does not have access to tier "
-              + version.getAccessTier().getShortName()
-              + ", cannot access CDR");
-    }
-
-    String authorizationDomain = version.getAccessTier().getAuthDomainName();
-    if (!fireCloudService.isUserMemberOfGroupWithCache(
-        userProvider.get().getUsername(), authorizationDomain)) {
-      throw new ForbiddenException(
-          "Requester is not a member of " + authorizationDomain + ", cannot access CDR");
-    }
-
-    CdrVersionContext.setCdrVersionNoCheckAuthDomain(version);
+    log.info(
+        String.format(
+            "setCdrVersion is decommissioned.  '%s' not set",
+            version.getCdrVersionId()));
   }
 
   public Optional<DbCdrVersion> findByCdrVersionId(Long cdrVersionId) {
