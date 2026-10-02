@@ -771,9 +771,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
 
       Timestamp retryTime = new Timestamp(clock.instant().toEpochMilli());
 
-      archiveRecord
-          .setStatus(WorkspaceArchiveStatus.RETRYING.toString())
-          .setLastRetry(retryTime);
+      archiveRecord.setStatus(WorkspaceArchiveStatus.RETRYING.toString()).setLastRetry(retryTime);
       workspaceBucketArchiveDao.save(archiveRecord);
 
       RawlsWorkspaceDetails fcWorkspace =
@@ -793,10 +791,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
               null,
               archiveBucket,
               archivePath,
-              "archive-retry-"
-                  + namespace
-                  + "-"
-                  + retryTime.toString().replaceAll("[\\s:]+", ""),
+              "archive-retry-" + namespace + "-" + retryTime.toString().replaceAll("[\\s:]+", ""),
               projectId,
               null,
               serviceAccountEmail,

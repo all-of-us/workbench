@@ -2,8 +2,6 @@ package org.pmiops.workbench;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.pmiops.workbench.firecloud.IntegrationTestUsers.COMPLIANT_USER;
-import static org.pmiops.workbench.firecloud.IntegrationTestUsers.COMPLIANT_USER_SUBJECT_ID;
 import static org.pmiops.workbench.firecloud.IntegrationTestUsers.NON_COMPLIANT_USER;
 
 import java.io.IOException;
@@ -14,7 +12,6 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FireCloudServiceImpl;
 import org.pmiops.workbench.firecloud.FirecloudApiClientFactory;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
-import org.pmiops.workbench.firecloud.model.FirecloudMe;
 import org.pmiops.workbench.google.StorageConfig;
 import org.pmiops.workbench.sam.SamRetryHandler;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,34 +56,35 @@ public class FireCloudIntegrationTest extends BaseIntegrationTest {
    * FireCloud dev with the matching email address.
    */
 
-//  Commented out to unblock release due to Terra dev issues
-//  @Test
-//  public void testImpersonatedProfileCall() throws Exception {
-//    ApiClient apiClient = firecloudApiClientFactory.newImpersonatedApiClient(COMPLIANT_USER);
-//
-//    // Run the most basic API call against the /me/ endpoint.
-//    ProfileApi profileApi = new ProfileApi(apiClient);
-//    FirecloudMe me = profileApi.me();
-//    assertThat(me.getUserInfo().getUserEmail()).isEqualTo(COMPLIANT_USER);
-//    assertThat(me.getUserInfo().getUserSubjectId()).isEqualTo(COMPLIANT_USER_SUBJECT_ID);
-//
-//    // Run a test against a different FireCloud endpoint. This is important, because the /me/
-//    // endpoint is accessible even by service accounts whose subject IDs haven't been whitelisted
-//    // by FireCloud devops.
-//    //
-//    // If we haven't had our "firecloud-admin" service account whitelisted,
-//    // then the following API call would result in a 401 error instead of a 404.
-//
-//    // TODO uncomment after issue with endpoint below is resolved
-//    //    NihApi nihApi = new NihApi(apiClient);
-//    //    int responseCode = 0;
-//    //    try {
-//    //      nihApi.nihStatus();
-//    //    } catch (ApiException e) {
-//    //      responseCode = e.getCode();
-//    //    }
-//    //    assertThat(responseCode).isEqualTo(404);
-//  }
+  //  Commented out to unblock release due to Terra dev issues
+  //  @Test
+  //  public void testImpersonatedProfileCall() throws Exception {
+  //    ApiClient apiClient = firecloudApiClientFactory.newImpersonatedApiClient(COMPLIANT_USER);
+  //
+  //    // Run the most basic API call against the /me/ endpoint.
+  //    ProfileApi profileApi = new ProfileApi(apiClient);
+  //    FirecloudMe me = profileApi.me();
+  //    assertThat(me.getUserInfo().getUserEmail()).isEqualTo(COMPLIANT_USER);
+  //    assertThat(me.getUserInfo().getUserSubjectId()).isEqualTo(COMPLIANT_USER_SUBJECT_ID);
+  //
+  //    // Run a test against a different FireCloud endpoint. This is important, because the /me/
+  //    // endpoint is accessible even by service accounts whose subject IDs haven't been
+  // whitelisted
+  //    // by FireCloud devops.
+  //    //
+  //    // If we haven't had our "firecloud-admin" service account whitelisted,
+  //    // then the following API call would result in a 401 error instead of a 404.
+  //
+  //    // TODO uncomment after issue with endpoint below is resolved
+  //    //    NihApi nihApi = new NihApi(apiClient);
+  //    //    int responseCode = 0;
+  //    //    try {
+  //    //      nihApi.nihStatus();
+  //    //    } catch (ApiException e) {
+  //    //      responseCode = e.getCode();
+  //    //    }
+  //    //    assertThat(responseCode).isEqualTo(404);
+  //  }
 
   @Test
   public void testImpersonatedProfileCall_tos_non_compliant() throws Exception {
