@@ -89,7 +89,7 @@ public class OfflineWorkspaceController implements OfflineWorkspaceApiDelegate {
   @Override
   public ResponseEntity<Void> retryNextFailedArchive() {
     workspaceMigrationService.retryNextArchiveByStatus(
-        WorkspaceArchiveStatus.RETRY_FAILED.toString());
+        WorkspaceArchiveStatus.FAILED.toString());
     return ResponseEntity.noContent().build();
   }
 
