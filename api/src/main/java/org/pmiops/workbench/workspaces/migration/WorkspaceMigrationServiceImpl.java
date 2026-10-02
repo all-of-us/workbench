@@ -769,9 +769,9 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
     try {
       logger.log(Level.INFO, " Starting archive retry for: " + namespace);
 
-      archiveRecord
-          .setStatus(WorkspaceArchiveStatus.RETRYING.toString())
-          .setLastRetry(new Timestamp(clock.instant().toEpochMilli()));
+      Timestamp retryTime = new Timestamp(clock.instant().toEpochMilli());
+
+      archiveRecord.setStatus(WorkspaceArchiveStatus.RETRYING.toString()).setLastRetry(retryTime);
       workspaceBucketArchiveDao.save(archiveRecord);
 
       RawlsWorkspaceDetails fcWorkspace =
@@ -791,10 +791,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
               null,
               archiveBucket,
               archivePath,
-              "archive-retry-"
-                  + namespace
-                  + "-"
-                  + archiveRecord.getLastRetry().toString().replaceAll("[\\s:]+", ""),
+              "archive-retry-" + namespace + "-" + retryTime.toString().replaceAll("[\\s:]+", ""),
               projectId,
               null,
               serviceAccountEmail,
@@ -945,7 +942,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
               projectId,
               null,
               serviceAccountEmail,
-              true);
+              false);
 
       logger.log(Level.INFO, namespace + ": Archive transfer job created");
 

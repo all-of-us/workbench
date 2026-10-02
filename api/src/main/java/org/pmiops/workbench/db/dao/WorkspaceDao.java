@@ -209,7 +209,7 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
       "SELECT w.workspaceNamespace as workspaceNamespace, w.firecloudName as firecloudName "
           + "from DbWorkspace w "
           + "join DbVerifiedInstitutionalAffiliation via on w.creator.userId = via.user.userId "
-          + "where w.migratedVwbWorkspaceId is null "
+          + "where w.migrationState = 'FAILED' "
           + "and w.activeStatus = 0 "
           + "and via.institution.institutionId != 1 "
           + "and w.workspaceId not in (SELECT legacyWorkspaceId from DbWorkspaceBucketArchive )"
@@ -248,6 +248,13 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
           + "SELECT legacyWorkspaceId from DbWorkspaceBucketArchive where status = 'ARCHIVED')) "
           + "order by w.lastModifiedTime asc limit 4")
   List<WorkspaceDeletionView> findNextWorkspacesToDelete();
+
+  @Query(
+      "SELECT workspaceNamespace as workspaceNamespace, firecloudName as firecloudName "
+          + "from DbWorkspace "
+          + "where activeStatus = 0 "
+          + "order by lastModifiedTime asc limit 4")
+  List<WorkspaceDeletionView> findNextNonProdWorkspacesToDelete();
 
   @Query(
       "SELECT w FROM DbWorkspace w "

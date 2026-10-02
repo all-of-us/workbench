@@ -4,6 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import jakarta.inject.Provider;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceUserCacheService;
@@ -28,6 +30,8 @@ public class OfflineWorkspaceControllerTest {
   @Mock private WorkspaceMigrationService workspaceMigrationService;
   @Mock private WorkspaceUserCacheService mockWorkspaceUserCacheService;
   @Mock private TaskQueueService mockTaskQueueService;
+  @Mock private Provider<WorkbenchConfig> mockConfigProvider;
+  private static WorkbenchConfig workbenchConfig;
 
   private OfflineWorkspaceController offlineWorkspaceController;
 
@@ -44,7 +48,10 @@ public class OfflineWorkspaceControllerTest {
             workspaceService,
             workspaceDao,
             mockWorkspaceUserCacheService,
-            workspaceMigrationService);
+            workspaceMigrationService,
+            mockConfigProvider);
+    workbenchConfig = WorkbenchConfig.createEmptyConfig();
+    workbenchConfig.server.shortName = "Prod";
   }
 
   @Test
@@ -80,6 +87,7 @@ public class OfflineWorkspaceControllerTest {
 
   @Test
   public void testDeleteNextLegacyWorkspace() {
+    when(mockConfigProvider.get()).thenReturn(workbenchConfig);
     when(workspaceDeletionView.getWorkspaceNamespace()).thenReturn(NAMESPACE);
     when(workspaceDeletionView.getFirecloudName()).thenReturn(TERRA_NAME);
     when(workspaceDao.findNextWorkspacesToDelete()).thenReturn(List.of(workspaceDeletionView));

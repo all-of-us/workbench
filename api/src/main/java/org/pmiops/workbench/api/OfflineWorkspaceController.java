@@ -1,8 +1,10 @@
 package org.pmiops.workbench.api;
 
+import jakarta.inject.Provider;
 import java.util.List;
 import java.util.logging.Logger;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.WorkspaceArchiveStatus;
@@ -22,6 +24,7 @@ public class OfflineWorkspaceController implements OfflineWorkspaceApiDelegate {
   private final WorkspaceDao workspaceDao;
   private final WorkspaceUserCacheService workspaceUserCacheService;
   private final WorkspaceMigrationService workspaceMigrationService;
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   public OfflineWorkspaceController(
@@ -29,12 +32,14 @@ public class OfflineWorkspaceController implements OfflineWorkspaceApiDelegate {
       WorkspaceService workspaceService,
       WorkspaceDao workspaceDao,
       WorkspaceUserCacheService workspaceUserCacheService,
-      WorkspaceMigrationService workspaceMigrationService) {
+      WorkspaceMigrationService workspaceMigrationService,
+      Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.taskQueueService = taskQueueService;
     this.workspaceService = workspaceService;
     this.workspaceDao = workspaceDao;
     this.workspaceUserCacheService = workspaceUserCacheService;
     this.workspaceMigrationService = workspaceMigrationService;
+    this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
   @Override
@@ -67,7 +72,9 @@ public class OfflineWorkspaceController implements OfflineWorkspaceApiDelegate {
   @Override
   public ResponseEntity<Void> deleteNextLegacyWorkspace() {
     List<WorkspaceDao.WorkspaceDeletionView> workspacesToDelete =
-        workspaceDao.findNextWorkspacesToDelete();
+        workbenchConfigProvider.get().server.shortName.equals("Prod")
+            ? workspaceDao.findNextWorkspacesToDelete()
+            : workspaceDao.findNextNonProdWorkspacesToDelete();
     if (workspacesToDelete == null || workspacesToDelete.isEmpty()) {
       throw new NotFoundException(
           "Next legacy workspace not found. Update query to continue archives");
@@ -88,8 +95,7 @@ public class OfflineWorkspaceController implements OfflineWorkspaceApiDelegate {
 
   @Override
   public ResponseEntity<Void> retryNextFailedArchive() {
-    workspaceMigrationService.retryNextArchiveByStatus(
-        WorkspaceArchiveStatus.RETRY_FAILED.toString());
+    workspaceMigrationService.retryNextArchiveByStatus(WorkspaceArchiveStatus.FAILED.toString());
     return ResponseEntity.noContent().build();
   }
 
