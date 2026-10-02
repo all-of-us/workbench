@@ -40,7 +40,6 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudMe;
 import org.pmiops.workbench.firecloud.model.FirecloudUserInfo;
 import org.pmiops.workbench.model.Authority;
@@ -76,7 +75,6 @@ public class AuthInterceptorTest {
   private static final long USER_ID = 123L;
 
   @MockitoBean private UserInfoService userInfoService;
-  @MockitoBean private FireCloudService fireCloudService;
   @MockitoBean private UserDao userDao;
   @MockitoBean private DevUserRegistrationService devUserRegistrationService;
 

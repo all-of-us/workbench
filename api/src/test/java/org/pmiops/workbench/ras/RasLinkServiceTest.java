@@ -50,7 +50,6 @@ import org.pmiops.workbench.db.model.DbIdentityVerification.DbIdentityVerificati
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserAccessModule;
 import org.pmiops.workbench.exceptions.ForbiddenException;
-import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.identityverification.IdentityVerificationService;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
@@ -77,7 +76,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 public class RasLinkServiceTest {
   @MockitoBean private AccessTierService accessTierService;
   @MockitoBean private DirectoryService directoryService;
-  @MockitoBean private FireCloudService fireCloudService;
   @MockitoBean private InitialCreditsService initialCreditsService;
   @MockitoBean private HttpTransport httpTransport;
   @MockitoBean private MailService mailService;

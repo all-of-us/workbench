@@ -5,10 +5,8 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.*;
 import java.util.function.Function;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -17,11 +15,9 @@ import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.model.*;
-import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
 import org.pmiops.workbench.utils.mappers.UserMapper;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -158,74 +154,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
-  public List<UserRole> getFirecloudUserRoles(String workspaceNamespace, String firecloudName) {
-    Map<String, RawlsWorkspaceAccessEntry> emailToRole =
-        workspaceAuthService.getFirecloudWorkspaceAcl(workspaceNamespace, firecloudName);
-
-    var userMap = userDao.getUsersMappedByUsernames(emailToRole.keySet());
-
-    return emailToRole.entrySet().stream()
-        .flatMap(
-            entry -> {
-              String email = entry.getKey();
-              RawlsWorkspaceAccessEntry acl = entry.getValue();
-              DbUser user = userMap.get(entry.getKey());
-              // Filter out groups
-              if (user == null) {
-                log.log(Level.WARNING, "No user found for " + email);
-                return Stream.empty();
-              } else {
-                return Stream.of(userMapper.toApiUserRole(user, acl));
-              }
-            })
-        .sorted(
-            Comparator.comparing(UserRole::getRole).thenComparing(UserRole::getEmail).reversed())
-        .toList();
-  }
-
-  private List<DbUserRecentWorkspace> pruneInaccessibleRecentWorkspaces(
-      List<DbUserRecentWorkspace> recentWorkspaces, long userId) {
-    List<DbWorkspace> dbWorkspaces =
-        workspaceDao.findAllByWorkspaceIdIn(
-            recentWorkspaces.stream()
-                .map(DbUserRecentWorkspace::getWorkspaceId)
-                .collect(Collectors.toList()));
-
-    Set<Long> workspaceIdsToDelete =
-        dbWorkspaces.stream()
-            .filter(
-                workspace -> {
-                  try {
-                    workspaceAuthService.enforceWorkspaceAccessLevel(
-                        workspace.getWorkspaceNamespace(),
-                        workspace.getFirecloudName(),
-                        WorkspaceAccessLevel.READER);
-                  } catch (ForbiddenException | NotFoundException e) {
-                    return true;
-                  }
-                  return false;
-                })
-            .map(DbWorkspace::getWorkspaceId)
-            .collect(Collectors.toSet());
-
-    if (!workspaceIdsToDelete.isEmpty()) {
-      userRecentWorkspaceDao.deleteByUserIdAndWorkspaceIdIn(userId, workspaceIdsToDelete);
-      /* The current table which stores user recent resources is unable to delete the entries for
-        deleted Workspace.https://precisionmedicineinitiative.atlassian.net/browse/RW-6159
-        The below statement does delete entries for inactive workspaces for the new table
-        (user_Recent_modified_resources), however we will uncomment it only when the new
-        table replaces the old version of user recent resource completely to avoid any discrepancies
-      */
-      //      userRecentlyModifiedResourceDao.deleteByUserIdAndWorkspaceIdIn(userId,
-      // workspaceIdsToDelete);
-    }
-
-    return recentWorkspaces.stream()
-        .filter(recentWorkspace -> !workspaceIdsToDelete.contains(recentWorkspace.getWorkspaceId()))
-        .collect(Collectors.toList());
-  }
-
-  @Override
   @Transactional
   public DbUserRecentWorkspace updateRecentWorkspaces(DbWorkspace workspace) {
     return updateRecentWorkspaces(
@@ -281,15 +209,5 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   @Override
   public List<DbWorkspace> lookupWorkspacesByNamespace(Collection<String> workspaceNamespaces) {
     return workspaceDao.getByWorkspaceNamespaceIn(workspaceNamespaces);
-  }
-
-  @Override
-  public List<DbUser> getWorkspaceOwnerList(DbWorkspace dbWorkspace) {
-    return userDao.findUsersByUsernameIn(
-        getFirecloudUserRoles(dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName())
-            .stream()
-            .filter(userRole -> userRole.getRole() == WorkspaceAccessLevel.OWNER)
-            .map(UserRole::getEmail)
-            .toList());
   }
 }

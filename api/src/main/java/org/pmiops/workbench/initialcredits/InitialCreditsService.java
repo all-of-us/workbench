@@ -37,7 +37,6 @@ import org.pmiops.workbench.db.model.DbVwbUserPod;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspaceFreeTierUsage;
 import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
@@ -52,7 +51,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class InitialCreditsService {
   private final Clock clock;
-  private final FireCloudService fireCloudService;
   private final InstitutionService institutionService;
   private final MailService mailService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
@@ -71,7 +69,6 @@ public class InitialCreditsService {
   @Autowired
   public InitialCreditsService(
       Clock clock,
-      FireCloudService fireCloudService,
       InstitutionService institutionService,
       MailService mailService,
       Provider<WorkbenchConfig> workbenchConfigProvider,
@@ -85,7 +82,6 @@ public class InitialCreditsService {
       VwbUserPodDao vwbUserPodDao,
       VwbUserService vwbUserService) {
     this.clock = clock;
-    this.fireCloudService = fireCloudService;
     this.institutionService = institutionService;
     this.mailService = mailService;
     this.taskQueueService = taskQueueService;

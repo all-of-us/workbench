@@ -46,7 +46,6 @@ import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.institution.InstitutionService;
@@ -95,7 +94,6 @@ public class UserServiceTest {
   private static DbAccessTier controlledTier;
 
   @MockitoBean private DirectoryService mockDirectoryService;
-  @MockitoBean private FireCloudService mockFireCloudService;
   @MockitoBean private InstitutionService mockInstitutionService;
   @MockitoBean private UserServiceAuditor mockUserServiceAuditAdapter;
   // use a SpyBean when we need the full service for some tests and mocks for others

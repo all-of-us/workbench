@@ -30,8 +30,6 @@ import org.pmiops.workbench.db.jdbc.ReportingQueryService;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exfiltration.EgressRemediationService;
-import org.pmiops.workbench.exfiltration.ObjectNameLengthServiceImpl;
-import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.google.CloudStorageClientImpl;
 import org.pmiops.workbench.iam.IamService;
@@ -39,10 +37,6 @@ import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.profile.ProfileMapper;
-import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessLevel;
-import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
-import org.pmiops.workbench.rawls.model.RawlsWorkspaceListResponse;
-import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.FeaturedWorkspaceMapper;
 import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
@@ -80,7 +74,6 @@ public class WorkspaceServiceTest {
     CloudStorageClientImpl.class,
     CommonMappers.class,
     FirecloudMapperImpl.class,
-    ObjectNameLengthServiceImpl.class,
     WorkspaceMapperImpl.class,
     WorkspaceServiceImpl.class
   })
@@ -115,7 +108,6 @@ public class WorkspaceServiceTest {
   @MockitoBean private Clock mockClock;
   @MockitoBean private CloudBillingClient mockCloudBillingClient;
   @MockitoBean private FeaturedWorkspaceDao mockFeaturedWorkspaceDao;
-  @MockitoBean private FireCloudService mockFireCloudService;
   @MockitoBean private MailService mockMailService;
   @MockitoBean private WorkspaceAuthService mockWorkspaceAuthService;
   @MockitoBean private Provider<Stopwatch> mockStopwatchProvider;
@@ -126,8 +118,6 @@ public class WorkspaceServiceTest {
   @Autowired private WorkspaceService workspaceService;
 
   private static DbUser currentUser;
-
-  private final List<RawlsWorkspaceListResponse> firecloudWorkspaceResponses = new ArrayList<>();
   private final List<DbWorkspace> dbWorkspaces = new ArrayList<>();
   private static final Instant NOW = Instant.parse("1985-11-05T22:04:00.00Z");
   private static final long USER_ID = 1L;
@@ -145,41 +135,7 @@ public class WorkspaceServiceTest {
     // Mock the Stopwatch provider
     Stopwatch mockStopwatch = Stopwatch.createUnstarted();
     doReturn(mockStopwatch).when(mockStopwatchProvider).get();
-
-    firecloudWorkspaceResponses.clear();
     dbWorkspaces.clear();
-    addMockedWorkspace(
-        workspaceIdIncrementer.getAndIncrement(),
-        "reader",
-        DEFAULT_WORKSPACE_NAMESPACE,
-        RawlsWorkspaceAccessLevel.READER,
-        WorkspaceActiveStatus.ACTIVE);
-    addMockedWorkspace(
-        workspaceIdIncrementer.getAndIncrement(),
-        "writer",
-        DEFAULT_WORKSPACE_NAMESPACE,
-        RawlsWorkspaceAccessLevel.WRITER,
-        WorkspaceActiveStatus.ACTIVE);
-    addMockedWorkspace(
-        workspaceIdIncrementer.getAndIncrement(),
-        "owner",
-        DEFAULT_WORKSPACE_NAMESPACE,
-        RawlsWorkspaceAccessLevel.OWNER,
-        WorkspaceActiveStatus.ACTIVE);
-    addMockedWorkspace(
-        workspaceIdIncrementer.getAndIncrement(),
-        "extra",
-        DEFAULT_WORKSPACE_NAMESPACE,
-        RawlsWorkspaceAccessLevel.OWNER,
-        WorkspaceActiveStatus.ACTIVE);
-    addMockedWorkspace(
-        workspaceIdIncrementer.getAndIncrement(),
-        "another_extra",
-        DEFAULT_WORKSPACE_NAMESPACE,
-        RawlsWorkspaceAccessLevel.OWNER,
-        WorkspaceActiveStatus.ACTIVE);
-
-    doReturn(firecloudWorkspaceResponses).when(mockFireCloudService).listWorkspaces();
 
     currentUser = new DbUser();
     currentUser.setUsername(DEFAULT_USERNAME);
@@ -188,46 +144,6 @@ public class WorkspaceServiceTest {
 
     workbenchConfig = WorkbenchConfig.createEmptyConfig();
     workbenchConfig.billing.accountId = "initial-credits";
-  }
-
-  private RawlsWorkspaceDetails createMockWorkspaceDetails(
-      String workspaceTerraUuid, String workspaceTerraName, String workspaceNamespace) {
-    return new RawlsWorkspaceDetails()
-        .workspaceId(workspaceTerraUuid)
-        .name(workspaceTerraName)
-        .namespace(workspaceNamespace);
-  }
-
-  private RawlsWorkspaceResponse mockRawlsWorkspaceResponse(
-      String workspaceTerraUuid,
-      String workspaceTerraName,
-      String workspaceNamespace,
-      RawlsWorkspaceAccessLevel accessLevel) {
-    RawlsWorkspaceDetails mockWorkspace =
-        createMockWorkspaceDetails(workspaceTerraUuid, workspaceTerraName, workspaceNamespace);
-
-    RawlsWorkspaceResponse mockWorkspaceResponse = new RawlsWorkspaceResponse();
-    mockWorkspaceResponse.workspace(mockWorkspace);
-    mockWorkspaceResponse.accessLevel(accessLevel);
-
-    doReturn(mockWorkspaceResponse)
-        .when(mockFireCloudService)
-        .getWorkspace(workspaceNamespace, workspaceTerraName);
-    return mockWorkspaceResponse;
-  }
-
-  private RawlsWorkspaceListResponse mockRawlsWorkspaceListResponse(
-      String workspaceTerraUuid,
-      String workspaceTerraName,
-      String workspaceNamespace,
-      RawlsWorkspaceAccessLevel accessLevel) {
-    RawlsWorkspaceDetails mockWorkspace =
-        createMockWorkspaceDetails(workspaceTerraUuid, workspaceTerraName, workspaceNamespace);
-
-    RawlsWorkspaceListResponse mockWorkspaceListResponse = new RawlsWorkspaceListResponse();
-    mockWorkspaceListResponse.setAccessLevel(accessLevel);
-    mockWorkspaceListResponse.setWorkspace(mockWorkspace);
-    return mockWorkspaceListResponse;
   }
 
   private DbWorkspace buildDbWorkspace(
@@ -242,38 +158,6 @@ public class WorkspaceServiceTest {
     dbWorkspace.setWorkspaceActiveStatusEnum(activeStatus);
     dbWorkspace.setFirecloudName(name);
     dbWorkspace.setFirecloudUuid(Long.toString(dbId));
-    return dbWorkspace;
-  }
-
-  private DbWorkspace addMockedWorkspace(
-      long workspaceId,
-      String workspaceTerraName,
-      String workspaceNamespace,
-      RawlsWorkspaceAccessLevel accessLevel,
-      WorkspaceActiveStatus activeStatus) {
-
-    // in reality, these will NOT match
-    String workspaceTerraUuid = Long.toString(workspaceId);
-
-    RawlsWorkspaceResponse mockWorkspaceResponse =
-        mockRawlsWorkspaceResponse(
-            workspaceTerraUuid, workspaceTerraName, workspaceNamespace, accessLevel);
-
-    RawlsWorkspaceListResponse mockWorkspaceListResponse =
-        mockRawlsWorkspaceListResponse(
-            workspaceTerraUuid, workspaceTerraName, workspaceNamespace, accessLevel);
-
-    firecloudWorkspaceResponses.add(mockWorkspaceListResponse);
-
-    DbWorkspace dbWorkspace =
-        workspaceDao.save(
-            buildDbWorkspace(
-                workspaceId,
-                mockWorkspaceResponse.getWorkspace().getName(),
-                workspaceNamespace,
-                activeStatus));
-
-    dbWorkspaces.add(dbWorkspace);
     return dbWorkspace;
   }
 

@@ -43,7 +43,6 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserAccessTier;
 import org.pmiops.workbench.db.model.DbUserCodeOfConductAgreement;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
-import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.institution.InstitutionService;
@@ -85,7 +84,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class UserServiceAccessTest {
   @MockitoBean private DirectoryService directoryService;
-  @MockitoBean private FireCloudService fireCloudService;
   @MockitoBean private UserServiceAuditor userServiceAuditor;
   @MockitoBean private InitialCreditsService initialCreditsService;
   @MockitoBean private VwbAccessService vwbAccessService;

@@ -26,7 +26,6 @@ public interface WorkspaceService {
 
   WorkspaceResponse getWorkspace(String workspaceNamespace, String workspaceTerraName);
 
-
   List<WorkspaceResponse> listWorkspaces();
 
   /**

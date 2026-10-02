@@ -41,7 +41,6 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspaceFreeTierUsage;
-import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.initialcredits.WorkspaceInitialCreditUsageService;
 import org.pmiops.workbench.institution.InstitutionService;
@@ -64,7 +63,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 @DataJpaTest
 class CloudTaskInitialCreditsExhaustionControllerTest {
 
-  @MockitoBean private FireCloudService fireCloudService;
   @MockitoBean private InstitutionService institutionService;
   @MockitoBean private TaskQueueService taskQueueService;
   @MockitoBean private UserServiceAuditor userServiceAuditor;

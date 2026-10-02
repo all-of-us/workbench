@@ -27,26 +27,21 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceBucketArchiveDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.*;
-import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.StorageTransferClient;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.mail.MailService;
-import org.pmiops.workbench.model.MigrationState;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceArchiveStatus;
 import org.pmiops.workbench.model.WorkspaceRecoveryStatus;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
-import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.pmiops.workbench.vwb.wsm.WsmClient;
 import org.pmiops.workbench.workspaces.WorkspaceService;
-import org.pmiops.workbench.wsmanager.ApiException;
 import org.pmiops.workbench.wsmanager.model.CloneControlledGcpBigQueryDatasetResult;
 import org.pmiops.workbench.wsmanager.model.CreatedControlledGcpGcsBucket;
 import org.pmiops.workbench.wsmanager.model.GcpGcsBucketAttributes;
 import org.pmiops.workbench.wsmanager.model.GcpGcsBucketResource;
 import org.pmiops.workbench.wsmanager.model.JobReport;
-import org.pmiops.workbench.wsmanager.model.WorkspaceDescription;
 
 @ExtendWith(MockitoExtension.class)
 public class WorkspaceMigrationServiceImplTest {
@@ -82,7 +77,6 @@ public class WorkspaceMigrationServiceImplTest {
   @Mock private WorkspaceMapper workspaceMapper;
   @Mock private UserDao userDao;
   @Mock private Provider<WorkbenchConfig> workbenchConfigProvider;
-  @Mock private FireCloudService fireCloudService;
   @Mock private InitialCreditsService initialCreditsService;
   @Mock private StorageTransferClient storageTransferClient;
   @Mock private TaskQueueService taskQueueService;
@@ -135,327 +129,6 @@ public class WorkspaceMigrationServiceImplTest {
     lenient().when(workspaceDao.getRequired(NAMESPACE, TERRA_NAME)).thenReturn(dbWorkspace);
     lenient().when(workspaceDao.findByWorkspaceNamespace(NAMESPACE)).thenReturn(dbWorkspace);
   }
-
-  private void setupStartMigrationStubs() {
-    when(fireCloudService.getWorkspace(NAMESPACE, TERRA_NAME))
-        .thenReturn(new RawlsWorkspaceResponse().workspace(rawlsWorkspace));
-
-    when(workspaceMapper.toApiWorkspace(
-            eq(dbWorkspace), any(RawlsWorkspaceDetails.class), eq(initialCreditsService)))
-        .thenReturn(workspace);
-
-    DbUser dbUser = new DbUser();
-    DbVwbUserPod pod = new DbVwbUserPod();
-    pod.setVwbPodId(POD_ID);
-    dbUser.setVwbUserPod(pod);
-
-    lenient().when(userDao.findUserByUsername(any())).thenReturn(dbUser);
-
-    WorkspaceDescription vwbWorkspace = new WorkspaceDescription();
-    vwbWorkspace.setId(UUID.randomUUID());
-
-    when(wsmClient.createWorkspaceAsService(any(), any())).thenReturn(vwbWorkspace);
-    lenient()
-        .when(
-            wsmClient.cloneBQDataset(
-                vwbWorkspace.getId(),
-                config.vwb.cdrVersionsForMigration.get(0).workspaceId,
-                UUID.fromString(config.vwb.cdrVersionsForMigration.get(0).resourceId),
-                JOB_ID))
-        .thenReturn(CLONED_DATASET_RESULT);
-    try {
-      when(wsmClient.createControlledBucket(any(), any())).thenReturn(CREATED_BUCKET);
-    } catch (ApiException e) {
-      throw new RuntimeException("Bucket test", e);
-    }
-    when(wsmClient.getWorkspaceAsService(workspace.getNamespace())).thenReturn(null, vwbWorkspace);
-
-    when(storageTransferClient.createTransferJob(
-            any(), any(), any(), any(), any(), any(), any(), any(), any()))
-        .thenReturn("transferJobs/migration-" + SERVER_PROJECT);
-  }
-
-  @Test
-  void startWorkspaceMigration_setsStateToStarting() {
-    setupStartMigrationStubs();
-
-    service.startWorkspaceMigration(
-        NAMESPACE, TERRA_NAME, SELECTED_FOLDERS, POD_ID, RESEARCH_PURPOSE);
-
-    verify(workspaceDao, times(2))
-        .save(argThat(ws -> MigrationState.STARTING.name().equals(ws.getMigrationState())));
-  }
-
-  @Test
-  void startWorkspaceMigration_usesProvidedPodId_whenGiven() {
-    setupStartMigrationStubs();
-
-    String customPodId = "custom-pod";
-
-    service.startWorkspaceMigration(
-        NAMESPACE, TERRA_NAME, SELECTED_FOLDERS, customPodId, RESEARCH_PURPOSE);
-
-    verify(wsmClient).createWorkspaceAsService(dbWorkspace, customPodId);
-  }
-
-  @Test
-  void startWorkspaceMigration_fallsBackToUserPod_whenPodIdNull() {
-    setupStartMigrationStubs();
-
-    service.startWorkspaceMigration(
-        NAMESPACE, TERRA_NAME, SELECTED_FOLDERS, null, RESEARCH_PURPOSE);
-
-    verify(wsmClient).createWorkspaceAsService(dbWorkspace, POD_ID);
-  }
-
-  @Test
-  void startWorkspaceMigration_startsStsTransferWithSelectedFolders() {
-    setupStartMigrationStubs();
-
-    service.startWorkspaceMigration(
-        NAMESPACE, TERRA_NAME, SELECTED_FOLDERS, POD_ID, RESEARCH_PURPOSE);
-
-    verify(storageTransferClient)
-        .createTransferJob(
-            SOURCE_BUCKET,
-            null,
-            DEST_BUCKET,
-            null,
-            NAMESPACE,
-            SERVER_PROJECT,
-            SELECTED_FOLDERS,
-            SERVICE_ACCOUNT_EMAIL,
-            false);
-  }
-
-  @Test
-  void startWorkspaceMigration_startsStsTransferWithEmptyFolders_migratesEntireBucket() {
-    setupStartMigrationStubs();
-
-    service.startWorkspaceMigration(NAMESPACE, TERRA_NAME, List.of(), POD_ID, RESEARCH_PURPOSE);
-
-    verify(storageTransferClient)
-        .createTransferJob(
-            SOURCE_BUCKET,
-            null,
-            DEST_BUCKET,
-            null,
-            NAMESPACE,
-            SERVER_PROJECT,
-            List.of(),
-            SERVICE_ACCOUNT_EMAIL,
-            false);
-  }
-
-  @Test
-  void startWorkspaceMigration_pushesStatusTask() {
-    setupStartMigrationStubs();
-
-    service.startWorkspaceMigration(
-        NAMESPACE, TERRA_NAME, SELECTED_FOLDERS, POD_ID, RESEARCH_PURPOSE);
-
-    verify(taskQueueService).pushWorkspaceMigrationStatusTask(NAMESPACE, TERRA_NAME);
-  }
-
-  @Test
-  void checkMigrationStatus_requeueTaskIfStillRunning() {
-    TransferTypes.TransferOperation transferOperation =
-        TransferTypes.TransferOperation.newBuilder()
-            .setStatus(TransferTypes.TransferOperation.Status.IN_PROGRESS)
-            .build();
-    when(storageTransferClient.getTransferJobStatus(SERVER_PROJECT, JOB_NAME))
-        .thenReturn(transferOperation);
-
-    service.checkMigrationStatus(NAMESPACE, TERRA_NAME);
-
-    verify(taskQueueService).pushWorkspaceMigrationStatusTask(NAMESPACE, TERRA_NAME);
-    assertThat(dbWorkspace.getMigrationState()).isNotEqualTo(MigrationState.FINISHED.name());
-  }
-
-  @Test
-  void checkMigrationStatus_setsFinishedWhenComplete() {
-    TransferTypes.TransferOperation transferOperation =
-        TransferTypes.TransferOperation.newBuilder()
-            .setStatus(TransferTypes.TransferOperation.Status.SUCCESS)
-            .build();
-    when(storageTransferClient.getTransferJobStatus(SERVER_PROJECT, JOB_NAME))
-        .thenReturn(transferOperation);
-
-    service.checkMigrationStatus(NAMESPACE, TERRA_NAME);
-
-    assertThat(dbWorkspace.getMigrationState()).isEqualTo(MigrationState.FINISHED.name());
-    verify(workspaceDao)
-        .save(argThat(ws -> MigrationState.FINISHED.name().equals(ws.getMigrationState())));
-  }
-
-  @Test
-  void startWorkspaceArchive_startsArchiveSuccessfully() {
-
-    when(fireCloudService.getWorkspaceAsService(NAMESPACE, TERRA_NAME))
-        .thenReturn(new RawlsWorkspaceResponse().workspace(rawlsWorkspace));
-
-    when(workspaceBucketArchiveDao.findByLegacyWorkspaceId(anyLong())).thenReturn(List.of());
-
-    when(workspaceBucketArchiveDao.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
-
-    when(storageTransferClient.createTransferJob(
-            any(), any(), any(), any(), any(), any(), any(), any(), any()))
-        .thenReturn("transferJobs/migration-archive-" + NAMESPACE);
-
-    service.startWorkspaceArchive(NAMESPACE, TERRA_NAME);
-
-    verify(storageTransferClient)
-        .createTransferJob(
-            eq(SOURCE_BUCKET),
-            isNull(),
-            eq("all-of-us-archive-ct-bucket-wb-blazing-lime-5817"),
-            eq(NAMESPACE + "/"),
-            eq("archive-" + NAMESPACE),
-            eq(SERVER_PROJECT),
-            isNull(),
-            eq(SERVICE_ACCOUNT_EMAIL),
-            eq(false));
-
-    verify(storageTransferClient)
-        .runTransferJob(SERVER_PROJECT, "transferJobs/migration-archive-" + NAMESPACE);
-
-    verify(taskQueueService).pushWorkspaceArchiveStatusTask(NAMESPACE, TERRA_NAME);
-  }
-
-  @Test
-  void startWorkspaceArchive_skipsIfAlreadyArchived() {
-
-    DbWorkspaceBucketArchive archive =
-        new DbWorkspaceBucketArchive().setStatus(WorkspaceArchiveStatus.ARCHIVED.toString());
-
-    when(workspaceBucketArchiveDao.findByLegacyWorkspaceId(anyLong())).thenReturn(List.of(archive));
-
-    service.startWorkspaceArchive(NAMESPACE, TERRA_NAME);
-
-    verify(storageTransferClient, never())
-        .createTransferJob(any(), any(), any(), any(), any(), any(), any(), any(), any());
-
-    verify(taskQueueService, never()).pushWorkspaceArchiveStatusTask(any(), any());
-  }
-
-  @Test
-  void checkArchiveStatus_requeuesWhenStillRunning() {
-
-    DbWorkspaceBucketArchive archive =
-        new DbWorkspaceBucketArchive().setStatus(WorkspaceArchiveStatus.IN_PROGRESS.toString());
-
-    when(workspaceBucketArchiveDao.findByLegacyWorkspaceId(anyLong())).thenReturn(List.of(archive));
-
-    TransferTypes.TransferOperation transferOperation =
-        TransferTypes.TransferOperation.newBuilder()
-            .setStatus(TransferTypes.TransferOperation.Status.IN_PROGRESS)
-            .build();
-
-    when(storageTransferClient.getTransferJobStatus(
-            SERVER_PROJECT, "transferJobs/migration-archive-" + NAMESPACE))
-        .thenReturn(transferOperation);
-
-    service.checkArchiveStatus(NAMESPACE, TERRA_NAME);
-
-    verify(taskQueueService).pushWorkspaceArchiveStatusTask(NAMESPACE, TERRA_NAME);
-  }
-
-  @Test
-  void checkArchiveStatus_marksArchiveCompleted() {
-
-    DbWorkspaceBucketArchive archive =
-        new DbWorkspaceBucketArchive().setStatus(WorkspaceArchiveStatus.IN_PROGRESS.toString());
-
-    when(workspaceBucketArchiveDao.findByLegacyWorkspaceId(anyLong())).thenReturn(List.of(archive));
-
-    TransferTypes.TransferOperation transferOperation =
-        TransferTypes.TransferOperation.newBuilder()
-            .setStatus(TransferTypes.TransferOperation.Status.SUCCESS)
-            .build();
-
-    when(storageTransferClient.getTransferJobStatus(
-            SERVER_PROJECT, "transferJobs/migration-archive-" + NAMESPACE))
-        .thenReturn(transferOperation);
-
-    service.checkArchiveStatus(NAMESPACE, TERRA_NAME);
-
-    assertThat(archive.getStatus()).isEqualTo(WorkspaceArchiveStatus.ARCHIVED.toString());
-
-    verify(workspaceBucketArchiveDao).save(archive);
-
-    verify(storageTransferClient)
-        .deleteTransferJob(SERVER_PROJECT, "transferJobs/migration-archive-" + NAMESPACE);
-  }
-
-  @Test
-  void checkArchiveStatus_marksArchiveFailed() {
-
-    DbWorkspaceBucketArchive archive =
-        new DbWorkspaceBucketArchive().setStatus(WorkspaceArchiveStatus.IN_PROGRESS.toString());
-
-    when(workspaceBucketArchiveDao.findByLegacyWorkspaceId(anyLong())).thenReturn(List.of(archive));
-
-    TransferTypes.TransferOperation transferOperation =
-        TransferTypes.TransferOperation.newBuilder()
-            .setStatus(TransferTypes.TransferOperation.Status.FAILED)
-            .build();
-
-    when(storageTransferClient.getTransferJobStatus(
-            SERVER_PROJECT, "transferJobs/migration-archive-" + NAMESPACE))
-        .thenReturn(transferOperation);
-
-    service.checkArchiveStatus(NAMESPACE, TERRA_NAME);
-
-    assertThat(archive.getStatus()).isEqualTo(WorkspaceArchiveStatus.FAILED.toString());
-
-    verify(workspaceBucketArchiveDao).save(archive);
-  }
-
-  //  private void setupRecoveryStubs() {
-  //
-  //    // Rawls workspace lookup
-  //    when(fireCloudService.getWorkspace(anyString(), anyString()))
-  //        .thenReturn(new RawlsWorkspaceResponse().workspace(rawlsWorkspace));
-  //
-  //    // Workspace returned from mapper/service
-  //    when(workspaceMapper.toApiWorkspace(
-  //            eq(dbWorkspace), any(RawlsWorkspaceDetails.class), eq(initialCreditsService)))
-  //        .thenReturn(workspace);
-  //
-  //    // User pod lookup
-  //    DbUser dbUser = new DbUser();
-  //
-  //    DbVwbUserPod pod = new DbVwbUserPod();
-  //    pod.setVwbPodId(POD_ID);
-  //
-  //    dbUser.setVwbUserPod(pod);
-  //
-  //    when(userDao.findUserByUsername(any())).thenReturn(dbUser);
-  //
-  //    // New VWB workspace creation
-  //    WorkspaceDescription vwbWorkspace = new WorkspaceDescription();
-  //
-  //    vwbWorkspace.setId(UUID.randomUUID());
-  //
-  //    when(wsmClient.createWorkspaceAsService(any(), any())).thenReturn(vwbWorkspace);
-  //
-  //    // BQ clone
-  //    when(wsmClient.cloneBQDataset(any(), any(), any(),
-  // any())).thenReturn(CLONED_DATASET_RESULT);
-  //
-  //    // Archive lookup
-  //    when(workspaceBucketArchiveDao.findByLegacyWorkspaceId(anyLong()))
-  //        .thenReturn(
-  //            List.of(
-  //                new DbWorkspaceBucketArchive()
-  //                    .setStatus(WorkspaceArchiveStatus.ARCHIVED.toString())
-  //                    .setGcsPath(ARCHIVE_PATH)));
-  //
-  //    // Recovery transfer job
-  //    when(storageTransferClient.createTransferJob(
-  //            any(), any(), any(), any(), any(), any(), any(), any()))
-  //        .thenReturn(RECOVERY_JOB_NAME);
-  //  }
 
   @Test
   void startWorkspaceRecovery_findsArchiveMetadata() {
@@ -526,9 +199,6 @@ public class WorkspaceMigrationServiceImplTest {
   void checkRecoveryStatus_marksRecoveredWhenSuccessful() throws MessagingException {
 
     when(workbenchConfigProvider.get()).thenReturn(config);
-
-    when(workspaceService.getWorkspaceOwnerList(any(DbWorkspace.class)))
-        .thenReturn(List.of(new DbUser()));
 
     doNothing().when(mailService).sendWorkspaceUnarchivedEmail(any(), anyList());
 

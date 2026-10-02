@@ -30,7 +30,6 @@ import org.pmiops.workbench.db.model.DbFeaturedWorkspace.DbFeaturedCategory;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserCodeOfConductAgreement;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.DemographicSurveyV2;
 import org.pmiops.workbench.model.DisseminateResearchEnum;
 import org.pmiops.workbench.model.EducationV2;
@@ -157,37 +156,6 @@ public class TestMockFactory {
         .workspaceId(WORKSPACE_TERRA_UUID)
         .bucketName(WORKSPACE_BUCKET_NAME)
         .googleProject(DEFAULT_GOOGLE_PROJECT);
-  }
-
-  public static void stubCreateFcWorkspace(FireCloudService fireCloudService) {
-    doAnswer(
-            invocation -> {
-              String capturedWorkspaceNamespace = (String) invocation.getArguments()[0];
-              String capturedWorkspaceTerraName = (String) invocation.getArguments()[1];
-              RawlsWorkspaceDetails fcWorkspace =
-                  createTerraWorkspace(
-                      capturedWorkspaceNamespace, capturedWorkspaceTerraName, null);
-
-              RawlsWorkspaceResponse fcResponse = new RawlsWorkspaceResponse();
-              fcResponse.setWorkspace(fcWorkspace);
-              fcResponse.setAccessLevel(RawlsWorkspaceAccessLevel.OWNER);
-
-              doReturn(fcResponse)
-                  .when(fireCloudService)
-                  .getWorkspace(capturedWorkspaceNamespace, capturedWorkspaceTerraName);
-              return fcWorkspace;
-            })
-        .when(fireCloudService)
-        .createWorkspace(anyString(), anyString(), anyString());
-  }
-
-  public static void stubCreateBillingProject(FireCloudService fireCloudService) {
-    stubCreateBillingProject(fireCloudService, UUID.randomUUID().toString());
-  }
-
-  public static void stubCreateBillingProject(
-      FireCloudService fireCloudService, String billingProjectId) {
-    doReturn(billingProjectId).when(fireCloudService).createBillingProjectName();
   }
 
   public static Cloudbilling createMockedCloudbilling() {

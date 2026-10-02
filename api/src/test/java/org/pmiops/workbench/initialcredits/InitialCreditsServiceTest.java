@@ -53,7 +53,6 @@ import org.pmiops.workbench.db.model.DbVwbUserPod;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspaceFreeTierUsage;
 import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
@@ -78,7 +77,6 @@ public class InitialCreditsServiceTest {
 
   @MockitoBean private BigQueryService bigQueryService;
   @MockitoBean private WorkspaceMapper workspaceMapper;
-  @MockitoBean private FireCloudService fireCloudService;
   private static final Instant START_INSTANT = Instant.parse("2000-01-01T00:00:00.00Z");
   private static final FakeClock CLOCK = new FakeClock(START_INSTANT);
 

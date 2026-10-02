@@ -8,7 +8,6 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -39,7 +38,6 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ServerErrorException;
-import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.model.Degree;
 import org.pmiops.workbench.model.InstitutionalRole;
@@ -258,33 +256,15 @@ public class RdrExportServiceImplTest {
   public void exportWorkspace() throws ApiException {
     RdrWorkspace rdrWorkspace = toDefaultRdrWorkspace(workspace);
     rdrExportService.exportWorkspaces(ImmutableList.of(workspace.getWorkspaceId()), NO_BACKFILL);
-    verify(mockWorkspaceService)
-        .getFirecloudUserRoles(workspace.getWorkspaceNamespace(), workspace.getFirecloudName());
     assertThat(rdrExportDao.findAll()).hasSize(1);
 
     verify(mockRdrApi).exportWorkspaces(ImmutableList.of(rdrWorkspace), NO_BACKFILL);
   }
 
   @Test
-  public void exportWorkspace_firecloudCallFail_skipUpdateRdrEntity() throws ApiException {
-    when(mockWorkspaceService.getFirecloudUserRoles(
-            workspace.getWorkspaceNamespace(), workspace.getFirecloudName()))
-        .thenThrow(WorkbenchException.class);
-
-    // workspace.getWorkspaceId() fails, so skip that export. There should be only one workspace
-    // exported
-    rdrExportService.exportWorkspaces(
-        ImmutableList.of(workspace.getWorkspaceId(), creatorWorkspace.getWorkspaceId()),
-        NO_BACKFILL);
-    assertThat(rdrExportDao.findAll()).hasSize(1);
-  }
-
-  @Test
   public void exportWorkspaceBackfill() throws ApiException {
     RdrWorkspace rdrWorkspace = toDefaultRdrWorkspace(workspace);
     rdrExportService.exportWorkspaces(ImmutableList.of(workspace.getWorkspaceId()), true);
-    verify(mockWorkspaceService)
-        .getFirecloudUserRoles(workspace.getWorkspaceNamespace(), workspace.getFirecloudName());
     assertThat(rdrExportDao.findAll()).isEmpty();
 
     verify(mockRdrApi).exportWorkspaces(ImmutableList.of(rdrWorkspace), true);
@@ -299,8 +279,6 @@ public class RdrExportServiceImplTest {
     RdrWorkspace rdrWorkspace = toDefaultRdrWorkspace(workspace);
 
     rdrExportService.exportWorkspaces(ImmutableList.of(workspace.getWorkspaceId()), NO_BACKFILL);
-    verify(mockWorkspaceService)
-        .getFirecloudUserRoles(workspace.getWorkspaceNamespace(), workspace.getFirecloudName());
     assertThat(rdrExportDao.findAll()).hasSize(1);
 
     rdrWorkspace
@@ -335,9 +313,6 @@ public class RdrExportServiceImplTest {
 
     rdrExportService.exportWorkspaces(
         ImmutableList.of(deletedWorkspace.getWorkspaceId()), NO_BACKFILL);
-    verify(mockWorkspaceService, never())
-        .getFirecloudUserRoles(
-            deletedWorkspace.getWorkspaceNamespace(), deletedWorkspace.getFirecloudName());
     assertThat(rdrExportDao.findAll()).hasSize(1);
 
     rdrWorkspace.setStatus(RdrWorkspace.StatusEnum.INACTIVE);

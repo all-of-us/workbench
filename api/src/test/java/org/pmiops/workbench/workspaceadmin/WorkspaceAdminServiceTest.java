@@ -37,7 +37,6 @@ import org.pmiops.workbench.db.jdbc.ReportingQueryService;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.google.CloudMonitoringService;
 import org.pmiops.workbench.google.CloudStorageClient;
@@ -106,7 +105,6 @@ public class WorkspaceAdminServiceTest {
   @MockitoBean private CloudStorageClient mockCloudStorageClient;
   @MockitoBean private FeaturedWorkspaceDao mockFeaturedWorkspaceDao;
   @MockitoBean private FeaturedWorkspaceMapper mockFeaturedWorkspaceMapper;
-  @MockitoBean private FireCloudService mockFirecloudService;
   @MockitoBean private VwbAccessService mockVwbAccessService;
   @MockitoBean private LeonardoRuntimeAuditor mockLeonardoRuntimeAuditor;
   @MockitoBean private MailService mailService;
