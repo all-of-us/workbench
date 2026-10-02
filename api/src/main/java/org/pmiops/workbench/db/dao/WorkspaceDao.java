@@ -209,7 +209,7 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
       "SELECT w.workspaceNamespace as workspaceNamespace, w.firecloudName as firecloudName "
           + "from DbWorkspace w "
           + "join DbVerifiedInstitutionalAffiliation via on w.creator.userId = via.user.userId "
-          + "where w.migratedVwbWorkspaceId is null "
+          + "where w.migrationState = 'FAILED' "
           + "and w.activeStatus = 0 "
           + "and via.institution.institutionId != 1 "
           + "and w.workspaceId not in (SELECT legacyWorkspaceId from DbWorkspaceBucketArchive )"
