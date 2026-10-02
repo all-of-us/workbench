@@ -54,8 +54,6 @@ const styles = reactStyles({
 
 interface ServerDownStatus {
   apiDown: boolean;
-  firecloudDown: boolean;
-  notebooksDown: boolean;
 }
 
 interface Props {
@@ -84,8 +82,6 @@ export const SystemErrorHandler = fp.flow(
         copiedErrorIdToClipboard: false,
         serverDownStatus: {
           apiDown: false,
-          firecloudDown: false,
-          notebooksDown: false,
         },
         serverStatusAcknowledged: false,
       };
@@ -110,17 +106,11 @@ export const SystemErrorHandler = fp.flow(
 
     async pingServer() {
       const serverDownStatus = {
-        firecloudDown: false,
-        notebooksDown: false,
         apiDown: false,
       };
       await statusApi()
         .getStatus()
-        .then((statusResponse) => {
-          if (statusResponse.firecloudStatus === false) {
-            serverDownStatus.firecloudDown = true;
-          }
-        })
+        .then(() => {})
         .catch(() => {
           serverDownStatus.apiDown = true;
         });
@@ -130,13 +120,6 @@ export const SystemErrorHandler = fp.flow(
 
     closeError() {
       systemErrorStore.next(undefined);
-    }
-
-    copyToClipboard() {
-      this.setState({ copiedErrorIdToClipboard: true });
-      setTimeout(() => {
-        this.setState({ copiedErrorIdToClipboard: false });
-      }, 1000);
     }
 
     openContactWidget() {
@@ -154,7 +137,7 @@ export const SystemErrorHandler = fp.flow(
     render() {
       const { systemError } = this.props;
       const {
-        serverDownStatus: { apiDown, firecloudDown, notebooksDown },
+        serverDownStatus: { apiDown },
       } = this.state;
 
       return (
@@ -211,30 +194,27 @@ export const SystemErrorHandler = fp.flow(
                 buttonText='Close'
               />
             )}
-            {(apiDown || firecloudDown || notebooksDown) &&
-              !this.state.serverStatusAcknowledged && (
-                <Modal>
-                  <ModalTitle>Service Problems</ModalTitle>
-                  <ModalBody>
-                    <div>One or more of our services is currently down:</div>
-                    <ul style={styles.serverStatusList}>
-                      {apiDown && <li>Server</li>}
-                      {firecloudDown && <li>Workspaces Service</li>}
-                      {notebooksDown && <li>Notebooks Service</li>}
-                    </ul>
-                    <div>Please try again later.</div>
-                  </ModalBody>
-                  <ModalFooter>
-                    <Button
-                      onClick={() =>
-                        this.setState({ serverStatusAcknowledged: true })
-                      }
-                    >
-                      Close
-                    </Button>
-                  </ModalFooter>
-                </Modal>
-              )}
+            {apiDown && !this.state.serverStatusAcknowledged && (
+              <Modal>
+                <ModalTitle>Service Problems</ModalTitle>
+                <ModalBody>
+                  <div>One or more of our services is currently down:</div>
+                  <ul style={styles.serverStatusList}>
+                    {apiDown && <li>Server</li>}
+                  </ul>
+                  <div>Please try again later.</div>
+                </ModalBody>
+                <ModalFooter>
+                  <Button
+                    onClick={() =>
+                      this.setState({ serverStatusAcknowledged: true })
+                    }
+                  >
+                    Close
+                  </Button>
+                </ModalFooter>
+              </Modal>
+            )}
           </React.Fragment>
         )
       );
