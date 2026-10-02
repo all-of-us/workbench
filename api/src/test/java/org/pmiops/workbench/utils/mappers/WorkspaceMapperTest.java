@@ -29,7 +29,6 @@ import org.pmiops.workbench.db.model.DbFeaturedWorkspace;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.initialcredits.WorkspaceInitialCreditUsageService;
 import org.pmiops.workbench.institution.InstitutionService;
@@ -58,7 +57,6 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 @SpringJUnitConfig
 public class WorkspaceMapperTest {
-  @MockitoBean private FireCloudService fireCloudService;
   @MockitoBean private InstitutionService institutionService;
   @MockitoBean private MailService mailService;
   @MockitoBean private TaskQueueService taskQueueService;

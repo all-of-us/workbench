@@ -5,7 +5,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
-import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,7 +12,6 @@ import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudMonitoringService;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.model.AdminWorkspaceObjectsCounts;
@@ -51,7 +49,6 @@ public class WorkspaceAdminControllerTest {
   private static final String BAD_EXCEPTION_REQUEST_REASON_CHAR =
       "Locking Reason text length should be at least 10 characters long and at most 4000 characters";
 
-  @MockitoBean private FireCloudService mockFirecloudService;
   @MockitoBean private WorkspaceAdminService mockWorkspaceAdminService;
   @MockitoBean private WorkspaceService mockWorkspaceService;
 
@@ -82,9 +79,6 @@ public class WorkspaceAdminControllerTest {
 
     final UserRole collaborator =
         new UserRole().email("test@test.test").role(WorkspaceAccessLevel.WRITER);
-    final List<UserRole> collaborators = List.of(collaborator);
-    when(mockWorkspaceService.getFirecloudUserRoles(WORKSPACE_NAMESPACE, WORKSPACE_TERRA_NAME))
-        .thenReturn(collaborators);
 
     final AdminWorkspaceObjectsCounts adminWorkspaceObjectsCounts =
         new AdminWorkspaceObjectsCounts().cohortCount(1).conceptSetCount(2).datasetCount(3);

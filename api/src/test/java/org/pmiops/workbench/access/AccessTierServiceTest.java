@@ -18,7 +18,6 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserAccessTier;
-import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.TierAccessStatus;
 import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +31,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @DataJpaTest
 public class AccessTierServiceTest {
-  @MockitoBean private FireCloudService fireCloudService;
   @MockitoBean private VwbAccessService vwbAccessService;
   @Autowired private AccessTierDao accessTierDao;
   @Autowired private AccessTierService accessTierService;

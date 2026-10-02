@@ -580,26 +580,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-  /v1/auth-domain/{groupName}:
-    post:
-      tags:
-      - authDomain
-      description: This endpoint will create the registered auth domain.
-      operationId: createAuthDomain
-      parameters:
-      - name: groupName
-        in: path
-        description: groupName
-        required: true
-        schema:
-          type: string
-      responses:
-        200:
-          description: Successfully created auth domain
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AuthDomainCreatedResponse'
   /v1/userSearch/{accessTierShortName}/{term}:
     get:
       tags:
@@ -687,30 +667,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/WorkspaceResponseListResponse'
-  /v1/workspaces/access/{workspaceNamespace}:
-    get:
-      tags:
-      - workspaces
-      description: Returns the WorkspaceAccessLevel Enum as String for  workspace
-        namespace
-      operationId: getWorkspaceAccess
-      parameters:
-      - name: workspaceNamespace
-        in: path
-        description: The Workspace namespace
-        required: true
-        schema:
-          type: string
-      responses:
-        200:
-          description: A workspace access level string
-          content:
-            application/json:
-              schema:
-                type: string
-        403:
-          description: Forbidden
-          content: {}
   /v1/workspaces/{workspaceNamespace}/{terraName}:
     get:
       tags:

@@ -4,25 +4,17 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.utils.TestMockFactory.createRegisteredTier;
 
-import com.google.common.collect.ImmutableMap;
 import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -33,7 +25,6 @@ import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ForbiddenException;
-import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -62,7 +53,6 @@ public class WorkspaceAuthServiceTest {
   @Autowired private WorkspaceAuthService workspaceAuthService;
 
   @MockitoBean private AccessTierService mockAccessTierService;
-  @MockitoBean private FireCloudService mockFireCloudService;
   @MockitoBean private InitialCreditsService mockInitialCreditsService;
   @MockitoBean private WorkspaceDao mockWorkspaceDao;
 
@@ -121,161 +111,6 @@ public class WorkspaceAuthServiceTest {
     assertThrows(
         ForbiddenException.class,
         () -> workspaceAuthService.validateInitialCreditUsage(namespace, fcName));
-  }
-
-  private static Stream<Arguments> accessLevels() {
-    return Stream.of(
-        Arguments.of("OWNER", WorkspaceAccessLevel.OWNER),
-        Arguments.of("WRITER", WorkspaceAccessLevel.WRITER),
-        Arguments.of("READER", WorkspaceAccessLevel.READER),
-        Arguments.of("NO_ACCESS", WorkspaceAccessLevel.NO_ACCESS),
-        Arguments.of("PROJECT_OWNER", WorkspaceAccessLevel.OWNER));
-  }
-
-  @ParameterizedTest(name = "getWorkspaceAccessLevel({0})")
-  @MethodSource("accessLevels")
-  public void test_getWorkspaceAccessLevel_valid(
-      RawlsWorkspaceAccessLevel accessLevel, WorkspaceAccessLevel expected) {
-    stubFcGetWorkspace(namespace, fcName, accessLevel);
-    assertThat(workspaceAuthService.getWorkspaceAccessLevel(namespace, fcName)).isEqualTo(expected);
-  }
-
-  private static Stream<Arguments> enforcedAccessLevels_valid() {
-    return Stream.of(
-        Arguments.of("OWNER", WorkspaceAccessLevel.OWNER, WorkspaceAccessLevel.OWNER),
-        Arguments.of("OWNER", WorkspaceAccessLevel.OWNER, WorkspaceAccessLevel.READER),
-        Arguments.of("WRITER", WorkspaceAccessLevel.WRITER, WorkspaceAccessLevel.READER),
-        Arguments.of("READER", WorkspaceAccessLevel.READER, WorkspaceAccessLevel.READER),
-        Arguments.of("PROJECT_OWNER", WorkspaceAccessLevel.OWNER, WorkspaceAccessLevel.WRITER));
-  }
-
-  private static Stream<Arguments> enforcedAccessLevels_invalid() {
-    return Stream.of(
-        Arguments.of("WRITER", WorkspaceAccessLevel.OWNER, ForbiddenException.class),
-        Arguments.of("READER", WorkspaceAccessLevel.WRITER, ForbiddenException.class),
-        Arguments.of("NO_ACCESS", WorkspaceAccessLevel.READER, ForbiddenException.class),
-        Arguments.of("NO_ACCESS", WorkspaceAccessLevel.OWNER, ForbiddenException.class));
-  }
-
-  @ParameterizedTest(name = "enforceWorkspaceAccessLevel({0} user access, {2} required)")
-  @MethodSource("enforcedAccessLevels_valid")
-  public void test_enforceWorkspaceAccessLevel_valid(
-      RawlsWorkspaceAccessLevel accessLevel,
-      WorkspaceAccessLevel expected,
-      WorkspaceAccessLevel required) {
-    final String namespace = "wsns";
-    final String fcName = "firecloudname";
-    stubFcGetWorkspace(namespace, fcName, accessLevel);
-    assertThat(workspaceAuthService.enforceWorkspaceAccessLevel(namespace, fcName, required))
-        .isEqualTo(expected);
-  }
-
-  @ParameterizedTest(
-      name = "enforceWorkspaceAccessLevel({0} user access, {1} required, expected exception {2})")
-  @MethodSource("enforcedAccessLevels_invalid")
-  public void test_enforceWorkspaceAccessLevel_invalid(
-      RawlsWorkspaceAccessLevel accessLevel,
-      WorkspaceAccessLevel required,
-      Class<? extends Throwable> expectedException) {
-    final String namespace = "wsns";
-    final String fcName = "firecloudname";
-    stubFcGetWorkspace(namespace, fcName, accessLevel);
-    assertThrows(
-        expectedException,
-        () -> workspaceAuthService.enforceWorkspaceAccessLevel(namespace, fcName, required));
-  }
-
-  // Arguments are (original Workspace ACL), (ACL updates to make), (expected result Workspace ACL),
-  // (expected remove BP from owner count), (expected add BP to owner count)
-  private static Stream<Arguments> patchWorkspaceAcl() {
-    return Stream.of(
-        // trivial case: do nothing to empty ACL
-        Arguments.of(ImmutableMap.of(), ImmutableMap.of(), ImmutableMap.of(), 0, 0),
-
-        // add one entry to empty ACL -> expect that one entry in response
-        Arguments.of(
-            ImmutableMap.of(),
-            ImmutableMap.of("newuser", WorkspaceAccessLevel.OWNER),
-            ImmutableMap.of("newuser", WorkspaceAccessLevel.OWNER),
-            0,
-            1), // add newuser
-
-        // do nothing to existing ACL -> expect no updates
-        Arguments.of(
-            ImmutableMap.of(
-                "user1",
-                WorkspaceAccessLevel.OWNER,
-                "user2",
-                WorkspaceAccessLevel.WRITER,
-                "user3",
-                WorkspaceAccessLevel.READER),
-            ImmutableMap.of(),
-            ImmutableMap.of(),
-            0, // user1 should be ignored, NOT removed
-            0),
-
-        // add 1 entry to an existing ACL of 1 and explicitly include all existing -> expect all
-        Arguments.of(
-            ImmutableMap.of("user1", WorkspaceAccessLevel.OWNER),
-            ImmutableMap.of(
-                "user1", WorkspaceAccessLevel.OWNER, "user2", WorkspaceAccessLevel.OWNER),
-            ImmutableMap.of(
-                "user1", WorkspaceAccessLevel.OWNER, "user2", WorkspaceAccessLevel.OWNER),
-            0,
-            1),
-
-        // update 1 of an existing ACL of 2 -> expect to see that update only
-        Arguments.of(
-            ImmutableMap.of(
-                "user1", WorkspaceAccessLevel.OWNER,
-                "user2", WorkspaceAccessLevel.OWNER),
-            ImmutableMap.of("user1", WorkspaceAccessLevel.READER),
-            ImmutableMap.of("user1", WorkspaceAccessLevel.READER),
-            1, // remove user1 but ignore user2
-            0),
-
-        // add 1 to an existing ACL of 1 -> expect only that addition
-        Arguments.of(
-            ImmutableMap.of("user1", WorkspaceAccessLevel.OWNER),
-            ImmutableMap.of("user2", WorkspaceAccessLevel.READER),
-            ImmutableMap.of("user2", WorkspaceAccessLevel.READER),
-            0, // user1 should be ignored, NOT removed
-            0),
-
-        // add 1 to an existing ACL of 1 and explicitly remove the existing 1
-        Arguments.of(
-            ImmutableMap.of("user1", WorkspaceAccessLevel.OWNER),
-            ImmutableMap.of(
-                "user1", WorkspaceAccessLevel.NO_ACCESS, "user2", WorkspaceAccessLevel.OWNER),
-            ImmutableMap.of(
-                "user1", WorkspaceAccessLevel.NO_ACCESS, "user2", WorkspaceAccessLevel.OWNER),
-            1, // user1 should be removed
-            1)); // user2 should be added
-  }
-
-  @ParameterizedTest
-  @MethodSource("patchWorkspaceAcl")
-  public void test_patchWorkspaceAcl(
-      Map<String, WorkspaceAccessLevel> originalAcl,
-      Map<String, WorkspaceAccessLevel> updates,
-      Map<String, WorkspaceAccessLevel> expectedFcUpdates,
-      int expectedBpRemovals,
-      int expectedBpAdditions) {
-    final String namespace = "wsns";
-    final String fcName = "firecloudname";
-
-    stubRegisteredTier();
-    stubUpdateAcl(namespace, fcName);
-    stubFcGetAcl(namespace, fcName, originalAcl);
-    DbWorkspace workspace = stubDaoGetRequired(true, false);
-
-    workspaceAuthService.patchWorkspaceAcl(workspace, updates);
-    verify(mockFireCloudService)
-        .updateWorkspaceACL(namespace, fcName, buildAclUpdates(expectedFcUpdates));
-    verify(mockFireCloudService, times(expectedBpRemovals))
-        .removeOwnerFromBillingProjectAsService(anyString(), anyString());
-    verify(mockFireCloudService, times(expectedBpAdditions))
-        .addOwnerToBillingProject(anyString(), anyString());
   }
 
   @Test

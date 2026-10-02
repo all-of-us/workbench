@@ -45,7 +45,6 @@ import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.institution.InstitutionService;
@@ -91,7 +90,6 @@ public class UserServiceImpl implements UserService {
   private final AccessModuleNameMapper accessModuleNameMapper;
   private final AccessModuleService accessModuleService;
   private final DirectoryService directoryService;
-  private final FireCloudService fireCloudService;
   private final MailService mailService;
   private final DiscoverySourceMapper discoverySourceMapper;
   private final AccessSyncService accessSyncService;
@@ -111,7 +109,6 @@ public class UserServiceImpl implements UserService {
       VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao,
       AccessModuleNameMapper accessModuleNameMapper,
       AccessModuleService accessModuleService,
-      FireCloudService fireCloudService,
       DirectoryService directoryService,
       AccessTierService accessTierService,
       MailService mailService,
@@ -128,7 +125,6 @@ public class UserServiceImpl implements UserService {
     this.verifiedInstitutionalAffiliationDao = verifiedInstitutionalAffiliationDao;
     this.accessModuleNameMapper = accessModuleNameMapper;
     this.accessModuleService = accessModuleService;
-    this.fireCloudService = fireCloudService;
     this.directoryService = directoryService;
     this.accessTierService = accessTierService;
     this.mailService = mailService;

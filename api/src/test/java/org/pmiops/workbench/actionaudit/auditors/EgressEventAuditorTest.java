@@ -99,8 +99,6 @@ public class EgressEventAuditorTest {
     dbWorkspace.setFirecloudName(WORKSPACE_FIRECLOUD_NAME);
     when(workspaceDao.getByGoogleProject(GOOGLE_PROJECT)).thenReturn(Optional.of(dbWorkspace));
     firecloudUserRoles.add(new UserRole().email(USER_EMAIL));
-    when(mockWorkspaceService.getFirecloudUserRoles(WORKSPACE_NAMESPACE, WORKSPACE_FIRECLOUD_NAME))
-        .thenReturn(firecloudUserRoles);
   }
 
   @Test

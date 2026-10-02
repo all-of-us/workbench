@@ -2,7 +2,6 @@ package org.pmiops.workbench.cdr;
 
 import jakarta.inject.Provider;
 import java.util.List;
-import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.access.AccessTierService;
@@ -48,13 +47,7 @@ public class CdrVersionService {
    */
   public void setCdrVersion(DbCdrVersion version) {
     log.info(
-        String.format(
-            "setCdrVersion is decommissioned.  '%s' not set",
-            version.getCdrVersionId()));
-  }
-
-  public Optional<DbCdrVersion> findByCdrVersionId(Long cdrVersionId) {
-    return cdrVersionDao.findById(cdrVersionId);
+        String.format("setCdrVersion is decommissioned.  '%s' not set", version.getCdrVersionId()));
   }
 
   /**

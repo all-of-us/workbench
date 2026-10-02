@@ -1,51 +1,29 @@
 package org.pmiops.workbench.api;
 
 import jakarta.inject.Provider;
-import java.time.Clock;
 import java.util.*;
-import java.util.function.Supplier;
-import java.util.logging.Logger;
-import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
-import org.pmiops.workbench.cloudtasks.TaskQueueService;
-import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.db.dao.CdrVersionDao;
-import org.pmiops.workbench.db.dao.FolderSyncTransferDao;
-import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.dao.WorkspaceOperationDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.db.model.DbWorkspaceOperation;
-import org.pmiops.workbench.db.model.DbWorkspaceOperation.DbWorkspaceOperationStatus;
-import org.pmiops.workbench.exceptions.ForbiddenException;
-import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.model.*;
 import org.pmiops.workbench.user.VwbUserService;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.pmiops.workbench.vwb.admin.VwbAdminQueryService;
 import org.pmiops.workbench.vwb.wsm.WsmClient;
-import org.pmiops.workbench.workspaces.WorkspaceAuthService;
-import org.pmiops.workbench.workspaces.WorkspaceOperationMapper;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceFactory;
 import org.pmiops.workbench.workspaces.migration.WorkspaceMigrationService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class WorkspacesController implements WorkspacesApiDelegate {
-
-  private static final Logger log = Logger.getLogger(WorkspacesController.class.getName());
   private final InitialCreditsService initialCreditsService;
   private final Provider<DbUser> userProvider;
-  private final WorkspaceAuthService workspaceAuthService;
   private final WorkspaceDao workspaceDao;
   private final WorkspaceMapper workspaceMapper;
-  private final WorkspaceOperationDao workspaceOperationDao;
   private final WorkspaceService workspaceService;
   private final WorkspaceMigrationService workspaceMigrationService;
   private final VwbUserService vwbUserService;
@@ -55,47 +33,25 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   @Autowired
   public WorkspacesController(
-      CdrVersionDao cdrVersionDao,
-      Clock clock,
-      FireCloudService fireCloudService,
       InitialCreditsService initialCreditsService,
       Provider<DbUser> userProvider,
-      Provider<WorkbenchConfig> workbenchConfigProvider,
-      TaskQueueService taskQueueService,
-      UserDao userDao,
-      WorkspaceAuditor workspaceAuditor,
-      WorkspaceAuthService workspaceAuthService,
       WorkspaceDao workspaceDao,
       WorkspaceMapper workspaceMapper,
-      WorkspaceOperationDao workspaceOperationDao,
-      WorkspaceOperationMapper workspaceOperationMapper,
       WorkspaceService workspaceService,
       WorkspaceMigrationService workspaceMigrationService,
       WorkspaceServiceFactory workspaceServiceFactory,
       VwbUserService vwbUserService,
       WsmClient wsmClient,
-      VwbAdminQueryService vwbAdminQueryService,
-      FolderSyncTransferDao folderSyncTransferDao) {
-    this.cdrVersionDao = cdrVersionDao;
-    this.clock = clock;
-    this.fireCloudService = fireCloudService;
+      VwbAdminQueryService vwbAdminQueryService) {
     this.initialCreditsService = initialCreditsService;
-    this.taskQueueService = taskQueueService;
-    this.userDao = userDao;
     this.userProvider = userProvider;
-    this.workbenchConfigProvider = workbenchConfigProvider;
-    this.workspaceAuditor = workspaceAuditor;
-    this.workspaceAuthService = workspaceAuthService;
     this.workspaceDao = workspaceDao;
     this.workspaceMapper = workspaceMapper;
-    this.workspaceOperationDao = workspaceOperationDao;
-    this.workspaceOperationMapper = workspaceOperationMapper;
     this.workspaceService = workspaceService;
     this.workspaceMigrationService = workspaceMigrationService;
     this.workspaceServiceFactory = workspaceServiceFactory;
     this.vwbUserService = vwbUserService;
     this.wsmClient = wsmClient;
-    this.folderSyncTransferDao = folderSyncTransferDao;
     this.vwbAdminQueryService = vwbAdminQueryService;
   }
 
@@ -106,70 +62,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         new VwbWorkspaceListResponse()
             .items(
                 vwbAdminQueryService.queryAccessibleWorkspaces(userProvider.get().getUsername())));
-  }
-
-  private void processWorkspaceTask(long operationId, Supplier<Workspace> workspaceAction) {
-    DbWorkspaceOperation operation =
-        workspaceOperationDao
-            .findById(operationId)
-            .orElseThrow(
-                () ->
-                    new NotFoundException(
-                        String.format("Workspace Operation '%d' not found", operationId)));
-
-    if (operation.getStatus() != DbWorkspaceOperationStatus.QUEUED) {
-      log.warning(
-          String.format(
-              "processWorkspaceTask: exiting because operation %d is in %s state instead of QUEUED",
-              operation.getId(), operation.getStatus().toString()));
-      return;
-    }
-
-    try {
-      log.info(
-          String.format(
-              "processWorkspaceTask: begin processing operation %d by transitioning from %s to %s",
-              operation.getId(),
-              operation.getStatus().toString(),
-              DbWorkspaceOperationStatus.PROCESSING));
-      operation =
-          workspaceOperationDao.save(operation.setStatus(DbWorkspaceOperationStatus.PROCESSING));
-
-      Workspace w = workspaceAction.get();
-      long workspaceId =
-          workspaceDao.getRequired(w.getNamespace(), w.getTerraName()).getWorkspaceId();
-      log.info(
-          String.format(
-              "processWorkspaceTask: recording SUCCESS for operation %d - workspace ID %d",
-              operation.getId(), workspaceId));
-      operation.setStatus(DbWorkspaceOperationStatus.SUCCESS).setWorkspaceId(workspaceId);
-    } catch (Exception e) {
-      log.info(
-          String.format(
-              "processWorkspaceTask: recording ERROR for operation %d", operation.getId()));
-      operation.setStatus(DbWorkspaceOperationStatus.ERROR);
-      throw e;
-    } finally {
-      operation = workspaceOperationDao.save(operation);
-    }
-  }
-
-  @Override
-  public ResponseEntity<String> getWorkspaceAccess(String workspaceNamespace) {
-    try {
-      DbWorkspace workspace = workspaceService.lookupWorkspaceByNamespace(workspaceNamespace);
-      return ResponseEntity.ok(
-          workspaceAuthService
-              .enforceWorkspaceAccessLevel(
-                  workspace.getWorkspaceNamespace(),
-                  workspace.getFirecloudName(),
-                  WorkspaceAccessLevel.READER)
-              .toString());
-    } catch (NotFoundException nfe) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(nfe.getMessage());
-    } catch (ForbiddenException uae) {
-      return ResponseEntity.status(HttpStatus.FORBIDDEN).body(uae.getMessage());
-    }
   }
 
   @Override

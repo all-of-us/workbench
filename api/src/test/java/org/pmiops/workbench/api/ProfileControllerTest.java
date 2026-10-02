@@ -68,7 +68,6 @@ import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
@@ -147,7 +146,6 @@ public class ProfileControllerTest extends BaseControllerTest {
   @MockitoBean private CaptchaVerificationService mockCaptchaVerificationService;
   @MockitoBean private CloudStorageClient mockCloudStorageClient;
   @MockitoBean private DirectoryService mockDirectoryService;
-  @MockitoBean private FireCloudService mockFireCloudService;
   @MockitoBean private MailService mockMailService;
   @MockitoBean private ProfileAuditor mockProfileAuditor;
   @MockitoBean private UserServiceAuditor mockUserServiceAuditor;

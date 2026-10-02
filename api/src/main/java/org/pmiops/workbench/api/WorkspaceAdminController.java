@@ -3,10 +3,8 @@ package org.pmiops.workbench.api;
 import jakarta.annotation.Nullable;
 import java.util.List;
 import org.pmiops.workbench.annotations.AuthorityRequired;
-import org.pmiops.workbench.model.AccessReason;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.CloudStorageTraffic;
-import org.pmiops.workbench.model.ReadOnlyNotebookResponse;
 import org.pmiops.workbench.model.WorkspaceAdminView;
 import org.pmiops.workbench.model.WorkspaceAuditLogQueryResponse;
 import org.pmiops.workbench.model.WorkspaceUserAdminView;
@@ -67,7 +65,6 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
         new WorkspaceWaitingForRetrievalListResponse()
             .items(workspaceAdminService.getWorkspacesWaitingForRetrieval()));
   }
-
 
   @Override
   @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
