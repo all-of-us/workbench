@@ -250,6 +250,13 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
   List<WorkspaceDeletionView> findNextWorkspacesToDelete();
 
   @Query(
+      "SELECT workspaceNamespace as workspaceNamespace, firecloudName as firecloudName "
+          + "from DbWorkspace "
+          + "where activeStatus = 0 "
+          + "order by lastModifiedTime asc limit 4")
+  List<WorkspaceDeletionView> findNextNonProdWorkspacesToDelete();
+
+  @Query(
       "SELECT w FROM DbWorkspace w "
           + "WHERE w.recoveryState = :recoveryState "
           + "ORDER BY w.lastModifiedTime DESC")
