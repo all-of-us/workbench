@@ -30,7 +30,8 @@ public class OfflineWorkspaceControllerTest {
   @Mock private WorkspaceMigrationService workspaceMigrationService;
   @Mock private WorkspaceUserCacheService mockWorkspaceUserCacheService;
   @Mock private TaskQueueService mockTaskQueueService;
-  @Mock private Provider<WorkbenchConfig> workbenchConfigProvider;
+  @Mock private Provider<WorkbenchConfig> mockConfigProvider;
+  private static WorkbenchConfig workbenchConfig;
 
   private OfflineWorkspaceController offlineWorkspaceController;
 
@@ -48,7 +49,9 @@ public class OfflineWorkspaceControllerTest {
             workspaceDao,
             mockWorkspaceUserCacheService,
             workspaceMigrationService,
-            workbenchConfigProvider);
+            mockConfigProvider);
+    workbenchConfig = WorkbenchConfig.createEmptyConfig();
+    workbenchConfig.server.shortName = "Prod";
   }
 
   @Test
@@ -84,6 +87,7 @@ public class OfflineWorkspaceControllerTest {
 
   @Test
   public void testDeleteNextLegacyWorkspace() {
+    when(mockConfigProvider.get()).thenReturn(workbenchConfig);
     when(workspaceDeletionView.getWorkspaceNamespace()).thenReturn(NAMESPACE);
     when(workspaceDeletionView.getFirecloudName()).thenReturn(TERRA_NAME);
     when(workspaceDao.findNextWorkspacesToDelete()).thenReturn(List.of(workspaceDeletionView));
