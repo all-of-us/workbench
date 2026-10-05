@@ -4,8 +4,6 @@ import com.google.cloud.storage.Blob;
 import com.google.storagetransfer.v1.proto.TransferTypes.TransferOperation;
 import jakarta.inject.Provider;
 import jakarta.mail.MessagingException;
-
-import java.lang.StackTraceElement;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Duration;
@@ -1494,11 +1492,10 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
     if (e == null) {
       return null;
     }
-    StringBuilder sb = new StringBuilder();
-    for (StackTraceElement element : e.getStackTrace()) {
-      sb.append(element.toString()).append("\n");
-    }
-    return sb.toString();
+    java.io.StringWriter sw = new java.io.StringWriter();
+    java.io.PrintWriter pw = new java.io.PrintWriter(sw);
+    e.printStackTrace(pw);
+    return sw.toString();
   }
 
   @Override

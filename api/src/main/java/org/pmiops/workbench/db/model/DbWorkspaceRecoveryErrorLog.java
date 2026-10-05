@@ -93,4 +93,3 @@ public class DbWorkspaceRecoveryErrorLog {
     return this;
   }
 }
-

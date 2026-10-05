@@ -18,4 +18,3 @@ public interface WorkspaceRecoveryErrorLogDao
   List<DbWorkspaceRecoveryErrorLog> findLatestErrorsByWorkspaceId(
       @Param("workspaceId") long workspaceId, @Param("limit") int limit);
 }
-

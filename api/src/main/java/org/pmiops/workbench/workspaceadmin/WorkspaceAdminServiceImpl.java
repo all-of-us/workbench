@@ -540,17 +540,20 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   }
 
   @Override
-  public List<org.pmiops.workbench.model.WorkspaceRecoveryErrorLog>
-      getWorkspaceRecoveryErrorLogs(String workspaceNamespace) {
+  public List<org.pmiops.workbench.model.WorkspaceRecoveryErrorLog> getWorkspaceRecoveryErrorLogs(
+      String workspaceNamespace) {
+    // Limit to most recent 50 error logs to avoid overwhelming the UI
+    final int MAX_ERROR_LOGS = 50;
+
     DbWorkspace workspace = workspaceDao.findByWorkspaceNamespace(workspaceNamespace);
     if (workspace == null) {
       return List.of();
     }
 
-    // Fetch recovery error logs for this workspace
+    // Fetch latest recovery error logs for this workspace with limit
     List<org.pmiops.workbench.db.model.DbWorkspaceRecoveryErrorLog> dbLogs =
-        workspaceRecoveryErrorLogDao.findByWorkspaceIdOrderByCreatedTimeDesc(
-            workspace.getWorkspaceId());
+        workspaceRecoveryErrorLogDao.findLatestErrorsByWorkspaceId(
+            workspace.getWorkspaceId(), MAX_ERROR_LOGS);
 
     // Convert to API model
     return dbLogs.stream()

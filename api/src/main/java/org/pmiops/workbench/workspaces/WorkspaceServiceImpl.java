@@ -612,7 +612,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         accessTier.getAuthDomainName());
   }
 
-   /** Creates a Terra (FireCloud) Billing project and adds the current user as owner. */
   /** Creates a Terra (FireCloud) Billing project and adds the current user as owner. */
   private String createTerraBillingProject(DbAccessTier accessTier) {
     DbUser user = userProvider.get();
