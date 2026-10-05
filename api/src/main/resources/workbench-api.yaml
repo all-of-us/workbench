@@ -1396,18 +1396,6 @@ paths:
         204:
           description: No content.
           content: {}
-  /v1/cron/ensureTestUserTosCompliance:
-    get:
-      tags:
-      - offlineTestUsers
-      - cron
-      description: Keep test users' TOS compliance statuses in the appropriate states
-      operationId: ensureTestUserTosCompliance
-      security: []
-      responses:
-        204:
-          description: No content.
-          content: {}
   /v1/cron/emailNewUserSatisfactionSurveyLinks:
     get:
       tags:
