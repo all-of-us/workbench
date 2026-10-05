@@ -1,8 +1,6 @@
 package org.pmiops.workbench.config;
 
-import org.pmiops.workbench.calhoun.CalhounRetryHandler;
 import org.pmiops.workbench.google.GoogleRetryHandler;
-import org.pmiops.workbench.rawls.RawlsRetryHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -13,9 +11,7 @@ import org.springframework.retry.backoff.ThreadWaitSleeper;
 
 @Configuration
 @Import({
-  CalhounRetryHandler.class,
   GoogleRetryHandler.class,
-  RawlsRetryHandler.class,
 })
 public class RetryConfig {
 

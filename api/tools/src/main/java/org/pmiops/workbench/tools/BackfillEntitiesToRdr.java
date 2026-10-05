@@ -91,6 +91,7 @@ public class BackfillEntitiesToRdr extends Tool {
         null,
         null,
         null,
+        null,
         userDao,
         verifiedInstitutionalAffiliationDao);
   }

@@ -156,9 +156,7 @@ public class CdrVersionServiceTest {
             false);
   }
 
-
   // we still expect to see all tiers returned for an RT-only user
-
 
   @Test
   public void testGetCdrVersionsByTierUnregistered() {

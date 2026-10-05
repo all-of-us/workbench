@@ -10,7 +10,6 @@ import org.pmiops.workbench.model.*;
 import org.pmiops.workbench.user.VwbUserService;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.pmiops.workbench.vwb.admin.VwbAdminQueryService;
-import org.pmiops.workbench.vwb.wsm.WsmClient;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceFactory;
 import org.pmiops.workbench.workspaces.migration.WorkspaceMigrationService;
@@ -28,7 +27,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final WorkspaceMigrationService workspaceMigrationService;
   private final VwbUserService vwbUserService;
   private final WorkspaceServiceFactory workspaceServiceFactory;
-  private final WsmClient wsmClient;
   private final VwbAdminQueryService vwbAdminQueryService;
 
   @Autowired
@@ -41,7 +39,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       WorkspaceMigrationService workspaceMigrationService,
       WorkspaceServiceFactory workspaceServiceFactory,
       VwbUserService vwbUserService,
-      WsmClient wsmClient,
       VwbAdminQueryService vwbAdminQueryService) {
     this.initialCreditsService = initialCreditsService;
     this.userProvider = userProvider;
@@ -51,7 +48,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.workspaceMigrationService = workspaceMigrationService;
     this.workspaceServiceFactory = workspaceServiceFactory;
     this.vwbUserService = vwbUserService;
-    this.wsmClient = wsmClient;
     this.vwbAdminQueryService = vwbAdminQueryService;
   }
 
@@ -87,22 +83,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Void> startWorkspaceArchive(String workspaceNamespace, String terraName) {
-
-    workspaceMigrationService.startWorkspaceArchive(workspaceNamespace, terraName);
-
-    return ResponseEntity.ok().build();
-  }
-
-  @Override
-  public ResponseEntity<Void> retryWorkspaceArchive(String status) {
-
-    workspaceMigrationService.retryNextArchiveByStatus(status);
-
-    return ResponseEntity.ok().build();
-  }
-
-  @Override
   public ResponseEntity<Void> startWorkspaceRecovery(
       String namespace, StartWorkspaceRecoveryRequest request) {
 
@@ -118,21 +98,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     workspaceMigrationService.requestWorkspaceRecovery(namespace, podId);
 
     return ResponseEntity.ok().build();
-  }
-
-  @Override
-  public ResponseEntity<Boolean> vwbWorkspaceExists(String namespace) {
-    return ResponseEntity.ok(wsmClient.getWorkspaceAsService(namespace) != null);
-  }
-
-  @Override
-  public ResponseEntity<MigrationBucketContentsResponse> getMigrationBucketContents(
-      String namespace, String terraName) {
-
-    MigrationBucketContentsResponse response =
-        workspaceMigrationService.getBucketContents(namespace, terraName);
-
-    return ResponseEntity.ok(response);
   }
 
   @Override

@@ -107,8 +107,6 @@ public class WorkspacesControllerTest {
   @MockitoBean private VwbAdminQueryService vwbAdminQueryService;
   private static final String LOGGED_IN_USER_EMAIL = "bob@gmail.com";
 
-
-
   @MockitoBean private BigQueryService bigQueryService;
   @MockitoBean private CloudStorageClient cloudStorageClient;
   @MockitoBean private ConceptBigQueryService conceptBigQueryService;

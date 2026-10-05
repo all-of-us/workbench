@@ -7,7 +7,6 @@ import jakarta.inject.Provider;
 import java.time.Clock;
 import java.util.ArrayList;
 import java.util.Optional;
-import java.util.logging.Logger;
 import org.pmiops.workbench.actionaudit.ActionAuditEvent;
 import org.pmiops.workbench.actionaudit.ActionAuditEvent.Builder;
 import org.pmiops.workbench.actionaudit.ActionAuditService;
@@ -20,7 +19,6 @@ import org.pmiops.workbench.actionaudit.targetproperties.EgressEventCommentTarge
 import org.pmiops.workbench.actionaudit.targetproperties.EgressEventTargetProperty;
 import org.pmiops.workbench.actionaudit.targetproperties.ModelBackedTargetProperty;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbEgressEvent;
 import org.pmiops.workbench.db.model.DbUser;
@@ -29,7 +27,6 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.SumologicEgressEvent;
 import org.pmiops.workbench.model.SumologicEgressEventRequest;
 import org.pmiops.workbench.model.VwbEgressEventRequest;
-import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -38,28 +35,20 @@ import org.springframework.stereotype.Service;
 public class EgressEventAuditorImpl implements EgressEventAuditor {
   private final Provider<DbUser> userProvider;
   private final ActionAuditService actionAuditService;
-  private final WorkspaceService workspaceService;
   private final WorkspaceDao workspaceDao;
-  private final UserDao userDao;
   private final Clock clock;
   private final Provider<String> actionIdProvider;
-
-  private static final Logger logger = Logger.getLogger(EgressEventAuditorImpl.class.getName());
 
   @Autowired
   public EgressEventAuditorImpl(
       Provider<DbUser> userProvider,
       ActionAuditService actionAuditService,
-      WorkspaceService workspaceService,
       WorkspaceDao workspaceDao,
-      UserDao userDao,
       Clock clock,
       @Qualifier(ACTION_ID_BEAN) Provider<String> actionIdProvider) {
     this.userProvider = userProvider;
     this.actionAuditService = actionAuditService;
-    this.workspaceService = workspaceService;
     this.workspaceDao = workspaceDao;
-    this.userDao = userDao;
     this.clock = clock;
     this.actionIdProvider = actionIdProvider;
   }

@@ -60,64 +60,11 @@ public class CloudTaskWorkspacesController implements CloudTaskWorkspacesApiDele
   }
 
   @Override
-  public ResponseEntity<Void> checkWorkspaceMigrationStatus(
-      CheckWorkspaceMigrationStatusRequest request) {
-    LOGGER.info(
-        String.format(
-            "Checking migration status for workspace %s/%s",
-            request.getWorkspaceNamespace(), request.getWorkspaceName()));
-
-    workspaceMigrationService.checkMigrationStatus(
-        request.getWorkspaceNamespace(), request.getWorkspaceName());
-
-    return ResponseEntity.ok().build();
-  }
-
-  @Override
-  public ResponseEntity<Void> checkWorkspaceArchiveStatus(CheckWorkspaceArchiveStatusRequest body) {
-
-    workspaceMigrationService.checkArchiveStatus(
-        body.getWorkspaceNamespace(), body.getWorkspaceName());
-
-    return ResponseEntity.ok().build();
-  }
-
-  @Override
-  public ResponseEntity<Void> checkWorkspaceArchiveRetryStatus(
-      CheckWorkspaceArchiveRetryStatusRequest body) {
-
-    workspaceMigrationService.checkArchiveRetryStatus(
-        body.getWorkspaceNamespace(), body.getTerraName());
-
-    return ResponseEntity.ok().build();
-  }
-
-  @Override
   public ResponseEntity<Void> checkWorkspaceRecoveryStatus(
       CheckWorkspaceRecoveryStatusRequest request) {
 
     workspaceMigrationService.checkRecoveryStatus(request.getWorkspaceNamespace());
 
-    return ResponseEntity.ok().build();
-  }
-
-  @Override
-  public ResponseEntity<Void> checkFolderSyncStatus(CheckFolderSyncStatusRequest request) {
-    LOGGER.info(
-        String.format(
-            "Checking folder sync status for workspace %s/%s - %s",
-            request.getWorkspaceNamespace(), request.getWorkspaceName(), request.getJobName()));
-
-    workspaceMigrationService.checkFolderSyncStatus(
-        request.getWorkspaceNamespace(), request.getWorkspaceName(), request.getJobName());
-
-    return ResponseEntity.ok().build();
-  }
-
-  @Override
-  public ResponseEntity<Void> deleteLegacyWorkspace(DeleteLegacyWorkspaceRequest request) {
-    LOGGER.info(
-        "deleteLegacyWorkspace has been decommissioned: " + request.getWorkspaceNamespace());
     return ResponseEntity.ok().build();
   }
 }

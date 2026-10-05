@@ -10,37 +10,34 @@ import {
 
 import { StyledExternalLink } from 'app/components/buttons';
 import { TooltipTrigger } from 'app/components/popups';
-import { AoU, AouTitle } from 'app/components/text-wrappers';
-import {
-  toolTipTextDemographic,
-  toolTipTextDucc,
-} from 'app/pages/workspace/workspace-edit-text';
+import { AoU } from 'app/components/text-wrappers';
 import colors from 'app/styles/colors';
 
-export const ResearchPurposeDescription = (
-  <div style={{ display: 'inline' }}>
-    The <AouTitle /> requires each data user of the <AoU /> data to provide a
-    meaningful description of the intended purpose of data use for each
-    workspace they create. To provide transparency to <AouTitle /> participants,
-    &nbsp;your answers below will be made available publicly in the{' '}
-    <a
-      target='_blank'
-      href='https://www.researchallofus.org/research-projects-directory/'
-    >
-      Research Hub Directory{' '}
-    </a>{' '}
-    on our public website.{' '}
-    <b>Your responses will not be used to make decisions about data access.</b>
-    <hr />
-    <i>
-      Note that you are required to create separate workspaces for each project
-      for which you access{' '}
-    </i>{' '}
-    All of Us{' '}
-    <i>
-      data, hence the responses below are expected to be specific to the project
-      for which you are creating this particular workspace.
-    </i>
+export const toolTipTextDemographic =
+  'For example, by stratifying results based on race/ethnicity, age, ' +
+  'sex, gender identity, sexual orientation, geography, disability status, access to care, ' +
+  'education level, or income\n';
+
+export const toolTipTextDucc = (
+  <div>
+    These steps include, but are not limited to:
+    <ul>
+      <li>
+        Giving careful consideration to the sensibilities of the different
+        groups of people you are studying.
+      </li>
+      <li>
+        Ensuring that you understand, and suitably wield, your analytical tools.
+      </li>
+      <li>
+        Being conscientiously expansive in your inclusion of participant
+        populations and your analytical controls.{' '}
+      </li>
+      <li>
+        Using precise language to describe your findings including both what
+        your results mean and do not mean.
+      </li>
+    </ul>
   </div>
 );
 

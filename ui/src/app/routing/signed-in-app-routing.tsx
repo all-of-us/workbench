@@ -17,7 +17,6 @@ import { DataAccessRequirements } from 'app/pages/access/data-access-requirement
 import { AdminBannerTable } from 'app/pages/admin/admin-banner-table';
 import { AdminEgressAudit } from 'app/pages/admin/admin-egress-audit';
 import { AdminEgressEvents } from 'app/pages/admin/admin-egress-events';
-import { AdminNotebookView } from 'app/pages/admin/admin-notebook-view';
 import { WorkspaceAudit } from 'app/pages/admin/admin-workspace-audit';
 import { BatchSyncUserAccess } from 'app/pages/admin/batch-sync-user-access';
 import { AdminInstitution } from 'app/pages/admin/institution/admin-institution';
@@ -27,7 +26,6 @@ import { AdminUserTable } from 'app/pages/admin/user/admin-user-table';
 import { UserAudit } from 'app/pages/admin/user-audit';
 import { AdminVwbDataCollections } from 'app/pages/admin/vwb/admin-vwb-data-collections';
 import { AdminVwbGroups } from 'app/pages/admin/vwb/admin-vwb-groups';
-import { AdminVwbPreprodMigration } from 'app/pages/admin/vwb/admin-vwb-preprod-migration';
 import { AdminVwbWorkspace } from 'app/pages/admin/vwb/admin-vwb-workspace';
 import { AdminVwbWorkspaceSearch } from 'app/pages/admin/vwb/admin-vwb-workspace-search';
 import { AdminWorkspace } from 'app/pages/admin/workspace/admin-workspace';
@@ -36,10 +34,6 @@ import { AdminWorkspacesWaitingForRetrieval } from 'app/pages/admin/workspace/ad
 import { DemographicSurvey } from 'app/pages/demographic-survey';
 import { Homepage } from 'app/pages/homepage/homepage';
 import { ProfileComponent } from 'app/pages/profile/profile-component';
-import {
-  WorkspaceEdit,
-  WorkspaceEditMode,
-} from 'app/pages/workspace/workspace-edit';
 import { WorkspaceList } from 'app/pages/workspace/workspace-list';
 import { WorkspaceRecovery } from 'app/pages/workspace/workspace-recovery';
 import {
@@ -69,10 +63,6 @@ const AdminEgressEventsPage = fp.flow(
   withRouteData,
   withRoutingSpinner
 )(AdminEgressEvents);
-const AdminNotebookViewPage = fp.flow(
-  withRouteData,
-  withRoutingSpinner
-)(AdminNotebookView);
 const BatchSyncUserAccessPage = fp.flow(
   withRouteData,
   withRoutingSpinner
@@ -124,10 +114,6 @@ const VwbGroupAdminPage = fp.flow(
   withRouteData,
   withRoutingSpinner
 )(AdminVwbGroups);
-const AdminVwbPreprodMigrationPage = fp.flow(
-  withRouteData,
-  withRoutingSpinner
-)(AdminVwbPreprodMigration);
 const VwbWorkspaceAdminSearchPage = fp.flow(
   withRouteData,
   withRoutingSpinner
@@ -140,10 +126,6 @@ const WorkspaceAuditPage = fp.flow(
   withRouteData,
   withRoutingSpinner
 )(WorkspaceAudit);
-const WorkspaceEditPage = fp.flow(
-  withRouteData,
-  withRoutingSpinner
-)(WorkspaceEdit);
 const WorkspaceListPage = fp.flow(
   withRouteData,
   withRoutingSpinner
@@ -316,15 +298,6 @@ export const SignedInRoutes = () => {
       </AppRoute>
       <AppRoute
         exact
-        path='/admin/vwb/preprod-migration'
-        guards={[authorityGuard(AuthorityGuardedAction.WORKSPACE_ADMIN)]}
-      >
-        <AdminVwbPreprodMigrationPage
-          routeData={{ title: 'Preprod WS Migration', minimizeChrome: true }}
-        />
-      </AppRoute>
-      <AppRoute
-        exact
         path='/admin/vwb/workspaces'
         guards={[authorityGuard(AuthorityGuardedAction.WORKSPACE_ADMIN)]}
       >
@@ -380,15 +353,6 @@ export const SignedInRoutes = () => {
           routeData={{ title: 'Workspace Audit', minimizeChrome: true }}
         />
       </AppRoute>
-      <AppRoute
-        exact
-        path='/admin/workspaces/:ns/:nbName'
-        guards={[authorityGuard(AuthorityGuardedAction.WORKSPACE_ADMIN)]}
-      >
-        <AdminNotebookViewPage
-          routeData={{ pathElementForTitle: 'nbName', minimizeChrome: true }}
-        />
-      </AppRoute>
       <AppRoute exact path={DATA_ACCESS_REQUIREMENTS_PATH}>
         <DataAccessRequirementsPage
           routeData={{
@@ -431,16 +395,6 @@ export const SignedInRoutes = () => {
             title: 'View Workspaces',
             breadcrumb: BreadcrumbType.Workspaces,
           }}
-        />
-      </AppRoute>
-      <AppRoute
-        exact
-        path='/workspaces/build'
-        guards={[getAccessModuleGuard()]}
-      >
-        <WorkspaceEditPage
-          routeData={{ title: 'Create Workspace' }}
-          workspaceEditMode={WorkspaceEditMode.Create}
         />
       </AppRoute>
       <AppRoute

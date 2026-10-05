@@ -10,13 +10,8 @@ import { WorkspaceInfoField } from './workspace-info-field';
 interface Props {
   workspace: Workspace;
   activeStatus: WorkspaceActiveStatus;
-  reload: () => Promise<void>;
 }
-export const BasicInformation = ({
-  workspace,
-  activeStatus,
-  reload,
-}: Props) => {
+export const BasicInformation = ({ workspace, activeStatus }: Props) => {
   return (
     <>
       <h3>Basic Information</h3>
