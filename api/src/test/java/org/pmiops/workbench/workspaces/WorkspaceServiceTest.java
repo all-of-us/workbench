@@ -32,7 +32,6 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exfiltration.EgressRemediationService;
 import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.google.CloudStorageClientImpl;
-import org.pmiops.workbench.iam.IamService;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
@@ -61,7 +60,6 @@ public class WorkspaceServiceTest {
   @MockitoBean private BucketAuditQueryService bucketAuditQueryService;
   @MockitoBean private EgressRemediationService egressRemediationService;
   @MockitoBean private FeaturedWorkspaceMapper featuredWorkspaceMapper;
-  @MockitoBean private IamService iamService;
   @MockitoBean private InitialCreditsService initialCreditsService;
   @MockitoBean private ProfileMapper profileMapper;
   @MockitoBean private ReportingQueryService reportingQueryService;

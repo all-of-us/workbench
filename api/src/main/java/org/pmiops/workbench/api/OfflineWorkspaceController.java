@@ -1,10 +1,8 @@
 package org.pmiops.workbench.api;
 
-import jakarta.inject.Provider;
 import java.util.List;
 import java.util.logging.Logger;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.workspaces.WorkspaceUserCacheService;
 import org.springframework.beans.factory.annotation.Autowired;

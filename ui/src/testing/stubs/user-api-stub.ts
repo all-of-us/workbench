@@ -1,9 +1,5 @@
-import * as fp from 'lodash/fp';
-
 import {
-  User,
   UserApi,
-  UserResponse,
   UserRole,
   WorkbenchListBillingAccountsResponse,
 } from 'generated/fetch';
