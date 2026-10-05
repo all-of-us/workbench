@@ -311,8 +311,6 @@ public class ProfileControllerTest extends BaseControllerTest {
     try {
       when(mockCaptchaVerificationService.verifyCaptcha(CAPTCHA_TOKEN)).thenReturn(true);
       when(mockCaptchaVerificationService.verifyCaptcha(WRONG_CAPTCHA_TOKEN)).thenReturn(false);
-      when(mockFireCloudService.hasUserAcceptedLatestTerraToS()).thenReturn(true);
-      when(mockFireCloudService.isUserCompliantWithTerraToS()).thenReturn(true);
     } catch (ApiException e) {
       e.printStackTrace();
     }
@@ -469,7 +467,6 @@ public class ProfileControllerTest extends BaseControllerTest {
 
     assertThat(profile.getLatestTermsOfServiceVersion())
         .isNotEqualTo(config.termsOfService.minimumAcceptedAouVersion);
-    verify(mockFireCloudService, never()).acceptTermsOfServiceDeprecated();
   }
 
   @Test
@@ -481,7 +478,6 @@ public class ProfileControllerTest extends BaseControllerTest {
               config.termsOfService.minimumAcceptedAouVersion - 1);
           createAccountAndDbUserWithAffiliation();
         });
-    verify(mockFireCloudService, never()).acceptTermsOfServiceDeprecated();
   }
 
   @Test
@@ -492,7 +488,6 @@ public class ProfileControllerTest extends BaseControllerTest {
           createAccountRequest.setTermsOfServiceVersion(null);
           createAccountAndDbUserWithAffiliation();
         });
-    verify(mockFireCloudService, never()).acceptTermsOfServiceDeprecated();
   }
 
   @Test
@@ -730,7 +725,6 @@ public class ProfileControllerTest extends BaseControllerTest {
     // TODO: should we be more stringent about this in the future for RW-11416?
 
     profileController.acceptTermsOfService(1);
-    verify(mockFireCloudService).acceptTermsOfServiceDeprecated();
   }
 
   @Test

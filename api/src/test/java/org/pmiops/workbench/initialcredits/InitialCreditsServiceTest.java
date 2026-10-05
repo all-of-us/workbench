@@ -1550,8 +1550,6 @@ public class InitialCreditsServiceTest {
 
     commitTransaction();
 
-    FireCloudService mockFireCloudService = applicationContext.getBean(FireCloudService.class);
-
     // ACT
     initialCreditsService.updateInitialCreditsExhaustion(user, false);
 
@@ -1569,9 +1567,6 @@ public class InitialCreditsServiceTest {
     DbWorkspace updatedNonInitialWorkspace =
         workspaceDao.findById(nonInitialCreditsWorkspace.getWorkspaceId()).get();
     assertThat(updatedNonInitialWorkspace.isInitialCreditsExhausted()).isTrue();
-
-    verify(mockFireCloudService, never())
-        .removeBillingAccountFromBillingProjectAsService(any(String.class));
   }
 
   @Test
@@ -1584,11 +1579,6 @@ public class InitialCreditsServiceTest {
 
     // ACT
     initialCreditsService.updateInitialCreditsExhaustion(user, true);
-
-    // ASSERT
-    // Verify no interactions with APIs as there are no workspaces
-    FireCloudService mockFireCloudService = applicationContext.getBean(FireCloudService.class);
-    verify(mockFireCloudService, never()).removeBillingAccountFromBillingProjectAsService(any());
 
     // Verify workspaceDao.saveAll was called (even though the iterable was empty)
     verify(spyWorkspaceDao).saveAll(any(Iterable.class));
