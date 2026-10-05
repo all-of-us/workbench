@@ -4,6 +4,8 @@ import com.google.cloud.storage.Blob;
 import com.google.storagetransfer.v1.proto.TransferTypes.TransferOperation;
 import jakarta.inject.Provider;
 import jakarta.mail.MessagingException;
+
+import java.lang.StackTraceElement;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Duration;
@@ -18,6 +20,7 @@ import org.pmiops.workbench.db.dao.FolderSyncTransferDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceBucketArchiveDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.dao.WorkspaceRecoveryErrorLogDao;
 import org.pmiops.workbench.db.model.*;
 import org.pmiops.workbench.db.model.DbFolderSyncTransfer.TransferState;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -75,6 +78,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
   private final Clock clock;
   private final WorkspaceBucketArchiveDao workspaceBucketArchiveDao;
   private final ActionAuditQueryService actionAuditQueryService;
+  private final WorkspaceRecoveryErrorLogDao workspaceRecoveryErrorLogDao;
   private static final String CONTROLLED_TIER_ARCHIVE_BUCKET =
       "all-of-us-archive-ct-bucket-wb-blazing-lime-5817";
 
@@ -101,7 +105,8 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
       Provider<DbUser> userProvider,
       Clock clock,
       WorkspaceBucketArchiveDao workspaceBucketArchiveDao,
-      ActionAuditQueryService actionAuditQueryService) {
+      ActionAuditQueryService actionAuditQueryService,
+      WorkspaceRecoveryErrorLogDao workspaceRecoveryErrorLogDao) {
 
     this.wsmClient = wsmClient;
     this.workspaceDao = workspaceDao;
@@ -122,6 +127,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
     this.clock = clock;
     this.workspaceBucketArchiveDao = workspaceBucketArchiveDao;
     this.actionAuditQueryService = actionAuditQueryService;
+    this.workspaceRecoveryErrorLogDao = workspaceRecoveryErrorLogDao;
   }
 
   @Override
@@ -1456,6 +1462,13 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
 
       logger.log(Level.SEVERE, namespace + ": Recovery failed", e);
 
+      // Log error details to the database
+      logRecoveryError(
+          dbWorkspace.getWorkspaceId(),
+          "Recovery operation failed: " + e.getMessage(),
+          e.getClass().getSimpleName(),
+          getStackTrace(e));
+
       dbWorkspace.setRecoveryState(WorkspaceRecoveryStatus.FAILED.name());
 
       dbWorkspace.setLastModifiedTime(new Timestamp(clock.instant().toEpochMilli()));
@@ -1464,6 +1477,28 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
 
       throw new RuntimeException(namespace + ": Recovery failed to start", e);
     }
+  }
+
+  private void logRecoveryError(
+      long workspaceId, String errorMessage, String errorType, String stackTrace) {
+    try {
+      DbWorkspaceRecoveryErrorLog errorLog =
+          new DbWorkspaceRecoveryErrorLog(workspaceId, errorMessage, errorType, stackTrace);
+      workspaceRecoveryErrorLogDao.save(errorLog);
+    } catch (Exception e) {
+      logger.log(Level.WARNING, "Failed to log recovery error for workspace " + workspaceId, e);
+    }
+  }
+
+  private String getStackTrace(Exception e) {
+    if (e == null) {
+      return null;
+    }
+    StringBuilder sb = new StringBuilder();
+    for (StackTraceElement element : e.getStackTrace()) {
+      sb.append(element.toString()).append("\n");
+    }
+    return sb.toString();
   }
 
   @Override
@@ -1498,6 +1533,14 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
             namespace
                 + ": Recovery transfer failed: "
                 + transferOperation.getErrorBreakdownsList());
+
+        // Log error details
+        logRecoveryError(
+            dbWorkspace.getWorkspaceId(),
+            "Storage transfer failed: " + transferOperation.getErrorBreakdownsList(),
+            "TRANSFER_FAILED",
+            null);
+
         dbWorkspace.setRecoveryState(WorkspaceRecoveryStatus.FAILED.name());
 
         workspaceDao.save(dbWorkspace);

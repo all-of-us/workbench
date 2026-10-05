@@ -12,6 +12,7 @@ import org.pmiops.workbench.model.CloudStorageTraffic;
 import org.pmiops.workbench.model.PublishWorkspaceRequest;
 import org.pmiops.workbench.model.WorkspaceAdminView;
 import org.pmiops.workbench.model.WorkspaceAuditLogQueryResponse;
+import org.pmiops.workbench.model.WorkspaceRecoveryErrorLog;
 import org.pmiops.workbench.model.WorkspaceUserAdminView;
 import org.pmiops.workbench.model.WorkspaceWaitingForRetrieval;
 
@@ -50,4 +51,12 @@ public interface WorkspaceAdminService {
   void updateBillingToCredits(String workspaceNamespace, String terraName);
 
   List<WorkspaceUserAdminView> getWorkspaceCollaborators(String namespace);
+
+  /**
+   * Get recovery error logs for a workspace
+   *
+   * @param workspaceNamespace The workspace namespace
+   * @return List of recovery error logs for the workspace
+   */
+  List<WorkspaceRecoveryErrorLog> getWorkspaceRecoveryErrorLogs(String workspaceNamespace);
 }

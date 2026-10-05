@@ -27,6 +27,7 @@ import org.pmiops.workbench.db.dao.FeaturedWorkspaceDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.dao.WorkspaceRecoveryErrorLogDao;
 import org.pmiops.workbench.db.model.DbFeaturedWorkspace;
 import org.pmiops.workbench.db.model.DbFeaturedWorkspace.DbFeaturedCategory;
 import org.pmiops.workbench.db.model.DbUser;
@@ -89,6 +90,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   private final WorkspaceDao workspaceDao;
   private final WorkspaceMapper workspaceMapper;
   private final WorkspaceService workspaceService;
+  private final WorkspaceRecoveryErrorLogDao workspaceRecoveryErrorLogDao;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
@@ -112,6 +114,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
       WorkspaceDao workspaceDao,
       WorkspaceMapper workspaceMapper,
       WorkspaceService workspaceService,
+      WorkspaceRecoveryErrorLogDao workspaceRecoveryErrorLogDao,
       Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.actionAuditQueryService = actionAuditQueryService;
     this.adminAuditor = adminAuditor;
@@ -132,6 +135,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     this.workspaceDao = workspaceDao;
     this.workspaceMapper = workspaceMapper;
     this.workspaceService = workspaceService;
+    this.workspaceRecoveryErrorLogDao = workspaceRecoveryErrorLogDao;
     this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
@@ -533,5 +537,35 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
             })
         .filter(Objects::nonNull)
         .toList();
+  }
+
+  @Override
+  public List<org.pmiops.workbench.model.WorkspaceRecoveryErrorLog>
+      getWorkspaceRecoveryErrorLogs(String workspaceNamespace) {
+    DbWorkspace workspace = workspaceDao.findByWorkspaceNamespace(workspaceNamespace);
+    if (workspace == null) {
+      return List.of();
+    }
+
+    // Fetch recovery error logs for this workspace
+    List<org.pmiops.workbench.db.model.DbWorkspaceRecoveryErrorLog> dbLogs =
+        workspaceRecoveryErrorLogDao.findByWorkspaceIdOrderByCreatedTimeDesc(
+            workspace.getWorkspaceId());
+
+    // Convert to API model
+    return dbLogs.stream()
+        .map(
+            dbLog ->
+                new org.pmiops.workbench.model.WorkspaceRecoveryErrorLog()
+                    .setId(dbLog.getId())
+                    .setWorkspaceId(dbLog.getWorkspaceId())
+                    .setErrorMessage(dbLog.getErrorMessage())
+                    .setErrorType(dbLog.getErrorType())
+                    .setStackTrace(dbLog.getStackTrace())
+                    .setCreatedTime(
+                        dbLog.getCreatedTime() != null
+                            ? dbLog.getCreatedTime().toInstant().toString()
+                            : null))
+        .collect(java.util.stream.Collectors.toList());
   }
 }
