@@ -2,10 +2,7 @@ package org.pmiops.workbench.workspaces;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import org.pmiops.workbench.db.model.*;
-import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.WorkspaceResponse;
 
 /*
@@ -28,21 +25,7 @@ public interface WorkspaceService {
 
   List<WorkspaceResponse> listWorkspaces();
 
-  /**
-   * Return the email associated with the group that we use to indicate that a workspace is
-   * published. (implementation detail: it's the RT auth domain group email)
-   */
-  String getPublishedWorkspacesGroupEmail();
-
-  List<UserRole> getFirecloudUserRoles(String workspaceNamespace, String firecloudName);
-
   DbUserRecentWorkspace updateRecentWorkspaces(DbWorkspace workspace);
 
-  Map<String, DbWorkspace> getWorkspacesByGoogleProject(Set<String> keySet);
-
-  DbWorkspace lookupWorkspaceByNamespace(String workspaceNamespace);
-
   List<DbWorkspace> lookupWorkspacesByNamespace(Collection<String> workspaceNamespaces);
-
-  List<DbUser> getWorkspaceOwnerList(DbWorkspace dbWorkspace);
 }

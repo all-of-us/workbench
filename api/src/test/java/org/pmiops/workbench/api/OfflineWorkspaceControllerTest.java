@@ -41,14 +41,7 @@ public class OfflineWorkspaceControllerTest {
   @BeforeEach
   public void setUp() {
     offlineWorkspaceController =
-        new OfflineWorkspaceController(
-            mockTaskQueueService,
-            workspaceDao,
-            mockWorkspaceUserCacheService,
-            workspaceMigrationService,
-            mockConfigProvider);
-    workbenchConfig = WorkbenchConfig.createEmptyConfig();
-    workbenchConfig.server.shortName = "Prod";
+        new OfflineWorkspaceController(mockTaskQueueService, mockWorkspaceUserCacheService);
   }
 
   @Test

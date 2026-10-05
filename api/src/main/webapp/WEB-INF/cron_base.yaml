@@ -94,18 +94,3 @@ cron:
   schedule: every day 21:30
   timezone: America/Chicago
   target: api
-- description: Archives next legacy workspace to RW 2.0 archive bucket
-  url: /v1/cron/archiveNextLegacyWorkspace
-  schedule: every 1 minutes
-  timezone: America/Chicago
-  target: api
-- description: Deletes next migrated or archived legacy workspace and its billing project
-  url: /v1/cron/deleteNextLegacyWorkspace
-  schedule: every 1 minutes
-  timezone: America/Chicago
-  target: api
-- description: Retry failed workspace archives
-  url: /v1/cron/retryNextFailedArchive
-  schedule: every 1 minutes
-  timezone: America/Chicago
-  target: api

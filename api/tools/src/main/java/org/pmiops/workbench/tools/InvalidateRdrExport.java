@@ -91,6 +91,7 @@ public class InvalidateRdrExport extends Tool {
         null,
         null,
         null,
+        null,
         userDao,
         verifiedInstitutionalAffiliationDao);
   }

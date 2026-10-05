@@ -17,6 +17,9 @@ public interface ActionAuditQueryService {
 
   List<ActionAuditQueryService.UserIdWithRoleImpl> getWorkspaceUsersById(long workspaceId);
 
+  List<ActionAuditQueryService.UserIdWithRoleImpl> getUserWorkspaceAccessLevel(
+      long workspaceId, long userId);
+
   interface WorkspaceIdWithRole {
     Long workspaceId();
 

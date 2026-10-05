@@ -111,27 +111,6 @@ export const WorkspaceList = fp.flow(withUserProfile())(
       void this.loadRwAndLegacyWorkspaces();
     }
 
-    async loadRwWorkspaces() {
-      this.setState({ workspacesLoading: true });
-      try {
-        const vwbResponse = await workspacesApi().getVwbWorkspaces();
-
-        const resolvedVwbWorkspaces = (vwbResponse.items ??
-          []) as VwbWorkspaceCardModel[];
-
-        this.setState({
-          vwbWorkspaces: resolvedVwbWorkspaces,
-          workspacesLoading: false,
-        });
-      } catch (e) {
-        const response = await convertAPIError(e);
-        this.setState({
-          errorText: response.message,
-          workspacesLoading: false,
-        });
-      }
-    }
-
     async loadRwAndLegacyWorkspaces() {
       this.setState({ workspacesLoading: true });
       try {
@@ -417,10 +396,13 @@ export const WorkspaceList = fp.flow(withUserProfile())(
 
                         return (
                           <WorkspaceCard
-                            key={`${wp.workspace.namespace}-${wp.workspace.terraName}-legacy`}
+                            key={`${wp.workspace.namespace}-legacy`}
                             workspace={wp.workspace}
                             accessLevel={wp.accessLevel}
-                            reload={() => this.reloadWorkspaces()}
+                            reload={() => {
+                              console.log('reload WorkspaceCard');
+                              this.reloadWorkspaces();
+                            }}
                             tierAccessDisabled={tierAccessDisabled}
                             isMigratedView={false}
                             disableOpenAction={isMigrated}
