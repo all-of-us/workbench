@@ -106,9 +106,7 @@ const AdminWorkspaceImpl = (props: Props) => {
       {loadingWorkspace && <SpinnerOverlay />}
       {workspace && (
         <div>
-          <BasicInformation
-            {...{ workspace, activeStatus }}
-          />
+          <BasicInformation {...{ workspace, activeStatus }} />
           <WorkspaceMigrationInfo workspace={workspace} />
           <WorkspaceArchiveInfo
             loadingCollaborators={loadingCollaborators}

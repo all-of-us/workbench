@@ -44,7 +44,6 @@ import org.pmiops.workbench.exfiltration.EgressRemediationService;
 import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.google.CloudMonitoringService;
 import org.pmiops.workbench.google.CloudStorageClient;
-import org.pmiops.workbench.iam.IamService;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.*;
@@ -65,7 +64,6 @@ import org.pmiops.workbench.workspaceadmin.WorkspaceAdminService;
 import org.pmiops.workbench.workspaceadmin.WorkspaceAdminServiceImpl;
 import org.pmiops.workbench.workspaces.*;
 import org.pmiops.workbench.workspaces.migration.WorkspaceMigrationService;
-import org.pmiops.workbench.workspaces.resources.UserRecentResourceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -110,14 +108,12 @@ public class WorkspacesControllerTest {
   @MockitoBean private BigQueryService bigQueryService;
   @MockitoBean private CloudStorageClient cloudStorageClient;
   @MockitoBean private ConceptBigQueryService conceptBigQueryService;
-  @MockitoBean private UserRecentResourceService userRecentResourceService;
   @MockitoBean private WorkspaceServiceFactory workspaceServiceFactory;
   @MockitoBean AccessTierService accessTierService;
   @MockitoBean BucketAuditQueryService bucketAuditQueryService;
   @MockitoBean CloudBillingClient mockCloudBillingClient;
   @MockitoBean FeaturedWorkspaceMapper featuredWorkspaceMapper;
   @MockitoBean InitialCreditsService mockInitialCreditsService;
-  @MockitoBean IamService mockIamService;
 
   @MockitoBean
   @Qualifier(EGRESS_OBJECT_LENGTHS_SERVICE_QUALIFIER)
@@ -163,7 +159,6 @@ public class WorkspacesControllerTest {
     WorkspaceAdminServiceImpl.class,
     WorkspaceAuthService.class,
     WorkspaceMapperImpl.class,
-    WorkspaceOperationMapperImpl.class,
     WorkspaceServiceImpl.class,
     WorkspacesController.class,
   })
