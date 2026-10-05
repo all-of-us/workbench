@@ -53,9 +53,6 @@ import org.pmiops.workbench.user.VwbUserService;
 import org.pmiops.workbench.utils.mappers.AnalysisLanguageMapperImpl;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.FeaturedWorkspaceMapper;
-import org.pmiops.workbench.utils.mappers.FirecloudMapper;
-import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
-import org.pmiops.workbench.utils.mappers.LeonardoMapperImpl;
 import org.pmiops.workbench.utils.mappers.UserMapperImpl;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
 import org.pmiops.workbench.vwb.admin.VwbAdminQueryService;
@@ -129,7 +126,6 @@ public class WorkspacesControllerTest {
   @Autowired ConceptSetDao conceptSetDao;
   @Autowired DataSetDao dataSetDao;
   @Autowired FakeClock fakeClock;
-  @Autowired FirecloudMapper firecloudMapper;
   @Autowired UserDao userDao;
   @Autowired UserRecentWorkspaceDao userRecentWorkspaceDao;
   @Autowired WorkspaceAdminService workspaceAdminService;
@@ -153,8 +149,6 @@ public class WorkspacesControllerTest {
     CdrVersionService.class,
     CommonMappers.class,
     FakeClockConfiguration.class,
-    FirecloudMapperImpl.class,
-    LeonardoMapperImpl.class,
     UserMapperImpl.class,
     WorkspaceAdminServiceImpl.class,
     WorkspaceAuthService.class,
