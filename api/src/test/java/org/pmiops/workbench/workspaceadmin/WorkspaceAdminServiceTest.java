@@ -37,7 +37,6 @@ import org.pmiops.workbench.db.jdbc.ReportingQueryService;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.google.CloudMonitoringService;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
@@ -55,8 +54,6 @@ import org.pmiops.workbench.model.CloudStorageTraffic;
 import org.pmiops.workbench.model.TimeSeriesPoint;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAdminView;
-import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
-import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.FeaturedWorkspaceMapper;
@@ -146,21 +143,11 @@ public class WorkspaceAdminServiceTest {
     accessTierDao.save(cdrVersion.getAccessTier());
     cdrVersionDao.save(cdrVersion);
     providedWorkbenchConfig = WorkbenchConfig.createEmptyConfig();
-    when(mockFirecloudService.getWorkspaceAsService(any(), any()))
-        .thenReturn(
-            new RawlsWorkspaceResponse()
-                .workspace(
-                    new RawlsWorkspaceDetails()
-                        .bucketName("bucket")
-                        .namespace(WORKSPACE_NAMESPACE)));
 
     final Workspace workspace =
         TestMockFactory.createWorkspace(
             WORKSPACE_NAMESPACE, WORKSPACE_DISPLAY_NAME, WORKSPACE_TERRA_NAME);
     dbWorkspace = workspaceDao.save(TestMockFactory.createDbWorkspaceStub(workspace, 1L));
-
-    when(mockFirecloudService.getGroup(anyString()))
-        .thenReturn(new FirecloudManagedGroupWithMembers().groupEmail("test@firecloud.org"));
 
     testLeoRuntime =
         new LeonardoGetRuntimeResponse()

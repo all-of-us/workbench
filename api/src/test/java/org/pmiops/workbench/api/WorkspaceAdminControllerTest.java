@@ -15,11 +15,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.google.CloudMonitoringService;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.model.AdminWorkspaceObjectsCounts;
-import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
-import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
-import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
@@ -77,21 +73,10 @@ public class WorkspaceAdminControllerTest {
     when(mockWorkspaceAdminService.getFirstWorkspaceByNamespace(WORKSPACE_NAMESPACE))
         .thenReturn(Optional.of(dbWorkspace));
 
-    final UserRole collaborator =
-        new UserRole().email("test@test.test").role(WorkspaceAccessLevel.WRITER);
-
     final AdminWorkspaceObjectsCounts adminWorkspaceObjectsCounts =
         new AdminWorkspaceObjectsCounts().cohortCount(1).conceptSetCount(2).datasetCount(3);
     when(mockWorkspaceAdminService.getAdminWorkspaceObjects(dbWorkspace.getWorkspaceId()))
         .thenReturn(adminWorkspaceObjectsCounts);
-
-    RawlsWorkspaceDetails fcWorkspace =
-        TestMockFactory.createTerraWorkspace(
-            WORKSPACE_NAMESPACE, WORKSPACE_TERRA_NAME, FIRECLOUD_WORKSPACE_CREATOR_USERNAME);
-    RawlsWorkspaceResponse fcWorkspaceResponse =
-        new RawlsWorkspaceResponse().workspace(fcWorkspace);
-    when(mockFirecloudService.getWorkspaceAsService(WORKSPACE_NAMESPACE, WORKSPACE_TERRA_NAME))
-        .thenReturn(fcWorkspaceResponse);
   }
 
   @Test
