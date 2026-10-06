@@ -560,12 +560,12 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
         .map(
             dbLog ->
                 new org.pmiops.workbench.model.WorkspaceRecoveryErrorLog()
-                    .setId(dbLog.getId())
-                    .setWorkspaceId(dbLog.getWorkspaceId())
-                    .setErrorMessage(dbLog.getErrorMessage())
-                    .setErrorType(dbLog.getErrorType())
-                    .setStackTrace(dbLog.getStackTrace())
-                    .setCreatedTime(
+                    .id(dbLog.getId())
+                    .workspaceId(dbLog.getWorkspaceId())
+                    .errorMessage(dbLog.getErrorMessage())
+                    .errorType(dbLog.getErrorType())
+                    .stackTrace(dbLog.getStackTrace())
+                    .createdTime(
                         dbLog.getCreatedTime() != null
                             ? dbLog.getCreatedTime().toInstant().toString()
                             : null))
