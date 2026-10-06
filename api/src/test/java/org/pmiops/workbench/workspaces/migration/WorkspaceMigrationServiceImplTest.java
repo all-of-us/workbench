@@ -91,6 +91,8 @@ public class WorkspaceMigrationServiceImplTest {
   @Mock private MailService mailService;
   @Mock private WorkspaceService workspaceService;
   @Mock private WorkspaceRecoveryErrorLogDao workspaceRecoveryErrorLogDao;
+  @Mock private org.pmiops.workbench.actionaudit.ActionAuditQueryService actionAuditQueryService;
+  @Mock private org.pmiops.workbench.user.VwbUserService vwbUserService;
   // Clock MOCK
   @Mock private Clock clock;
 
@@ -579,8 +581,57 @@ public class WorkspaceMigrationServiceImplTest {
   }
 
   @Test
-  void startWorkspaceRecovery_logsErrorWhenRecoveryFails() {
-    workspace.setRecoveryState(WorkspaceRecoveryStatus.REQUESTED);
+  void startWorkspaceRecovery_logsErrorWhenRecoveryFails()
+      throws org.pmiops.workbench.wsmanager.ApiException {
+    dbWorkspace.setRecoveryState(WorkspaceRecoveryStatus.REQUESTED.name());
+    dbWorkspace.setWorkspaceId(123L);
+
+    // Setup creator
+    DbUser creatorRef = new DbUser();
+    creatorRef.setUserId(1L);
+    dbWorkspace.setCreator(creatorRef);
+
+    // Setup archive metadata
+    when(workspaceBucketArchiveDao.findByLegacyWorkspaceId(anyLong()))
+        .thenReturn(
+            List.of(
+                new DbWorkspaceBucketArchive()
+                    .setStatus(WorkspaceArchiveStatus.ARCHIVED.toString())
+                    .setGcsPath(ARCHIVE_PATH)));
+
+    // Setup user/creator lookup
+    DbUser creator = new DbUser();
+    creator.setUserId(1L);
+    creator.setUsername(CREATOR);
+    when(userDao.findUserByUserId(anyLong())).thenReturn(creator);
+
+    // Setup workspace creation
+    WorkspaceDescription vwbWorkspace = new WorkspaceDescription();
+    vwbWorkspace.setId(UUID.randomUUID());
+    vwbWorkspace.setUserFacingId("recovery-ws-id");
+    when(wsmClient.createWorkspaceAsService(any(), any())).thenReturn(vwbWorkspace);
+
+    // Setup workspace sharing
+    lenient().doNothing().when(wsmClient).shareWorkspaceAsService(any(), any(), any());
+
+    // Setup no collaborators
+    when(actionAuditQueryService.getWorkspaceUsersById(anyLong())).thenReturn(null);
+
+    // Setup workspace properties update
+    lenient().doNothing().when(wsmClient).updateWorkspaceProperties(any(), any());
+
+    // Setup workspace retrieval with policies
+    lenient().when(wsmClient.getWorkspaceAsService(any())).thenReturn(vwbWorkspace);
+
+    // Setup bucket creation
+    lenient().when(wsmClient.createControlledBucket(any(), any())).thenReturn(CREATED_BUCKET);
+
+    // Setup transfer job creation
+    lenient()
+        .when(
+            storageTransferClient.createTransferJob(
+                any(), any(), any(), any(), any(), any(), any(), any(), anyBoolean()))
+        .thenReturn(RECOVERY_JOB_NAME);
 
     // Simulate BQ clone failure
     when(wsmClient.cloneBQDataset(any(), any(), any(), any()))
