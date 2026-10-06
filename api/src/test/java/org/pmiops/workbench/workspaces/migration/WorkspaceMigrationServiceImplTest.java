@@ -20,6 +20,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.VwbConfig.CdrVersionForMigration;
@@ -77,6 +78,7 @@ public class WorkspaceMigrationServiceImplTest {
   @Mock private WorkspaceMapper workspaceMapper;
   @Mock private UserDao userDao;
   @Mock private Provider<WorkbenchConfig> workbenchConfigProvider;
+  @Mock private ActionAuditQueryService auditQueryService;
   @Mock private InitialCreditsService initialCreditsService;
   @Mock private StorageTransferClient storageTransferClient;
   @Mock private TaskQueueService taskQueueService;
