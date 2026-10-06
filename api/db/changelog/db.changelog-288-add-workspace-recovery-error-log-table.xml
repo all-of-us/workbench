@@ -18,9 +18,9 @@
       </column>
       <column name="error_type" type="VARCHAR(255)"/>
       <column name="stack_trace" type="TEXT"/>
-      <column name="created_time" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
-        <constraints nullable="false" updatable="false"/>
-      </column>
+       <column name="created_time" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+         <constraints nullable="false"/>
+       </column>
     </createTable>
 
     <createIndex tableName="workspace_recovery_error_log" indexName="idx_workspace_recovery_error_log_workspace_id">
