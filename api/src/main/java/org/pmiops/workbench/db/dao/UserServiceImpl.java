@@ -45,7 +45,6 @@ import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.institution.InstitutionService;
@@ -91,7 +90,6 @@ public class UserServiceImpl implements UserService {
   private final AccessModuleNameMapper accessModuleNameMapper;
   private final AccessModuleService accessModuleService;
   private final DirectoryService directoryService;
-  private final FireCloudService fireCloudService;
   private final MailService mailService;
   private final DiscoverySourceMapper discoverySourceMapper;
   private final AccessSyncService accessSyncService;
@@ -111,7 +109,6 @@ public class UserServiceImpl implements UserService {
       VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao,
       AccessModuleNameMapper accessModuleNameMapper,
       AccessModuleService accessModuleService,
-      FireCloudService fireCloudService,
       DirectoryService directoryService,
       AccessTierService accessTierService,
       MailService mailService,
@@ -128,7 +125,6 @@ public class UserServiceImpl implements UserService {
     this.verifiedInstitutionalAffiliationDao = verifiedInstitutionalAffiliationDao;
     this.accessModuleNameMapper = accessModuleNameMapper;
     this.accessModuleService = accessModuleService;
-    this.fireCloudService = fireCloudService;
     this.directoryService = directoryService;
     this.accessTierService = accessTierService;
     this.mailService = mailService;
@@ -466,19 +462,6 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public boolean hasSignedLatestTermsOfServiceForBoth(@Nonnull DbUser dbUser) {
-    boolean hasSignedLatestAouTos = hasSignedLatestAoUTermsOfService(dbUser);
-    boolean hasSignedLatestTerraTos = fireCloudService.hasUserAcceptedLatestTerraToS();
-
-    log.log(
-        Level.INFO,
-        String.format(
-            "User %s has signed latest AoU TOS: %s, and latest Terra TOS: %s",
-            dbUser.getUsername(), hasSignedLatestAouTos, hasSignedLatestTerraTos));
-    return hasSignedLatestAouTos && hasSignedLatestTerraTos;
-  }
-
-  @Override
   @Transactional
   public void submitAouTermsOfService(@Nonnull DbUser dbUser, @Nonnull Integer tosVersion) {
     long userId = dbUser.getUserId();
@@ -490,16 +473,6 @@ public class UserServiceImpl implements UserService {
             .setTosVersion(tosVersion)
             .setAouAgreementTime(clockNow()));
     userServiceAuditor.fireAcknowledgeTermsOfService(dbUser, tosVersion);
-  }
-
-  @Override
-  @Deprecated // to be replaced as part of RW-11416
-  public void acceptTerraTermsOfServiceDeprecated(@Nonnull DbUser dbUser) {
-    fireCloudService.acceptTermsOfServiceDeprecated();
-    userTermsOfServiceDao.save(
-        userTermsOfServiceDao
-            .findByUserIdOrThrow(dbUser.getUserId())
-            .setTerraAgreementTime(clockNow()));
   }
 
   @Override
@@ -614,14 +587,6 @@ public class UserServiceImpl implements UserService {
         },
         targetUser,
         agent);
-  }
-
-  /** Syncs the eraCommons access module status for the current user. */
-  @Override
-  public DbUser syncEraCommonsStatus() {
-    DbUser user = userProvider.get();
-    FirecloudNihStatus nihStatus = fireCloudService.getNihStatus();
-    return setEraCommonsStatus(user, nihStatus, Agent.asUser(user));
   }
 
   @Override

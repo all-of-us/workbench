@@ -1,16 +1,10 @@
 package org.pmiops.workbench.api;
 
-import jakarta.inject.Provider;
 import java.util.List;
 import java.util.logging.Logger;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.model.WorkspaceArchiveStatus;
-import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceUserCacheService;
-import org.pmiops.workbench.workspaces.migration.WorkspaceMigrationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,82 +14,18 @@ public class OfflineWorkspaceController implements OfflineWorkspaceApiDelegate {
   private static final Logger log = Logger.getLogger(OfflineWorkspaceController.class.getName());
 
   private final TaskQueueService taskQueueService;
-  private final WorkspaceService workspaceService;
-  private final WorkspaceDao workspaceDao;
   private final WorkspaceUserCacheService workspaceUserCacheService;
-  private final WorkspaceMigrationService workspaceMigrationService;
-  private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   public OfflineWorkspaceController(
-      TaskQueueService taskQueueService,
-      WorkspaceService workspaceService,
-      WorkspaceDao workspaceDao,
-      WorkspaceUserCacheService workspaceUserCacheService,
-      WorkspaceMigrationService workspaceMigrationService,
-      Provider<WorkbenchConfig> workbenchConfigProvider) {
+      TaskQueueService taskQueueService, WorkspaceUserCacheService workspaceUserCacheService) {
     this.taskQueueService = taskQueueService;
-    this.workspaceService = workspaceService;
-    this.workspaceDao = workspaceDao;
     this.workspaceUserCacheService = workspaceUserCacheService;
-    this.workspaceMigrationService = workspaceMigrationService;
-    this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
   @Override
   public ResponseEntity<Void> cleanupOrphanedWorkspaces() {
-    List<String> orphanedNamespaces = workspaceService.getOrphanedWorkspaceNamespacesAsService();
-    taskQueueService.groupAndPushCleanupOrphanedWorkspacesTasks(orphanedNamespaces);
-
-    return ResponseEntity.noContent().build();
-  }
-
-  @Override
-  public ResponseEntity<Void> archiveNextLegacyWorkspace() {
-    WorkspaceDao.WorkspaceArchiveView workspaceArchiveView =
-        workspaceMigrationService.getNextWorkspaceToArchive();
-    if (workspaceArchiveView == null) {
-      throw new NotFoundException(
-          "Next legacy workspace not found. Update query to continue archives");
-    }
-    log.info(
-        "Next legacy workspace found: "
-            + workspaceArchiveView.getWorkspaceNamespace()
-            + "/"
-            + workspaceArchiveView.getFirecloudName());
-    workspaceMigrationService.startWorkspaceArchive(
-        workspaceArchiveView.getWorkspaceNamespace(), workspaceArchiveView.getFirecloudName());
-
-    return ResponseEntity.noContent().build();
-  }
-
-  @Override
-  public ResponseEntity<Void> deleteNextLegacyWorkspace() {
-    List<WorkspaceDao.WorkspaceDeletionView> workspacesToDelete =
-        workbenchConfigProvider.get().server.shortName.equals("Prod")
-            ? workspaceDao.findNextWorkspacesToDelete()
-            : workspaceDao.findNextNonProdWorkspacesToDelete();
-    if (workspacesToDelete == null || workspacesToDelete.isEmpty()) {
-      throw new NotFoundException(
-          "Next legacy workspace not found. Update query to continue archives");
-    }
-    workspacesToDelete.forEach(
-        workspaceDeletionView -> {
-          log.info(
-              "Next legacy workspace to delete: "
-                  + workspaceDeletionView.getWorkspaceNamespace()
-                  + "/"
-                  + workspaceDeletionView.getFirecloudName());
-          taskQueueService.pushDeleteLegacyWorkspaceTask(
-              workspaceDeletionView.getWorkspaceNamespace(),
-              workspaceDeletionView.getFirecloudName());
-        });
-    return ResponseEntity.noContent().build();
-  }
-
-  @Override
-  public ResponseEntity<Void> retryNextFailedArchive() {
-    workspaceMigrationService.retryNextArchiveByStatus(WorkspaceArchiveStatus.FAILED.toString());
+    log.info("cleanupOrphanedWorkspaces is decommissioned");
     return ResponseEntity.noContent().build();
   }
 

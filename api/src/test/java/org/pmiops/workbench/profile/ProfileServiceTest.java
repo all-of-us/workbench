@@ -42,7 +42,6 @@ import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbVwbUserPod;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapper;
@@ -80,7 +79,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 public class ProfileServiceTest {
   @MockitoBean private AccessModuleService accessModuleService;
   @MockitoBean private AccessTierService accessTierService;
-  @MockitoBean private FireCloudService fireCloudService;
   @MockitoBean private NewUserSatisfactionSurveyService newUserSatisfactionSurveyService;
   @MockitoBean private ProfileAuditor profileAuditor;
   @MockitoBean private VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;

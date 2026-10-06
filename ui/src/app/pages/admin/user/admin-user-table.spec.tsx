@@ -3,7 +3,7 @@ import '@testing-library/jest-dom';
 import * as React from 'react';
 import * as fp from 'lodash/fp';
 
-import { AuthDomainApi, Profile, UserAdminApi } from 'generated/fetch';
+import { Profile, UserAdminApi } from 'generated/fetch';
 
 import { screen } from '@testing-library/react';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
@@ -11,7 +11,6 @@ import { serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
 import { renderWithRouter } from 'testing/react-test-helpers';
-import { AuthDomainApiStub } from 'testing/stubs/auth-domain-api-stub';
 import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
 import { UserAdminApiStub } from 'testing/stubs/user-admin-api-stub';
 
@@ -40,7 +39,6 @@ describe('AdminUserTable', () => {
       showSpinner: () => fp.noop,
     };
     registerApiClient(UserAdminApi, new UserAdminApiStub());
-    registerApiClient(AuthDomainApi, new AuthDomainApiStub());
   });
 
   it('should render', () => {

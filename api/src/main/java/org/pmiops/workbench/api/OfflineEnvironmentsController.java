@@ -1,10 +1,6 @@
 package org.pmiops.workbench.api;
 
-import java.util.List;
 import java.util.logging.Logger;
-import org.pmiops.workbench.cloudtasks.TaskQueueService;
-import org.pmiops.workbench.workspaces.WorkspaceService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -16,15 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class OfflineEnvironmentsController implements OfflineEnvironmentsApiDelegate {
   private static final Logger log = Logger.getLogger(OfflineEnvironmentsController.class.getName());
-  private final TaskQueueService taskQueueService;
-  private final WorkspaceService workspaceService;
 
-  @Autowired
-  OfflineEnvironmentsController(
-      TaskQueueService taskQueueService, WorkspaceService workspaceService) {
-    this.taskQueueService = taskQueueService;
-    this.workspaceService = workspaceService;
-  }
+  OfflineEnvironmentsController() {}
 
   /**
    * deleteOldRuntimes deletes older runtimes in order to force an upgrade on the next researcher
@@ -56,14 +45,9 @@ public class OfflineEnvironmentsController implements OfflineEnvironmentsApiDele
 
   @Override
   public ResponseEntity<Void> deleteUnsharedWorkspaceEnvironments() {
-    List<String> activeNamespaces = workspaceService.getActiveWorkspaceNamespacesAsService();
 
-    log.info(
-        String.format(
-            "Queuing %d active workspaces in batches for deletion of unshared resources",
-            activeNamespaces.size()));
+    log.info("deleteUnsharedWorkspaceEnvironments endpoint is decommissioned");
 
-    taskQueueService.groupAndPushDeleteWorkspaceEnvironmentTasks(activeNamespaces);
     return ResponseEntity.noContent().build();
   }
 }

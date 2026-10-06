@@ -10,7 +10,7 @@ import {
 } from 'generated/fetch';
 
 import { environment } from 'environments/environment';
-import { SnowmanButton, StyledRouterLink } from 'app/components/buttons';
+import { StyledRouterLink } from 'app/components/buttons';
 import { WorkspaceCardBase } from 'app/components/card';
 import { ConfirmWorkspaceDeleteModal } from 'app/components/confirm-workspace-delete-modal';
 import { FlexColumn, FlexRow } from 'app/components/flex';
@@ -22,8 +22,7 @@ import {
 import { MigrationBadge } from 'app/components/migration/migration-badge';
 import { RecoveryBadge } from 'app/components/migration/recovery-badge';
 import { withErrorModal } from 'app/components/modals';
-import { PopupTrigger, TooltipTrigger } from 'app/components/popups';
-import { WorkspaceShare } from 'app/pages/workspace/workspace-share';
+import { TooltipTrigger } from 'app/components/popups';
 import { dataTabPath } from 'app/routing/utils';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
@@ -34,12 +33,10 @@ import {
 } from 'app/utils/access-tiers';
 import { AnalyticsTracker, triggerEvent } from 'app/utils/analytics';
 import { displayDate } from 'app/utils/dates';
-import { currentWorkspaceStore, NavigationProps } from 'app/utils/navigation';
+import { NavigationProps } from 'app/utils/navigation';
 import { notificationStore } from 'app/utils/stores';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { isCommunityWorkspace } from 'app/utils/workspace-utils';
-
-import { WorkspaceActionsMenu } from './workspace-actions-menu';
 
 const EVENT_CATEGORY = 'Workspace list';
 
@@ -120,7 +117,6 @@ const styles = reactStyles({
 
 interface WorkspaceCardState {
   confirmDeleting: boolean;
-  showShareModal: boolean;
 }
 
 interface WorkspaceCardProps extends NavigationProps {
@@ -147,7 +143,6 @@ export const WorkspaceCard = fp.flow(withNavigation)(
       super(props);
       this.state = {
         confirmDeleting: false,
-        showShareModal: false,
       };
     }
 
@@ -175,21 +170,6 @@ export const WorkspaceCard = fp.flow(withNavigation)(
       }
     );
 
-    async handleShareDialogClose() {
-      // Share workspace publishes to current workspace,
-      // but here we aren't in the context of a workspace
-      // so we need to clear it.
-      currentWorkspaceStore.next(undefined);
-      this.setState({ showShareModal: false });
-      this.reloadData();
-    }
-
-    // Reloads data by calling the callback from the owning component. This
-    // currently causes the workspace-list to reload the entire list of recentWorkspaces.
-    async reloadData() {
-      await this.props.reload();
-    }
-
     trackWorkspaceNavigation() {
       const {
         workspace: { name, featuredCategory },
@@ -205,19 +185,15 @@ export const WorkspaceCard = fp.flow(withNavigation)(
         workspace: { accessTierShortName, adminLocked, namespace, terraName },
         accessLevel,
         tierAccessDisabled,
-        navigate,
         useFeaturedWorkspacePageUi,
         isMigratedView,
         showDeleteAction = false,
         canDeleteAction,
         disableOpenAction = false,
       } = this.props;
-      const { confirmDeleting, showShareModal } = this.state;
+      const { confirmDeleting } = this.state;
       const isArchived = workspace.recoveryState != null;
 
-      const hideWorkspaceActions =
-        workspace.recoveryState != null ||
-        workspace.migrationState === MigrationState.FINISHED;
       const canUseDeleteAction =
         canDeleteAction ?? accessLevel === WorkspaceAccessLevel.OWNER;
       const isDeleted = terraName == null;
@@ -233,71 +209,6 @@ export const WorkspaceCard = fp.flow(withNavigation)(
         <React.Fragment>
           <WorkspaceCardBase>
             <FlexRow style={{ height: '100%' }}>
-              <FlexColumn
-                style={
-                  isArchived
-                    ? styles.workspaceMenuWrapperDisabled
-                    : styles.workspaceMenuWrapper
-                }
-              >
-                {!tierAccessDisabled && !hideWorkspaceActions && (
-                  <PopupTrigger
-                    side='bottom'
-                    closeOnClick
-                    content={
-                      <WorkspaceActionsMenu
-                        workspaceData={{ ...workspace, accessLevel }}
-                        onDuplicate={() => {
-                          !!workspace.featuredCategory
-                            ? AnalyticsTracker.Workspaces.DuplicateFeatured(
-                                workspace.name
-                              )
-                            : AnalyticsTracker.Workspaces.OpenDuplicatePage(
-                                'Card'
-                              );
-                          navigate([
-                            'workspaces',
-                            namespace,
-                            terraName,
-                            'duplicate',
-                          ]);
-                        }}
-                        onEdit={() => {
-                          AnalyticsTracker.Workspaces.OpenEditPage('Card');
-                          navigate([
-                            'workspaces',
-                            namespace,
-                            terraName,
-                            'edit',
-                          ]);
-                        }}
-                        onDelete={() => {
-                          AnalyticsTracker.Workspaces.OpenDeleteModal('Card');
-                          triggerEvent(
-                            EVENT_CATEGORY,
-                            'delete',
-                            'Card menu - click delete'
-                          );
-                          this.setState({ confirmDeleting: true });
-                        }}
-                        onShare={() => {
-                          AnalyticsTracker.Workspaces.OpenShareModal('Card');
-                          triggerEvent(
-                            EVENT_CATEGORY,
-                            'share',
-                            'Card menu - click share'
-                          );
-                          this.setState({ showShareModal: true });
-                        }}
-                      />
-                    }
-                  >
-                    <SnowmanButton style={{ marginLeft: 0 }} />
-                  </PopupTrigger>
-                )}
-
-                {/* ...existing code... */}
-              </FlexColumn>
               <FlexColumn
                 style={{
                   ...styles.workspaceCard,
@@ -529,13 +440,6 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                 this.deleteWorkspace();
               }}
               workspaceName={workspace.name}
-            />
-          )}
-          {showShareModal && (
-            <WorkspaceShare
-              data-test-id='workspace-share-modal'
-              workspace={{ ...workspace, accessLevel }}
-              onClose={() => this.handleShareDialogClose()}
             />
           )}
         </React.Fragment>

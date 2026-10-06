@@ -1,15 +1,8 @@
 package org.pmiops.workbench.api;
 
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
-import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.impersonation.ImpersonatedWorkspaceService;
 import org.pmiops.workbench.model.*;
-import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
-import org.pmiops.workbench.workspaces.WorkspaceAuthService;
-import org.pmiops.workbench.workspaces.WorkspaceUserCacheService;
 import org.pmiops.workbench.workspaces.migration.WorkspaceMigrationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -19,79 +12,29 @@ import org.springframework.web.bind.annotation.RestController;
 public class CloudTaskWorkspacesController implements CloudTaskWorkspacesApiDelegate {
   private static final Logger LOGGER =
       Logger.getLogger(CloudTaskWorkspacesController.class.getName());
-
-  private static final boolean DELETE_BILLING_PROJECTS = true;
-
-  private final ImpersonatedWorkspaceService impersonatedWorkspaceService;
-  private final WorkspaceAuthService workspaceAuthService;
-  private final WorkspaceUserCacheService workspaceUserCacheService;
   private final WorkspaceMigrationService workspaceMigrationService;
 
   @Autowired
-  public CloudTaskWorkspacesController(
-      ImpersonatedWorkspaceService impersonatedWorkspaceService,
-      WorkspaceAuthService workspaceAuthService,
-      WorkspaceUserCacheService workspaceUserCacheService,
-      WorkspaceMigrationService workspaceMigrationService) {
-    this.impersonatedWorkspaceService = impersonatedWorkspaceService;
-    this.workspaceAuthService = workspaceAuthService;
-    this.workspaceUserCacheService = workspaceUserCacheService;
+  public CloudTaskWorkspacesController(WorkspaceMigrationService workspaceMigrationService) {
     this.workspaceMigrationService = workspaceMigrationService;
   }
 
   @Override
   public ResponseEntity<Void> deleteTestUserWorkspacesBatch(List<TestUserWorkspace> request) {
-    LOGGER.info(String.format("Deleting a batch of %d workspaces...", request.size()));
-    request.stream()
-        .collect(Collectors.groupingBy(TestUserWorkspace::getUsername, Collectors.counting()))
-        .forEach(
-            (user, count) -> LOGGER.info(String.format("%d owned by test user %s", count, user)));
-
-    request.forEach(
-        workspace -> {
-          try {
-            impersonatedWorkspaceService.deleteWorkspace(
-                workspace.getUsername(),
-                workspace.getNamespace(),
-                workspace.getTerraName(),
-                DELETE_BILLING_PROJECTS);
-          } catch (NotFoundException e) {
-            LOGGER.info(
-                String.format(
-                    "Workspace %s/%s was not found",
-                    workspace.getNamespace(), workspace.getTerraName()));
-          }
-        });
-
+    LOGGER.info(
+        String.format(
+            "deleteTestUserWorkspacesBatch is decommissioned. %d workspaces skipped...",
+            request.size()));
     return ResponseEntity.ok().build();
   }
 
   @Override
   public ResponseEntity<Void> deleteTestUserWorkspacesInRawlsBatch(
       List<TestUserRawlsWorkspace> request) {
-    LOGGER.info(String.format("Deleting a batch of %d workspaces in Rawls...", request.size()));
-    request.stream()
-        .collect(Collectors.groupingBy(TestUserRawlsWorkspace::getUsername, Collectors.counting()))
-        .forEach(
-            (user, count) -> LOGGER.info(String.format("%d owned by test user %s", count, user)));
-
-    request.forEach(
-        workspace -> {
-          try {
-            impersonatedWorkspaceService.deleteOrphanedRawlsWorkspace(
-                workspace.getUsername(),
-                workspace.getNamespace(),
-                workspace.getGoogleProject(),
-                workspace.getTerraName(),
-                DELETE_BILLING_PROJECTS);
-          } catch (NotFoundException e) {
-            LOGGER.info(
-                String.format(
-                    "Workspace %s/%s was not found in Rawls",
-                    workspace.getNamespace(), workspace.getTerraName()));
-          }
-        });
-
+    LOGGER.info(
+        String.format(
+            "deleteTestUserWorkspacesInRawlsBatch is decommissioned. %d workspaces skipped...",
+            request.size()));
     return ResponseEntity.ok().build();
   }
 
@@ -99,18 +42,7 @@ public class CloudTaskWorkspacesController implements CloudTaskWorkspacesApiDele
   public ResponseEntity<Void> cleanupOrphanedWorkspacesBatch(List<String> request) {
     LOGGER.info(
         String.format(
-            "Cleaning up %d orphaned workspaces in internal database...", request.size()));
-
-    request.forEach(
-        namespace -> {
-          try {
-            impersonatedWorkspaceService.cleanupWorkspace(
-                namespace, "CleanupOrphanedWorkspaces Cron Job");
-          } catch (NotFoundException e) {
-            LOGGER.info(String.format("Workspace (%s) was not found in database", namespace));
-          }
-        });
-
+            "cleanupOrphanedWorkspacesBatch is decommissioned. %d skipped...", request.size()));
     return ResponseEntity.ok().build();
   }
 
@@ -123,57 +55,7 @@ public class CloudTaskWorkspacesController implements CloudTaskWorkspacesApiDele
   @Override
   public ResponseEntity<Void> processWorkspaceUserCacheQueueTask(
       List<WorkspaceUserCacheQueueWorkspace> workspaces) {
-    LOGGER.info("Processing workspace user cache queue task...");
-
-    Map<Long, Map<String, RawlsWorkspaceAccessEntry>> wsAcls =
-        workspaces.stream()
-            .collect(
-                Collectors.toMap(
-                    WorkspaceUserCacheQueueWorkspace::getWorkspaceId,
-                    workspace ->
-                        workspaceAuthService.getFirecloudWorkspaceAcl(
-                            workspace.getWorkspaceNamespace(),
-                            workspace.getWorkspaceFirecloudName())));
-
-    LOGGER.info(String.format("Updating cache for %d workspaces...", wsAcls.size()));
-
-    workspaceUserCacheService.updateWorkspaceUserCache(wsAcls);
-
-    LOGGER.info("Finished processing workspace user cache queue task.");
-
-    return ResponseEntity.ok().build();
-  }
-
-  @Override
-  public ResponseEntity<Void> checkWorkspaceMigrationStatus(
-      CheckWorkspaceMigrationStatusRequest request) {
-    LOGGER.info(
-        String.format(
-            "Checking migration status for workspace %s/%s",
-            request.getWorkspaceNamespace(), request.getWorkspaceName()));
-
-    workspaceMigrationService.checkMigrationStatus(
-        request.getWorkspaceNamespace(), request.getWorkspaceName());
-
-    return ResponseEntity.ok().build();
-  }
-
-  @Override
-  public ResponseEntity<Void> checkWorkspaceArchiveStatus(CheckWorkspaceArchiveStatusRequest body) {
-
-    workspaceMigrationService.checkArchiveStatus(
-        body.getWorkspaceNamespace(), body.getWorkspaceName());
-
-    return ResponseEntity.ok().build();
-  }
-
-  @Override
-  public ResponseEntity<Void> checkWorkspaceArchiveRetryStatus(
-      CheckWorkspaceArchiveRetryStatusRequest body) {
-
-    workspaceMigrationService.checkArchiveRetryStatus(
-        body.getWorkspaceNamespace(), body.getTerraName());
-
+    LOGGER.info("processWorkspaceUserCacheQueueTask is decommissioned...");
     return ResponseEntity.ok().build();
   }
 
@@ -183,26 +65,6 @@ public class CloudTaskWorkspacesController implements CloudTaskWorkspacesApiDele
 
     workspaceMigrationService.checkRecoveryStatus(request.getWorkspaceNamespace());
 
-    return ResponseEntity.ok().build();
-  }
-
-  @Override
-  public ResponseEntity<Void> checkFolderSyncStatus(CheckFolderSyncStatusRequest request) {
-    LOGGER.info(
-        String.format(
-            "Checking folder sync status for workspace %s/%s - %s",
-            request.getWorkspaceNamespace(), request.getWorkspaceName(), request.getJobName()));
-
-    workspaceMigrationService.checkFolderSyncStatus(
-        request.getWorkspaceNamespace(), request.getWorkspaceName(), request.getJobName());
-
-    return ResponseEntity.ok().build();
-  }
-
-  @Override
-  public ResponseEntity<Void> deleteLegacyWorkspace(DeleteLegacyWorkspaceRequest request) {
-    workspaceMigrationService.deleteNextLegacyWorkspace(
-        request.getWorkspaceNamespace(), request.getTerraName());
     return ResponseEntity.ok().build();
   }
 }

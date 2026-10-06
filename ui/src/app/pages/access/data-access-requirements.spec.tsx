@@ -935,7 +935,6 @@ describe('DataAccessRequirements', () => {
     });
 
     const spy2FA = jest.spyOn(profileApi(), 'syncTwoFactorAuthStatus');
-    const spyERA = jest.spyOn(profileApi(), 'syncEraCommonsStatus');
     const spyCompliance = jest.spyOn(
       profileApi(),
       'syncComplianceTrainingStatus'
@@ -944,7 +943,6 @@ describe('DataAccessRequirements', () => {
     component();
 
     expect(spy2FA).toHaveBeenCalledTimes(0);
-    expect(spyERA).toHaveBeenCalledTimes(0);
     expect(spyCompliance).toHaveBeenCalledTimes(0);
   });
 

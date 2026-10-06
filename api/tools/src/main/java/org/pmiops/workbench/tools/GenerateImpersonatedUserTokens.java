@@ -2,12 +2,14 @@ package org.pmiops.workbench.tools;
 
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.cloud.iam.credentials.v1.IamCredentialsClient;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.time.Instant;
+import java.util.List;
 import java.util.logging.Logger;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
@@ -15,7 +17,6 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.pmiops.workbench.auth.DelegatedUserCredentials;
 import org.pmiops.workbench.auth.ServiceAccounts;
-import org.pmiops.workbench.firecloud.FireCloudConfig;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -58,6 +59,15 @@ public class GenerateImpersonatedUserTokens {
 
   private static final Logger log =
       Logger.getLogger(GenerateImpersonatedUserTokens.class.getName());
+  private static final List<String> SCOPES =
+      ImmutableList.of(
+          "https://www.googleapis.com/auth/userinfo.profile",
+          "https://www.googleapis.com/auth/userinfo.email");
+  private static final List<String> BILLING_SCOPES =
+      ImmutableList.<String>builder()
+          .addAll(SCOPES)
+          .add("https://www.googleapis.com/auth/cloud-billing")
+          .build();
 
   private void writeTokens(String projectId, String[] usernames, String[] filenames)
       throws GeneralSecurityException, IOException {
@@ -77,7 +87,7 @@ public class GenerateImpersonatedUserTokens {
           new DelegatedUserCredentials(
               saEmail,
               username,
-              FireCloudConfig.BILLING_SCOPES,
+              BILLING_SCOPES,
               credsClient,
               GoogleNetHttpTransport.newTrustedTransport());
       creds.refresh();

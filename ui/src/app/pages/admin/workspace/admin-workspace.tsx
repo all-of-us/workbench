@@ -22,7 +22,6 @@ import { findCdrVersion } from 'app/utils/cdr-versions';
 import { cdrVersionStore, MatchParams, profileStore } from 'app/utils/stores';
 import { showAIANResearchPurpose } from 'app/utils/workspace-utils';
 
-import { AdminLockWorkspace } from './admin-lock-workspace';
 import { AdminWorkspaceRecoveryModal } from './admin-workspace-recovery-modal';
 import { BasicInformation } from './basic-information';
 import { Collaborators } from './collaborators';
@@ -107,16 +106,7 @@ const AdminWorkspaceImpl = (props: Props) => {
       {loadingWorkspace && <SpinnerOverlay />}
       {workspace && (
         <div>
-          {activeStatus === WorkspaceActiveStatus.ACTIVE && (
-            <AdminLockWorkspace
-              {...{ workspace }}
-              reload={populateFederatedWorkspaceInformation}
-            />
-          )}
-          <BasicInformation
-            {...{ workspace, activeStatus }}
-            reload={populateWorkspaceDetails}
-          />
+          <BasicInformation {...{ workspace, activeStatus }} />
           <WorkspaceMigrationInfo workspace={workspace} />
           <WorkspaceArchiveInfo
             loadingCollaborators={loadingCollaborators}

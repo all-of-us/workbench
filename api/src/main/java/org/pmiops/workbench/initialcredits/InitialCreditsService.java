@@ -37,8 +37,6 @@ import org.pmiops.workbench.db.model.DbVwbUserPod;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspaceFreeTierUsage;
 import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.exceptions.WorkbenchException;
-import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
@@ -53,7 +51,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class InitialCreditsService {
   private final Clock clock;
-  private final FireCloudService fireCloudService;
   private final InstitutionService institutionService;
   private final MailService mailService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
@@ -72,7 +69,6 @@ public class InitialCreditsService {
   @Autowired
   public InitialCreditsService(
       Clock clock,
-      FireCloudService fireCloudService,
       InstitutionService institutionService,
       MailService mailService,
       Provider<WorkbenchConfig> workbenchConfigProvider,
@@ -86,7 +82,6 @@ public class InitialCreditsService {
       VwbUserPodDao vwbUserPodDao,
       VwbUserService vwbUserService) {
     this.clock = clock;
-    this.fireCloudService = fireCloudService;
     this.institutionService = institutionService;
     this.mailService = mailService;
     this.taskQueueService = taskQueueService;
@@ -295,8 +290,6 @@ public class InitialCreditsService {
       // Link the initial credits billing account to the user's pod if the feature flag is enabled
       // and update the status to active
       linkInitialCreditsAccountAndSetVwbInitialCreditsActive(user);
-
-      relinkInitialCreditsAccountInTerra(user);
 
       userServiceAuditor.fireSetInitialCreditsOverride(
           user.getUserId(), previousLimitMaybe, newDollarLimit);
@@ -885,31 +878,5 @@ public class InitialCreditsService {
       pod.setInitialCreditsActive(true);
       vwbUserPodDao.save(pod);
     }
-  }
-
-  private void relinkInitialCreditsAccountInTerra(DbUser user) {
-    if (!workbenchConfigProvider.get().featureFlags.enableUnlinkBillingForInitialCredits) {
-      return;
-    }
-    List<DbWorkspace> workspaces = getWorkspacesForUser(user);
-    workspaces.stream()
-        .filter(ws -> isInitialCredits(ws.getBillingAccountName(), workbenchConfigProvider.get()))
-        .forEach(
-            ws -> {
-              try {
-                // This call is asynchronous, but we will time out if we wait for the call for every
-                // workspace to complete so we're going to do our best and just fire and forget.
-                fireCloudService.updateBillingAccountAsService(
-                    ws.getWorkspaceNamespace(), ws.getBillingAccountName());
-                logger.info(
-                    "Relinked initial credits billing account to workspace {}",
-                    ws.getWorkspaceNamespace());
-              } catch (WorkbenchException e) {
-                logger.error(
-                    "Failed to relink initial credits billing account to workspace {}",
-                    ws.getWorkspaceNamespace(),
-                    e);
-              }
-            });
   }
 }

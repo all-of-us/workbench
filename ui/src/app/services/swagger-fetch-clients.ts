@@ -26,7 +26,6 @@ import {
   ConfigApi,
   Configuration as FetchConfiguration,
   EgressEventsAdminApi,
-  FeaturedWorkspaceApi,
   InstitutionApi,
   ProfileApi,
   StatusAlertApi,
@@ -93,7 +92,6 @@ function bindCtor<T extends BaseAPI>(ctor: new () => T): () => T {
 export const cdrVersionsApi = bindCtor(CdrVersionsApi);
 export const configApi = bindCtor(ConfigApi);
 export const egressEventsAdminApi = bindCtor(EgressEventsAdminApi);
-export const featuredWorkspaceApi = bindCtor(FeaturedWorkspaceApi);
 export const institutionApi = bindCtor(InstitutionApi);
 export const profileApi = bindCtor(ProfileApi);
 export const statusAlertApi = bindCtor(StatusAlertApi);
