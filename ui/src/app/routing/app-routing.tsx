@@ -12,7 +12,6 @@ import { AppRoute, AppRouter, withRouteData } from 'app/components/app-router';
 import { SignedInAouHeaderWithDisplayTag } from 'app/components/headers';
 import { NotificationModal } from 'app/components/modals';
 import { TermsOfService } from 'app/components/terms-of-service';
-import { withLeoCookie } from 'app/components/with-leo-cookie';
 import { withRoutingSpinner } from 'app/components/with-routing-spinner';
 import { CookiePolicy } from 'app/pages/cookie-policy';
 import { SignIn } from 'app/pages/login/sign-in';
@@ -26,7 +25,6 @@ import {
   signInGuard,
   userDisabledPageGuard,
 } from 'app/routing/guards';
-import { bindApiClients as notebooksBindApiClients } from 'app/services/notebooks-swagger-fetch-clients';
 import {
   bindApiClients,
   getApiBaseUrl,
@@ -49,7 +47,6 @@ import {
   stackdriverErrorReporterStore,
   useStore,
 } from 'app/utils/stores';
-import { Configuration as NotebookConfiguration } from 'notebooks-generated/fetch';
 import StackdriverErrorReporter from 'stackdriver-errors-js';
 import { Configuration as TanagraConfiguration } from 'tanagra-generated';
 
@@ -62,11 +59,7 @@ const SessionExpiredPage = fp.flow(
   withRouteData,
   withRoutingSpinner
 )(SessionExpired);
-const SignedInPage = fp.flow(
-  withRouteData,
-  withRoutingSpinner,
-  withLeoCookie
-)(SignedIn);
+const SignedInPage = fp.flow(withRouteData, withRoutingSpinner)(SignedIn);
 const SignInAgainPage = fp.flow(withRouteData, withRoutingSpinner)(SignInAgain);
 const SignInPage = fp.flow(withRouteData, withRoutingSpinner)(SignIn);
 const UserDisabledPage = fp.flow(
@@ -80,12 +73,6 @@ const bindClients = () => {
       basePath: getApiBaseUrl(),
       // TODO: Look into removing 'Bearer' when updating to OpenAPI 3: https://stackoverflow.com/a/45471010/2166475
       accessToken: () => 'Bearer ' + getAccessToken(),
-    })
-  );
-  notebooksBindApiClients(
-    new NotebookConfiguration({
-      basePath: environment.leoApiUrl,
-      accessToken: () => getAccessToken(),
     })
   );
   tanagraBindApiClients(
