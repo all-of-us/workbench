@@ -12,7 +12,9 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.access.AccessTierService;
@@ -109,6 +111,8 @@ public class WorkspaceServiceTest {
   @MockitoBean private MailService mockMailService;
   @MockitoBean private WorkspaceAuthService mockWorkspaceAuthService;
   @MockitoBean private Provider<Stopwatch> mockStopwatchProvider;
+  @MockitoBean private WorkspaceDao mockedWorkspaceDao;
+  @MockitoBean private WorkspaceService mockedWorkspaceService;
 
   @Autowired private AccessTierDao accessTierDao;
   @Autowired private CdrVersionDao cdrVersionDao;
@@ -133,35 +137,66 @@ public class WorkspaceServiceTest {
     // Mock the Stopwatch provider
     Stopwatch mockStopwatch = Stopwatch.createUnstarted();
     doReturn(mockStopwatch).when(mockStopwatchProvider).get();
-    dbWorkspaces.clear();
 
     currentUser = new DbUser();
     currentUser.setUsername(DEFAULT_USERNAME);
     currentUser.setUserId(USER_ID);
     currentUser.setDisabled(false);
 
+    dbWorkspaces.clear();
+    dbWorkspaces.add(
+        buildDbWorkspace(
+            workspaceIdIncrementer.getAndIncrement(),
+            "Workspace 1",
+            WorkspaceActiveStatus.ACTIVE,
+            currentUser));
+    dbWorkspaces.add(
+        buildDbWorkspace(
+            workspaceIdIncrementer.getAndIncrement(),
+            "Workspace 2",
+            WorkspaceActiveStatus.ACTIVE,
+            currentUser));
+    dbWorkspaces.add(
+        buildDbWorkspace(
+            workspaceIdIncrementer.getAndIncrement(),
+            "Workspace 3",
+            WorkspaceActiveStatus.ACTIVE,
+            currentUser));
+    dbWorkspaces.add(
+        buildDbWorkspace(
+            workspaceIdIncrementer.getAndIncrement(),
+            "Workspace 4",
+            WorkspaceActiveStatus.ACTIVE,
+            currentUser));
+    dbWorkspaces.add(
+        buildDbWorkspace(
+            workspaceIdIncrementer.getAndIncrement(),
+            "Workspace 5",
+            WorkspaceActiveStatus.ACTIVE,
+            currentUser));
+    Set<Long> workspaceIds =
+        dbWorkspaces.stream().map(DbWorkspace::getWorkspaceId).collect(Collectors.toSet());
+
+    doReturn(workspaceIds).when(mockedWorkspaceDao).findAllWorkspaceIdsByCreator(currentUser);
+
     workbenchConfig = WorkbenchConfig.createEmptyConfig();
     workbenchConfig.billing.accountId = "initial-credits";
   }
 
   private DbWorkspace buildDbWorkspace(
-      long dbId, String name, String namespace, WorkspaceActiveStatus activeStatus) {
+      long dbId, String name, WorkspaceActiveStatus activeStatus, DbUser creator) {
     DbWorkspace dbWorkspace = new DbWorkspace();
     Timestamp nowTimestamp = Timestamp.from(NOW);
     dbWorkspace.setLastModifiedTime(nowTimestamp);
     dbWorkspace.setCreationTime(nowTimestamp);
+    dbWorkspace.setCreator(creator);
     dbWorkspace.setName(name);
     dbWorkspace.setWorkspaceId(dbId);
-    dbWorkspace.setWorkspaceNamespace(namespace);
+    dbWorkspace.setWorkspaceNamespace(DEFAULT_WORKSPACE_NAMESPACE);
     dbWorkspace.setWorkspaceActiveStatusEnum(activeStatus);
     dbWorkspace.setFirecloudName(name);
     dbWorkspace.setFirecloudUuid(Long.toString(dbId));
     return dbWorkspace;
-  }
-
-  @Test
-  public void listWorkspaces() {
-    assertThat(workspaceService.listWorkspaces()).hasSize(5);
   }
 
   @Test
@@ -171,10 +206,7 @@ public class WorkspaceServiceTest {
             status ->
                 assertThat(
                         buildDbWorkspace(
-                                workspaceIdIncrementer.getAndIncrement(),
-                                "1",
-                                DEFAULT_WORKSPACE_NAMESPACE,
-                                status)
+                                workspaceIdIncrementer.getAndIncrement(), "1", status, currentUser)
                             .getWorkspaceActiveStatusEnum())
                     .isEqualTo(status));
   }

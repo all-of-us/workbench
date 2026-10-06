@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.FakeJpaDateTimeConfiguration;
 import org.pmiops.workbench.access.AccessTierService;
+import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.RdrExportDao;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -64,6 +65,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 @DataJpaTest
 public class RdrExportServiceImplTest {
   @MockitoBean private AccessTierService accessTierService;
+  @MockitoBean private ActionAuditQueryService auditQueryService;
   @MockitoBean private ApiClient apiClient;
   @MockitoBean private RdrApi rdrApi;
   @MockitoBean private InstitutionService institutionService;
