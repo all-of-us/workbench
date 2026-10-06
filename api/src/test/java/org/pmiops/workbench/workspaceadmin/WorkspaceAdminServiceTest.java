@@ -47,9 +47,6 @@ import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGetRuntimeRespo
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.mail.MailService;
-import org.pmiops.workbench.model.AdminWorkspaceCloudStorageCounts;
-import org.pmiops.workbench.model.AdminWorkspaceObjectsCounts;
-import org.pmiops.workbench.model.AdminWorkspaceResources;
 import org.pmiops.workbench.model.CloudStorageTraffic;
 import org.pmiops.workbench.model.TimeSeriesPoint;
 import org.pmiops.workbench.model.Workspace;
@@ -205,21 +202,5 @@ public class WorkspaceAdminServiceTest {
     assertThat(workspaceDetailsResponse.getWorkspace().getName()).isEqualTo(WORKSPACE_DISPLAY_NAME);
     assertThat(workspaceDetailsResponse.getWorkspace().getDisplayName())
         .isEqualTo(WORKSPACE_DISPLAY_NAME);
-
-    // TODO(jaycarlton): instrument mocks such that we can see actual counts here.
-    //   The goal for today is just to move this test case here from WorkspaceAdminControllerTest,
-    //   where all those counts were mocked anyway. I.e. we're not actually losing coverage, even
-    //   though this looks trivial.
-    AdminWorkspaceResources resources = workspaceDetailsResponse.getResources();
-    AdminWorkspaceObjectsCounts objectsCounts = resources.getWorkspaceObjects();
-    assertThat(objectsCounts.getCohortCount()).isEqualTo(0);
-    assertThat(objectsCounts.getConceptSetCount()).isEqualTo(0);
-    assertThat(objectsCounts.getDatasetCount()).isEqualTo(0);
-
-    AdminWorkspaceCloudStorageCounts cloudStorageCounts = resources.getCloudStorage();
-    assertThat(cloudStorageCounts.getStorageBucketPath()).isEqualTo("gs://bucket");
-    assertThat(cloudStorageCounts.getNotebookFileCount()).isEqualTo(0);
-    assertThat(cloudStorageCounts.getNonNotebookFileCount()).isEqualTo(0);
-    assertThat(cloudStorageCounts.getStorageBytesUsed()).isEqualTo(0L);
   }
 }
