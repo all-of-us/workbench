@@ -581,8 +581,7 @@ public class WorkspaceMigrationServiceImplTest {
   }
 
   @Test
-  void startWorkspaceRecovery_logsErrorWhenRecoveryFails()
-      throws org.pmiops.workbench.wsmanager.ApiException {
+  void startWorkspaceRecovery_logsErrorWhenRecoveryFails() throws ApiException {
     dbWorkspace.setRecoveryState(WorkspaceRecoveryStatus.REQUESTED.name());
     dbWorkspace.setWorkspaceId(123L);
 
