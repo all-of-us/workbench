@@ -84,6 +84,10 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     List<WorkspaceResponse> allWorkspaces = new ArrayList<>();
     allWorkspaceIdsWithRole.forEach(
         workspaceIdWithRole -> {
+          System.out.print("allWorkspaceIdsWithRole.forEach");
+          System.out.print("\n");
+          System.out.print(workspaceIdWithRole);
+          System.out.print("\n");
           if (workspaceIdWithRole.workspaceId() != null) {
             DbWorkspace workspace =
                 workspaceDao.findByWorkspaceId(workspaceIdWithRole.workspaceId());
