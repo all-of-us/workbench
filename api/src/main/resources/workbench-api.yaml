@@ -1252,6 +1252,27 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+  /v1/admin/workspaces/{namespace}/recoveryErrorLogs:
+    get:
+      tags:
+        - workspaceAdmin
+      description: Retrieves all recovery error logs for a workspace
+      operationId: getWorkspaceRecoveryErrorLogs
+      parameters:
+        - name: namespace
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Recovery error logs retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WorkspaceRecoveryErrorLog'
   /v1/admin/workspaces/{workspaceNamespace}/publish:
     post:
       tags:
@@ -4792,14 +4813,38 @@ components:
         - RETRYING
         - RETRY_FAILED
     WorkspaceRecoveryStatus:
-      type: string
-      description: Indicates the status of the workspace recovery flow (NOT_STARTED, REQUESTED, RECOVERING, RECOVERED, FAILED).
-      enum:
-        - NOT_STARTED
-        - REQUESTED
-        - RECOVERING
-        - RECOVERED
-        - FAILED
+       type: string
+       description: Indicates the status of the workspace recovery flow (NOT_STARTED, REQUESTED, RECOVERING, RECOVERED, FAILED).
+       enum:
+         - NOT_STARTED
+         - REQUESTED
+         - RECOVERING
+         - RECOVERED
+         - FAILED
+    WorkspaceRecoveryErrorLog:
+       type: object
+       description: Log entry for workspace recovery errors
+       properties:
+         id:
+           type: integer
+           format: int64
+           description: Unique identifier for this error log entry
+         workspaceId:
+           type: integer
+           format: int64
+           description: The ID of the workspace that encountered the error
+         errorMessage:
+           type: string
+           description: The error message describing what went wrong
+         errorType:
+           type: string
+           description: The type or category of the error
+         stackTrace:
+           type: string
+           description: The stack trace of the error for debugging
+         createdTime:
+           type: string
+           description: Timestamp when the error was logged
     WorkspaceBillingUsageResponse:
       required:
       - cost

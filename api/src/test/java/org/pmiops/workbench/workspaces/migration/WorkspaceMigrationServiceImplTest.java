@@ -26,6 +26,7 @@ import org.pmiops.workbench.config.WorkbenchConfig.VwbConfig.CdrVersionForMigrat
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceBucketArchiveDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.dao.WorkspaceRecoveryErrorLogDao;
 import org.pmiops.workbench.db.model.*;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.StorageTransferClient;
@@ -89,6 +90,9 @@ public class WorkspaceMigrationServiceImplTest {
   @Mock private WorkspaceBucketArchiveDao workspaceBucketArchiveDao;
   @Mock private MailService mailService;
   @Mock private WorkspaceService workspaceService;
+  @Mock private WorkspaceRecoveryErrorLogDao workspaceRecoveryErrorLogDao;
+  @Mock private org.pmiops.workbench.actionaudit.ActionAuditQueryService actionAuditQueryService;
+  @Mock private org.pmiops.workbench.user.VwbUserService vwbUserService;
   // Clock MOCK
   @Mock private Clock clock;
 
@@ -574,5 +578,99 @@ public class WorkspaceMigrationServiceImplTest {
         .save(argThat(ws -> WorkspaceRecoveryStatus.FAILED.name().equals(ws.getRecoveryState())));
 
     verify(storageTransferClient).deleteTransferJob(SERVER_PROJECT, RECOVERY_JOB_NAME);
+  }
+
+  @Test
+  void startWorkspaceRecovery_logsErrorWhenRecoveryFails() throws ApiException {
+    dbWorkspace.setRecoveryState(WorkspaceRecoveryStatus.REQUESTED.name());
+    dbWorkspace.setWorkspaceId(123L);
+
+    // Setup creator
+    DbUser creatorRef = new DbUser();
+    creatorRef.setUserId(1L);
+    dbWorkspace.setCreator(creatorRef);
+
+    // Setup archive metadata
+    when(workspaceBucketArchiveDao.findByLegacyWorkspaceId(anyLong()))
+        .thenReturn(
+            List.of(
+                new DbWorkspaceBucketArchive()
+                    .setStatus(WorkspaceArchiveStatus.ARCHIVED.toString())
+                    .setGcsPath(ARCHIVE_PATH)));
+
+    // Setup user/creator lookup
+    DbUser creator = new DbUser();
+    creator.setUserId(1L);
+    creator.setUsername(CREATOR);
+    when(userDao.findUserByUserId(anyLong())).thenReturn(creator);
+
+    // Setup workspace creation
+    WorkspaceDescription vwbWorkspace = new WorkspaceDescription();
+    vwbWorkspace.setId(UUID.randomUUID());
+    vwbWorkspace.setUserFacingId("recovery-ws-id");
+    when(wsmClient.createWorkspaceAsService(any(), any())).thenReturn(vwbWorkspace);
+
+    // Setup workspace sharing
+    lenient().doNothing().when(wsmClient).shareWorkspaceAsService(any(), any(), any());
+
+    // Setup no collaborators
+    when(actionAuditQueryService.getWorkspaceUsersById(anyLong())).thenReturn(null);
+
+    // Setup workspace properties update
+    lenient().doNothing().when(wsmClient).updateWorkspaceProperties(any(), any());
+
+    // Setup workspace retrieval with policies
+    lenient().when(wsmClient.getWorkspaceAsService(any())).thenReturn(vwbWorkspace);
+
+    // Setup bucket creation
+    lenient().when(wsmClient.createControlledBucket(any(), any())).thenReturn(CREATED_BUCKET);
+
+    // Setup transfer job creation
+    lenient()
+        .when(
+            storageTransferClient.createTransferJob(
+                any(), any(), any(), any(), any(), any(), any(), any(), anyBoolean()))
+        .thenReturn(RECOVERY_JOB_NAME);
+
+    // Simulate BQ clone failure
+    when(wsmClient.cloneBQDataset(any(), any(), any(), any()))
+        .thenThrow(new RuntimeException("BQ clone failed: Table not found"));
+
+    assertThrows(
+        RuntimeException.class,
+        () -> service.startWorkspaceRecovery(NAMESPACE, RESEARCH_PURPOSE, POD_ID));
+
+    // Verify error was persisted to database
+    verify(workspaceRecoveryErrorLogDao)
+        .save(
+            argThat(
+                errorLog ->
+                    errorLog.getWorkspaceId() == dbWorkspace.getWorkspaceId()
+                        && errorLog.getErrorMessage().contains("BQ clone failed")
+                        && errorLog.getErrorType() != null
+                        && errorLog.getStackTrace() != null));
+  }
+
+  @Test
+  void checkRecoveryStatus_logsErrorWhenTransferFails() {
+
+    TransferTypes.TransferOperation transferOperation =
+        TransferTypes.TransferOperation.newBuilder()
+            .setStatus(TransferTypes.TransferOperation.Status.FAILED)
+            .build();
+
+    when(storageTransferClient.getTransferJobStatus(SERVER_PROJECT, RECOVERY_JOB_NAME))
+        .thenReturn(transferOperation);
+
+    service.checkRecoveryStatus(NAMESPACE);
+
+    // Verify error was persisted to database
+    verify(workspaceRecoveryErrorLogDao)
+        .save(
+            argThat(
+                errorLog ->
+                    errorLog.getWorkspaceId() == dbWorkspace.getWorkspaceId()
+                        && errorLog.getErrorMessage().contains("Storage transfer failed")
+                        && errorLog.getErrorType().equals("TRANSFER_FAILED")));
   }
 }

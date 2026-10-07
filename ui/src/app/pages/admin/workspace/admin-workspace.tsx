@@ -26,6 +26,7 @@ import { AdminLockWorkspace } from './admin-lock-workspace';
 import { AdminWorkspaceRecoveryModal } from './admin-workspace-recovery-modal';
 import { BasicInformation } from './basic-information';
 import { Collaborators } from './collaborators';
+import { RecoveryErrorLogsTable } from './recovery-error-logs-table';
 import { WorkspaceArchiveInfo } from './workspace-archival-info';
 import { WorkspaceMigrationInfo } from './workspace-migration-info';
 
@@ -123,6 +124,7 @@ const AdminWorkspaceImpl = (props: Props) => {
             workspace={workspace}
             onRecover={() => setShowRecoveryModal(true)}
           />
+          <RecoveryErrorLogsTable workspace={workspace} />
           <Accordion>
             <AccordionTab header='Research Purpose'>
               <ResearchPurposeSection

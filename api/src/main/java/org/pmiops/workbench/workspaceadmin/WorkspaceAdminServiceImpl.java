@@ -27,6 +27,7 @@ import org.pmiops.workbench.db.dao.FeaturedWorkspaceDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.dao.WorkspaceRecoveryErrorLogDao;
 import org.pmiops.workbench.db.model.DbFeaturedWorkspace;
 import org.pmiops.workbench.db.model.DbFeaturedWorkspace.DbFeaturedCategory;
 import org.pmiops.workbench.db.model.DbUser;
@@ -89,6 +90,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   private final WorkspaceDao workspaceDao;
   private final WorkspaceMapper workspaceMapper;
   private final WorkspaceService workspaceService;
+  private final WorkspaceRecoveryErrorLogDao workspaceRecoveryErrorLogDao;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
@@ -112,6 +114,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
       WorkspaceDao workspaceDao,
       WorkspaceMapper workspaceMapper,
       WorkspaceService workspaceService,
+      WorkspaceRecoveryErrorLogDao workspaceRecoveryErrorLogDao,
       Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.actionAuditQueryService = actionAuditQueryService;
     this.adminAuditor = adminAuditor;
@@ -132,6 +135,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     this.workspaceDao = workspaceDao;
     this.workspaceMapper = workspaceMapper;
     this.workspaceService = workspaceService;
+    this.workspaceRecoveryErrorLogDao = workspaceRecoveryErrorLogDao;
     this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
@@ -533,5 +537,38 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
             })
         .filter(Objects::nonNull)
         .toList();
+  }
+
+  @Override
+  public List<org.pmiops.workbench.model.WorkspaceRecoveryErrorLog> getWorkspaceRecoveryErrorLogs(
+      String workspaceNamespace) {
+    // Limit to most recent 50 error logs to avoid overwhelming the UI
+    final int MAX_ERROR_LOGS = 50;
+
+    DbWorkspace workspace = workspaceDao.findByWorkspaceNamespace(workspaceNamespace);
+    if (workspace == null) {
+      return List.of();
+    }
+
+    // Fetch latest recovery error logs for this workspace with limit
+    List<org.pmiops.workbench.db.model.DbWorkspaceRecoveryErrorLog> dbLogs =
+        workspaceRecoveryErrorLogDao.findLatestErrorsByWorkspaceId(
+            workspace.getWorkspaceId(), MAX_ERROR_LOGS);
+
+    // Convert to API model
+    return dbLogs.stream()
+        .map(
+            dbLog ->
+                new org.pmiops.workbench.model.WorkspaceRecoveryErrorLog()
+                    .id(dbLog.getId())
+                    .workspaceId(dbLog.getWorkspaceId())
+                    .errorMessage(dbLog.getErrorMessage())
+                    .errorType(dbLog.getErrorType())
+                    .stackTrace(dbLog.getStackTrace())
+                    .createdTime(
+                        dbLog.getCreatedTime() != null
+                            ? dbLog.getCreatedTime().toInstant().toString()
+                            : null))
+        .collect(java.util.stream.Collectors.toList());
   }
 }
