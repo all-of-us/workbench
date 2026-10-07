@@ -1252,6 +1252,27 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+  /v1/admin/workspaces/{namespace}/recoveryErrorLogs:
+    get:
+      tags:
+        - workspaceAdmin
+      description: Retrieves all recovery error logs for a workspace
+      operationId: getWorkspaceRecoveryErrorLogs
+      parameters:
+        - name: namespace
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Recovery error logs retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WorkspaceRecoveryErrorLog'
   /v1/admin/workspaces/{workspaceNamespace}/publish:
     post:
       tags:
@@ -2739,27 +2760,6 @@ paths:
       responses:
         200:
           description: Recovery request submitted successfully
-  /v1/workspaces/{namespace}/recoveryErrorLogs:
-     get:
-       tags:
-         - workspaces
-       description: Retrieves all recovery error logs for a workspace
-       operationId: getWorkspaceRecoveryErrorLogs
-       parameters:
-         - name: namespace
-           in: path
-           required: true
-           schema:
-             type: string
-       responses:
-         200:
-           description: Recovery error logs retrieved successfully
-           content:
-             application/json:
-               schema:
-                 type: array
-                 items:
-                   $ref: '#/components/schemas/WorkspaceRecoveryErrorLog'
   /v1/cloudTask/deleteTestUserWorkspaces:
     post:
       tags:

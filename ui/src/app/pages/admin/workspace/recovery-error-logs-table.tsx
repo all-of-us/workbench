@@ -9,12 +9,12 @@ import { Spinner } from 'app/components/spinners';
 import { workspaceAdminApi } from 'app/services/swagger-fetch-clients';
 
 interface WorkspaceRecoveryErrorLog {
-  id: number;
-  workspaceId: number;
-  errorMessage: string;
+  id?: number;
+  workspaceId?: number;
+  errorMessage?: string;
   errorType?: string;
   stackTrace?: string;
-  createdTime: string;
+  createdTime?: string;
 }
 
 interface Props {
@@ -41,12 +41,12 @@ export const RecoveryErrorLogsTable = ({ workspace }: Props) => {
     setFetchError(null);
     setLogs([]);
 
-    (workspaceAdminApi() as any)
+    workspaceAdminApi()
       .getWorkspaceRecoveryErrorLogs(workspace.namespace)
-      .then((result: any) => {
+      .then((result) => {
         setLogs(result || []);
       })
-      .catch((error: any) => {
+      .catch((error) => {
         console.error('Failed to fetch recovery error logs:', error);
         setFetchError('Failed to load recovery error logs');
         setLogs([]);
@@ -116,7 +116,6 @@ export const RecoveryErrorLogsTable = ({ workspace }: Props) => {
             </div>
           )}
           scrollable
-          responsiveLayout='scroll'
           paginator
           rows={10}
           rowsPerPageOptions={[5, 10, 20]}
