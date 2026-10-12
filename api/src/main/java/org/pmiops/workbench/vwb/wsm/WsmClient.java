@@ -475,4 +475,15 @@ public class WsmClient {
         + anticipatedFindings
         + "\n\n";
   }
+
+  public void deleteResource(UUID destinationWorkspaceId, UUID resourceId) {
+    wsmRetryHandler.run(
+        context -> {
+          controlledGcpResourceApiProvider
+              .get()
+              .deleteBigQueryDataset(destinationWorkspaceId.toString(), resourceId);
+          return null;
+        });
+  }
+
 }
