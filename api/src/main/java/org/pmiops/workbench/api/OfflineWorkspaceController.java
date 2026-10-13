@@ -100,6 +100,12 @@ public class OfflineWorkspaceController implements OfflineWorkspaceApiDelegate {
   }
 
   @Override
+  public ResponseEntity<Void> cleanupVwbWorkspace() {
+    workspaceMigrationService.cleanupNextWorkspace();
+    return ResponseEntity.noContent().build();
+  }
+
+  @Override
   public ResponseEntity<Void> cacheWorkspaceAcls() {
     log.info("Starting cacheWorkspaceAcls cron job");
     log.info("Finding all workspaces in need of a cache update");

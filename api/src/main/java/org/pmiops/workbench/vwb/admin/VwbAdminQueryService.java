@@ -38,4 +38,6 @@ public interface VwbAdminQueryService {
   List<VwbWorkspace> queryAccessibleWorkspaces(String email);
 
   List<PreprodWorkspace> queryPreprodWorkspaceByNamespace(String workspaceNamespace);
+
+  List<String> queryWorkspacesCreatedByService(List<String> workspaceIds);
 }

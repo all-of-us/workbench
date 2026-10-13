@@ -224,6 +224,17 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
           + "WHERE \n"
           + " workspace_namespace=@WORKSPACE_NAMESPACE ";
 
+  private static final String CREATOR_QUERY =
+      "SELECT \n"
+          + "  workspace_id, \n"
+          + "FROM \n"
+          + "  %s w \n"
+          + "WHERE \n"
+          + " created_by_email=@CREATOR \n"
+          + "AND \n"
+          + " workspace_id NOT IN UNNEST(@WORKSPACE_IDS) \n"
+          + "LIMIT 1";
+
   @Autowired
   public VwbAdminQueryServiceImpl(
       Provider<WorkbenchConfig> workbenchConfigProvider, BigQueryService bigQueryService) {
@@ -603,6 +614,28 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
     final TableResult result = bigQueryService.executeQuery(queryJobConfiguration);
     return StreamSupport.stream(result.iterateAll().spliterator(), false)
         .map(this::fieldValueListToPreprodWorkspace)
+        .toList();
+  }
+
+  @Override
+  public List<String> queryWorkspacesCreatedByService(List<String> workspaceIds) {
+    final String serviceAccount = workbenchConfigProvider.get().auth.serviceAccountApiUsers.get(0);
+    final String queryString =
+        String.format(CREATOR_QUERY, getTableName(VWB_WORKSPACE_TABLE_PREFIX));
+
+    final QueryJobConfiguration queryJobConfiguration =
+        QueryJobConfiguration.newBuilder(queryString)
+            .addNamedParameter("CREATOR", QueryParameterValue.string(serviceAccount))
+            .addNamedParameter(
+                "WORKSPACE_IDS",
+                QueryParameterValue.array(workspaceIds.toArray(new String[0]), String.class))
+            .build();
+
+    final TableResult result = bigQueryService.executeQuery(queryJobConfiguration);
+    return StreamSupport.stream(result.iterateAll().spliterator(), false)
+        .map(row -> FieldValues.getString(row, "workspace_id"))
+        .filter(java.util.Optional::isPresent)
+        .map(java.util.Optional::get)
         .toList();
   }
 

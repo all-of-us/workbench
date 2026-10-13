@@ -16,10 +16,12 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.VwbConfig.CdrVersionForMigration;
 import org.pmiops.workbench.db.dao.FolderSyncTransferDao;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.VwbSaCleanupDao;
 import org.pmiops.workbench.db.dao.WorkspaceBucketArchiveDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.*;
 import org.pmiops.workbench.db.model.DbFolderSyncTransfer.TransferState;
+import org.pmiops.workbench.db.model.DbVwbSaCleanup.CleanupState;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -34,6 +36,7 @@ import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.user.VwbUserService;
 import org.pmiops.workbench.utils.WorkbenchStringUtils;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
+import org.pmiops.workbench.vwb.admin.VwbAdminQueryService;
 import org.pmiops.workbench.vwb.user.api.PodApi;
 import org.pmiops.workbench.vwb.user.model.OrganizationMember;
 import org.pmiops.workbench.vwb.user.model.PodAction;
@@ -60,6 +63,8 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
   private final WorkspaceDao workspaceDao;
   private final WorkspaceMapper workspaceMapper;
   private final UserDao userDao;
+  private final VwbAdminQueryService vwbAdminQueryService;
+  private final VwbSaCleanupDao vwbSaCleanupDao;
   private final FolderSyncTransferDao folderSyncTransferDao;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final FireCloudService fireCloudService;
@@ -87,6 +92,8 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
       WorkspaceDao workspaceDao,
       WorkspaceMapper workspaceMapper,
       UserDao userDao,
+      VwbAdminQueryService vwbAdminQueryService,
+      VwbSaCleanupDao vwbSaCleanupDao,
       FolderSyncTransferDao folderSyncTransferDao,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       FireCloudService fireCloudService,
@@ -107,6 +114,8 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
     this.workspaceDao = workspaceDao;
     this.workspaceMapper = workspaceMapper;
     this.userDao = userDao;
+    this.vwbAdminQueryService = vwbAdminQueryService;
+    this.vwbSaCleanupDao = vwbSaCleanupDao;
     this.folderSyncTransferDao = folderSyncTransferDao;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.fireCloudService = fireCloudService;
@@ -1523,6 +1532,38 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
         logger.log(Level.INFO, namespace + ": Recovery completed");
 
         return;
+    }
+  }
+
+  @Override
+  public void cleanupNextWorkspace() {
+    List<String> cleanedUpIds = vwbSaCleanupDao.findAllWorkspaceIds();
+    List<String> workspaceIds = vwbAdminQueryService.queryWorkspacesCreatedByService(cleanedUpIds);
+    if (!workspaceIds.isEmpty()) {
+      String nextWorkspaceId = workspaceIds.get(0);
+      DbVwbSaCleanup dbVwbSaCleanup =
+          new DbVwbSaCleanup()
+              .setWorkspaceId(nextWorkspaceId)
+              .setStarted(new Timestamp(clock.instant().toEpochMilli()))
+              .setStatus(CleanupState.IN_PROGRESS.toString());
+      vwbSaCleanupDao.save(dbVwbSaCleanup);
+      logger.log(
+          Level.INFO,
+          "Found workspace " + nextWorkspaceId + " created by SA, removing SA from workspace");
+      try {
+        wsmClient.removeRoleAsService(
+            nextWorkspaceId,
+            workbenchConfigProvider.get().auth.serviceAccountApiUsers.get(0),
+            IamRole.OWNER);
+        dbVwbSaCleanup.setStatus(CleanupState.REMOVED.toString());
+        vwbSaCleanupDao.save(dbVwbSaCleanup);
+        logger.log(Level.INFO, "Removed service account from workspace " + nextWorkspaceId);
+      } catch (Exception e) {
+        dbVwbSaCleanup.setStatus(CleanupState.FAILED.toString());
+        vwbSaCleanupDao.save(dbVwbSaCleanup);
+        logger.log(
+            Level.WARNING, "Failed to remove service account from workspace " + nextWorkspaceId, e);
+      }
     }
   }
 

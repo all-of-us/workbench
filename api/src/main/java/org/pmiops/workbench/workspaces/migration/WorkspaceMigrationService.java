@@ -51,4 +51,6 @@ public interface WorkspaceMigrationService {
   void requestWorkspaceRecovery(String namespace, String podId);
 
   void checkRecoveryStatus(String namespace);
+
+  void cleanupNextWorkspace();
 }
