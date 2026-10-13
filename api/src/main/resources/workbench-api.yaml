@@ -2165,6 +2165,18 @@ paths:
         204:
           description: No content.
           content: {}
+  /v1/cron/cleanupVwbWorkspace:
+    get:
+      tags:
+      - offlineWorkspace
+      - cron
+      description: Will remove prod SA as owner from RW 2.0 workspace
+      operationId: cleanupVwbWorkspace
+      security: []
+      responses:
+        204:
+          description: No content.
+          content: {}
   /v1/cron/deleteTestUserWorkspacesOrphanedInRawls:
     get:
       tags:

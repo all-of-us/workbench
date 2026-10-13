@@ -295,6 +295,14 @@ public class WsmClient {
         });
   }
 
+  public void removeRoleAsService(String workspaceId, String userEmail, IamRole role) {
+    wsmRetryHandler.run(
+        context -> {
+          workspaceServiceApi.get().removeRole(workspaceId, role, userEmail);
+          return null;
+        });
+  }
+
   /**
    * Waits for the workspace creation to complete.
    *
@@ -341,6 +349,16 @@ public class WsmClient {
             workspaceServiceApi
                 .get()
                 .getWorkspaceByUserFacingId(workspaceNamespace, IamRole.READER));
+  }
+
+  /**
+   * Retrieves a list of workspace descriptions the service account is listed as owner.
+   *
+   * @return WorkspaceDescriptionList
+   */
+  public WorkspaceDescriptionList listWorkspacesAsService() {
+    return wsmRetryHandler.run(
+        context -> workspaceServiceApi.get().listWorkspaces(0, 1, IamRole.OWNER));
   }
 
   /**
