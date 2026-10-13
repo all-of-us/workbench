@@ -111,6 +111,6 @@ cron:
   target: api
 - description: Cleanup SA for RW 2.0 workspace
   url: /v1/cron/cleanupVwbWorkspace
-  schedule: every 1 minutes
+  schedule: every 5 minutes
   timezone: America/Chicago
   target: api
