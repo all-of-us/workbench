@@ -54,11 +54,6 @@ export const RecoveryErrorLogsTable = ({ workspace }: Props) => {
       .finally(() => setLoading(false));
   }, [workspace.namespace, workspace.recoveryState]);
 
-  // Only render if recovery failed
-  if (workspace.recoveryState !== WorkspaceRecoveryStatus.FAILED) {
-    return null;
-  }
-
   return (
     <div style={{ marginTop: '2rem' }}>
       <h2>Recovery Error Logs</h2>
