@@ -5,6 +5,7 @@ import java.util.logging.Logger;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.workspaces.WorkspaceUserCacheService;
+import org.pmiops.workbench.workspaces.migration.WorkspaceMigrationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -15,12 +16,16 @@ public class OfflineWorkspaceController implements OfflineWorkspaceApiDelegate {
 
   private final TaskQueueService taskQueueService;
   private final WorkspaceUserCacheService workspaceUserCacheService;
+  private final WorkspaceMigrationService workspaceMigrationService;
 
   @Autowired
   public OfflineWorkspaceController(
-      TaskQueueService taskQueueService, WorkspaceUserCacheService workspaceUserCacheService) {
+      TaskQueueService taskQueueService,
+      WorkspaceUserCacheService workspaceUserCacheService,
+      WorkspaceMigrationService workspaceMigrationService) {
     this.taskQueueService = taskQueueService;
     this.workspaceUserCacheService = workspaceUserCacheService;
+    this.workspaceMigrationService = workspaceMigrationService;
   }
 
   @Override
