@@ -6,18 +6,12 @@ import { Workspace, WorkspaceActiveStatus } from 'generated/fetch';
 import { isUsingInitialCredits } from 'app/utils/workspace-utils';
 
 import { WorkspaceInfoField } from './workspace-info-field';
-import { WorkspacePublishingInfo } from './workspace-publishing-info';
 
 interface Props {
   workspace: Workspace;
   activeStatus: WorkspaceActiveStatus;
-  reload: () => Promise<void>;
 }
-export const BasicInformation = ({
-  workspace,
-  activeStatus,
-  reload,
-}: Props) => {
+export const BasicInformation = ({ workspace, activeStatus }: Props) => {
   return (
     <>
       <h3>Basic Information</h3>
@@ -62,7 +56,6 @@ export const BasicInformation = ({
         <WorkspaceInfoField labelText='Last Modified Time'>
           {new Date(workspace.lastModifiedTime).toDateString()}
         </WorkspaceInfoField>
-        <WorkspacePublishingInfo {...{ workspace, reload }} />
         <WorkspaceInfoField labelText='Pod ID'>
           {workspace.recoveryPodId || 'No pod attached'}
         </WorkspaceInfoField>

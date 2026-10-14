@@ -30,7 +30,7 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
 
   DbWorkspace findByWorkspaceNamespace(String workspaceNamespace);
 
-  DbWorkspace findByWorkspaceIdAndActiveStatus(long workspaceId, short activeStatus);
+  DbWorkspace findByWorkspaceId(long workspaceId);
 
   default DbWorkspace getRequired(String ns, String firecloudName) {
     DbWorkspace workspace =
@@ -105,11 +105,8 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
 
   Set<DbWorkspace> findAllByCreator(DbUser user);
 
-  @Query(
-      "SELECT workspaceId from DbWorkspace "
-          + "WHERE creator = :creator AND activeStatus = :activeStatus")
-  Set<Long> findAllWorkspaceIdsByCreatorAndActiveStatus(
-      @Param("creator") DbUser creator, @Param("activeStatus") short activeStatus);
+  @Query("SELECT workspaceId from DbWorkspace " + "WHERE creator = :creator")
+  Set<Long> findAllWorkspaceIdsByCreator(@Param("creator") DbUser creator);
 
   @Query(
       "SELECT w.creator FROM DbWorkspace w "

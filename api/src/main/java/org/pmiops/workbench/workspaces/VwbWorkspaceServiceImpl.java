@@ -1,22 +1,15 @@
 package org.pmiops.workbench.workspaces;
 
-import jakarta.inject.Provider;
 import java.util.*;
-import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.*;
-import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
-import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.utils.mappers.FirecloudMapper;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.pmiops.workbench.vwb.wsm.WsmClient;
-import org.pmiops.workbench.wsmanager.ApiException;
-import org.pmiops.workbench.wsmanager.model.IamRole;
 import org.pmiops.workbench.wsmanager.model.WorkspaceDescription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,8 +33,6 @@ public class VwbWorkspaceServiceImpl implements WorkspaceService {
   private final InitialCreditsService expirationService;
 
   private final WorkspaceAuthService workspaceAuthService;
-  private final UserDao userDao;
-  private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   public VwbWorkspaceServiceImpl(
       WsmClient wsmClient,
@@ -49,17 +40,13 @@ public class VwbWorkspaceServiceImpl implements WorkspaceService {
       FirecloudMapper firecloudMapper,
       WorkspaceDao workspaceDao,
       InitialCreditsService expirationService,
-      WorkspaceAuthService workspaceAuthService,
-      UserDao userDao,
-      Provider<WorkbenchConfig> workbenchConfigProvider) {
+      WorkspaceAuthService workspaceAuthService) {
     this.wsmClient = wsmClient;
     this.workspaceMapper = workspaceMapper;
     this.firecloudMapper = firecloudMapper;
     this.workspaceDao = workspaceDao;
     this.expirationService = expirationService;
     this.workspaceAuthService = workspaceAuthService;
-    this.userDao = userDao;
-    this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
   @Override
@@ -86,65 +73,8 @@ public class VwbWorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
-  public boolean notebookTransferComplete(String workspaceNamespace, String workspaceId) {
-    return false;
-  }
-
-  @Override
   public List<WorkspaceResponse> listWorkspaces() {
     return Collections.emptyList();
-  }
-
-  @Override
-  public List<String> getActiveWorkspaceNamespacesAsService() {
-    logger.warn("getActiveWorkspaceNamespacesAsService not implemented in VWB");
-    return Collections.emptyList();
-  }
-
-  @Override
-  public List<String> getOrphanedWorkspaceNamespacesAsService() {
-    logger.warn("getOrphanedWorkspaceNamespacesAsService not implemented in VWB");
-    return Collections.emptyList();
-  }
-
-  @Override
-  public List<WorkspaceResponse> getFeaturedWorkspaces() {
-    logger.warn("getFeaturedWorkspaces not implemented in VWB");
-    return Collections.emptyList();
-  }
-
-  @Override
-  public String getPublishedWorkspacesGroupEmail() {
-    logger.warn("getPublishedWorkspacesGroupEmail not implemented in VWB");
-    return null;
-  }
-
-  @Override
-  public void deleteWorkspace(DbWorkspace dbWorkspace) {
-    logger.warn("deleteWorkspace not implemented for VWB");
-  }
-
-  @Override
-  public void updateWorkspaceBillingAccount(
-      DbWorkspace workspace, String newBillingAccountName, boolean serviceAccount) {
-    logger.warn("updateWorkspaceBillingAccount not implemented in VWB");
-  }
-
-  @Override
-  public void updateWorkspaceBillingAccount(DbWorkspace workspace, String newBillingAccountName) {
-    logger.warn("updateWorkspaceBillingAccount not implemented in VWB");
-  }
-
-  @Override
-  public List<UserRole> getFirecloudUserRoles(String workspaceNamespace, String firecloudName) {
-    logger.warn("getFirecloudUserRoles not implemented in VWB");
-    return null;
-  }
-
-  @Override
-  public List<DbUserRecentWorkspace> getRecentWorkspaces() {
-    logger.warn("getRecentWorkspaces not implemented in VWB");
-    return null;
   }
 
   @Override
@@ -154,75 +84,8 @@ public class VwbWorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
-  public Map<String, DbWorkspace> getWorkspacesByGoogleProject(Set<String> keySet) {
-    logger.warn("getWorkspacesByGoogleProject not implemented in VWB");
-    return null;
-  }
-
-  @Override
-  public DbWorkspace lookupWorkspaceByNamespace(String workspaceNamespace) {
-    logger.warn("lookupWorkspaceByNamespace not implemented in VWB");
-    return null;
-  }
-
-  @Override
   public List<DbWorkspace> lookupWorkspacesByNamespace(Collection<String> workspaceNamespaces) {
     logger.warn("lookupWorkspacesByNamespace not implemented in VWB");
-    return null;
-  }
-
-  @Override
-  public void publishCommunityWorkspace(DbWorkspace workspace) {
-    logger.warn("publishCommunityWorkspace not implemented in VWB");
-  }
-
-  @Override
-  public List<DbUser> getWorkspaceOwnerList(DbWorkspace dbWorkspace) {
-    logger.warn("getWorkspaceOwnerList not implemented in VWB");
-    return null;
-  }
-
-  @Override
-  public void deleteWorkspaceAsService(DbWorkspace dbWorkspace) {
-    logger.warn("deleteWorkspaceAsService not implemented in VWB");
-  }
-
-  @Override
-  public RawlsWorkspaceDetails createWorkspace(Workspace workspace, DbCdrVersion cdrVersion) {
-    String workspaceToClone = cdrVersion.getVwbTemplateId();
-
-    // Get the user's pod id
-    String podId =
-        Optional.ofNullable(userDao.findUserByUsername(workspace.getCreator()))
-            .map(DbUser::getVwbUserPod)
-            .map(DbVwbUserPod::getVwbPodId)
-            .orElse(workbenchConfigProvider.get().vwb.defaultPodId);
-
-    WorkspaceDescription workspaceDescription =
-        wsmClient.cloneWorkspaceAsService(workspaceToClone, workspace, podId);
-
-    // Need to wait until workspace has been created
-    // before sharing it with the user
-    String workspaceId = workspaceDescription.getId().toString();
-    try {
-      wsmClient.waitForWorkspaceCreation(workspaceId);
-    } catch (InterruptedException | ApiException e) {
-      // If the workspace is still in creating state, how do we recover here since we can't delete
-      // it.
-      // We may need a cron job to check orphaned workspaces and delete them
-      throw new WorkbenchException(e);
-    }
-    wsmClient.shareWorkspaceAsService(workspaceId, workspace.getCreator(), IamRole.OWNER);
-    return workspaceMapper.toWorkspaceDetails(workspaceDescription);
-  }
-
-  @Override
-  public RawlsWorkspaceDetails cloneWorkspace(
-      String fromWorkspaceNamespace,
-      String fromWorkspaceId,
-      Workspace toWorkspace,
-      DbCdrVersion cdrVersion) {
-    logger.warn("cloneWorkspace not implemented in VWB");
     return null;
   }
 }

@@ -2,16 +2,9 @@ package org.pmiops.workbench.api;
 
 import jakarta.annotation.Nullable;
 import java.util.List;
-import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.annotations.AuthorityRequired;
-import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.model.AccessReason;
-import org.pmiops.workbench.model.AdminLockingRequest;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.CloudStorageTraffic;
-import org.pmiops.workbench.model.EmptyResponse;
-import org.pmiops.workbench.model.PublishWorkspaceRequest;
-import org.pmiops.workbench.model.ReadOnlyNotebookResponse;
 import org.pmiops.workbench.model.WorkspaceAdminView;
 import org.pmiops.workbench.model.WorkspaceAuditLogQueryResponse;
 import org.pmiops.workbench.model.WorkspaceUserAdminView;
@@ -43,13 +36,6 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
     return ResponseEntity.ok(workspaceAdminService.getWorkspaceAdminView(workspaceNamespace));
   }
 
-  @Override
-  @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
-  public ResponseEntity<Void> updateBillingToCredits(String workspaceNamespace, String terraName) {
-    workspaceAdminService.updateBillingToCredits(workspaceNamespace, terraName);
-    return ResponseEntity.noContent().build();
-  }
-
   /**
    * Get all audit log entries for this workspace
    *
@@ -78,58 +64,6 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
     return ResponseEntity.ok(
         new WorkspaceWaitingForRetrievalListResponse()
             .items(workspaceAdminService.getWorkspacesWaitingForRetrieval()));
-  }
-
-  @Override
-  @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
-  public ResponseEntity<ReadOnlyNotebookResponse> adminReadOnlyNotebook(
-      String workspaceNamespace, String notebookNameWithFileExtension, AccessReason accessReason) {
-    final String notebookHtml =
-        workspaceAdminService.getReadOnlyNotebook(
-            workspaceNamespace, notebookNameWithFileExtension, accessReason);
-    return ResponseEntity.ok(new ReadOnlyNotebookResponse().html(notebookHtml));
-  }
-
-  @Override
-  @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
-  public ResponseEntity<EmptyResponse> setAdminLockedState(
-      String workspaceNamespace, AdminLockingRequest lockingRequest) {
-    String lockingReason = lockingRequest.getRequestReason();
-    if (lockingRequest.getRequestDateInMillis() == null
-        || lockingRequest.getRequestDateInMillis() == 0
-        || StringUtils.isBlank(lockingReason)) {
-      throw new BadRequestException(
-          String.format("Cannot have empty Request reason or Request Date"));
-    }
-    if (lockingReason.length() < 10 || lockingReason.length() > 4000) {
-      throw new BadRequestException(
-          "Locking Reason text length should be "
-              + "at least 10 characters long and at most 4000 characters");
-    }
-    workspaceAdminService.setAdminLockedState(workspaceNamespace, lockingRequest);
-    return ResponseEntity.ok(new EmptyResponse());
-  }
-
-  @Override
-  @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
-  public ResponseEntity<EmptyResponse> setAdminUnlockedState(String workspaceNamespace) {
-    workspaceAdminService.setAdminUnlockedState(workspaceNamespace);
-    return ResponseEntity.ok(new EmptyResponse());
-  }
-
-  @Override
-  @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
-  public ResponseEntity<EmptyResponse> publishWorkspaceViaDB(
-      String workspaceNamespace, PublishWorkspaceRequest body) {
-    workspaceAdminService.publishWorkspaceViaDB(workspaceNamespace, body);
-    return ResponseEntity.ok(new EmptyResponse());
-  }
-
-  @Override
-  @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
-  public ResponseEntity<EmptyResponse> unpublishWorkspaceViaDB(String workspaceNamespace) {
-    workspaceAdminService.unpublishWorkspaceViaDB(workspaceNamespace);
-    return ResponseEntity.ok(new EmptyResponse());
   }
 
   @Override

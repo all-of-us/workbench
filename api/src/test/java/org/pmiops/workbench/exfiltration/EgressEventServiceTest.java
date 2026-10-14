@@ -5,13 +5,11 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.pmiops.workbench.utils.TestMockFactory.DEFAULT_GOOGLE_PROJECT;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import java.sql.Timestamp;
-import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
@@ -29,7 +27,6 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbEgressEvent;
-import org.pmiops.workbench.db.model.DbEgressEvent.DbEgressEventStatus;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.*;
@@ -122,167 +119,6 @@ public class EgressEventServiceTest {
   }
 
   @Test
-  public void testCreateEgressEventAlert() throws Exception {
-    SumologicEgressEvent event = recentEgressEventForUser(dbUser1);
-    egressEventService.handleEvent(event);
-    verify(mockEgressEventAuditor).fireEgressEventForUser(event, dbUser1);
-    verify(mockTaskQueueService).pushEgressEventTask(anyLong(), anyBoolean());
-
-    List<DbEgressEvent> dbEvents = ImmutableList.copyOf(egressEventDao.findAll());
-    assertThat(dbEvents).hasSize(1);
-    DbEgressEvent dbEvent = Iterables.getOnlyElement(dbEvents);
-    assertThat(dbEvent.getUser()).isEqualTo(dbUser1);
-    assertThat(dbEvent.getWorkspace()).isEqualTo(dbWorkspace);
-    assertThat(dbEvent.getCreationTime()).isNotNull();
-    assertThat(dbEvent.getLastModifiedTime()).isNotNull();
-    assertThat(dbEvent.getSumologicEvent()).isNotNull();
-    assertThat(dbEvent.getEgressWindowSeconds()).isEqualTo(event.getTimeWindowDuration());
-  }
-
-  @Test
-  public void testAppCreateEgressEventAlert() {
-
-    SumologicEgressEvent event = recentAppEgressEvent(dbUser1, AppType.RSTUDIO);
-
-    doReturn(Optional.of(dbUser1)).when(mockUserService).getByDatabaseId(dbUser1.getUserId());
-
-    egressEventService.handleEvent(event);
-    verify(mockEgressEventAuditor).fireEgressEventForUser(event, dbUser1);
-    verify(mockTaskQueueService).pushEgressEventTask(anyLong(), anyBoolean());
-
-    List<DbEgressEvent> dbEvents = ImmutableList.copyOf(egressEventDao.findAll());
-    assertThat(dbEvents).hasSize(1);
-    DbEgressEvent dbEvent = Iterables.getOnlyElement(dbEvents);
-    assertThat(dbEvent.getUser()).isEqualTo(dbUser1);
-    assertThat(dbEvent.getWorkspace()).isEqualTo(dbWorkspace);
-    assertThat(dbEvent.getCreationTime()).isNotNull();
-    assertThat(dbEvent.getLastModifiedTime()).isNotNull();
-    assertThat(dbEvent.getSumologicEvent()).isNotNull();
-    assertThat(dbEvent.getEgressWindowSeconds()).isEqualTo(event.getTimeWindowDuration());
-  }
-
-  @Test
-  public void testAppCreateEgressEventAlert_skipCromwell() {
-
-    SumologicEgressEvent event = recentAppEgressEvent(dbUser1, AppType.CROMWELL);
-
-    doReturn(Optional.of(dbUser1)).when(mockUserService).getByDatabaseId(dbUser1.getUserId());
-
-    egressEventService.handleEvent(event);
-    verify(mockEgressEventAuditor).fireEgressEventForUser(event, dbUser1);
-    verify(mockTaskQueueService).pushEgressEventTask(anyLong(), anyBoolean());
-
-    List<DbEgressEvent> dbEvents = ImmutableList.copyOf(egressEventDao.findAll());
-    assertThat(dbEvents).hasSize(1);
-    DbEgressEvent dbEvent = Iterables.getOnlyElement(dbEvents);
-    assertThat(dbEvent.getUser()).isEqualTo(dbUser1);
-    assertThat(dbEvent.getWorkspace()).isEqualTo(dbWorkspace);
-    assertThat(dbEvent.getCreationTime()).isNotNull();
-    assertThat(dbEvent.getLastModifiedTime()).isNotNull();
-    assertThat(dbEvent.getSumologicEvent()).isNotNull();
-    assertThat(dbEvent.getEgressWindowSeconds()).isEqualTo(event.getTimeWindowDuration());
-  }
-
-  @Test
-  public void testCreateEgressEventAlert_stalePersistedEvent() {
-    SumologicEgressEvent oldEgressEvent =
-        recentEgressEventForUser(dbUser1)
-            .timeWindowDuration(60 * 60L)
-            .timeWindowStart(NOW.minus(Duration.ofMinutes(125)).toEpochMilli());
-
-    // Persist an existing copy of this event into the database.
-    fakeClock.setInstant(NOW.minus(Duration.ofHours(1L)));
-    egressEventDao.save(
-        new DbEgressEvent()
-            .setEgressWindowSeconds(oldEgressEvent.getTimeWindowDuration())
-            .setUser(dbUser1)
-            .setWorkspace(dbWorkspace)
-            .setStatus(DbEgressEventStatus.PENDING));
-
-    fakeClock.setInstant(NOW);
-    egressEventService.handleEvent(oldEgressEvent);
-    verifyNoInteractions(mockTaskQueueService);
-
-    Iterable<DbEgressEvent> dbEvents = egressEventDao.findAll();
-    assertThat(dbEvents).hasSize(1);
-  }
-
-  @Test
-  public void testCreateEgressEventAlert_staleEventsMultiwindow() {
-    SumologicEgressEvent oldEgressEvent =
-        recentEgressEventForUser(dbUser1)
-            .timeWindowDuration(60 * 60L)
-            .timeWindowStart(NOW.minus(Duration.ofMinutes(125)).toEpochMilli());
-
-    fakeClock.setInstant(NOW.minus(Duration.ofHours(1L)));
-    egressEventDao.save(
-        new DbEgressEvent()
-            // Different window; otherwise metadata matches.
-            .setEgressWindowSeconds(10 * 60L)
-            .setUser(dbUser1)
-            .setWorkspace(dbWorkspace)
-            .setStatus(DbEgressEventStatus.PENDING));
-
-    fakeClock.setInstant(NOW);
-    egressEventService.handleEvent(oldEgressEvent);
-    verify(mockTaskQueueService).pushEgressEventTask(anyLong(), anyBoolean());
-
-    Iterable<DbEgressEvent> dbEvents = egressEventDao.findAll();
-    assertThat(dbEvents).hasSize(2);
-  }
-
-  @Test
-  public void testCreateEgressEventAlert_staleEventsDifferentUsers() {
-    SumologicEgressEvent oldEgressEvent =
-        recentEgressEventForUser(dbUser1)
-            .timeWindowDuration(60 * 60L)
-            .timeWindowStart(NOW.minus(Duration.ofMinutes(125)).toEpochMilli());
-
-    fakeClock.setInstant(NOW.minus(Duration.ofHours(1L)));
-    egressEventDao.save(
-        new DbEgressEvent()
-            .setEgressWindowSeconds(oldEgressEvent.getTimeWindowDuration())
-            // Different user, otherwise metadata matches
-            .setUser(dbUser2)
-            .setWorkspace(dbWorkspace)
-            .setStatus(DbEgressEventStatus.PENDING));
-
-    fakeClock.setInstant(NOW);
-    egressEventService.handleEvent(oldEgressEvent);
-    verify(mockEgressEventAuditor).fireEgressEventForUser(oldEgressEvent, dbUser1);
-    verify(mockTaskQueueService).pushEgressEventTask(anyLong(), anyBoolean());
-
-    Iterable<DbEgressEvent> dbEvents = egressEventDao.findAll();
-    assertThat(dbEvents).hasSize(2);
-  }
-
-  @Test
-  public void testCreateEgressEventAlert_staleEventShortWindowPersisted() {
-    SumologicEgressEvent oldEgressEvent =
-        recentEgressEventForUser(dbUser1)
-            // > 2 windows into the past
-            .timeWindowStart(NOW.minus(Duration.ofMinutes(3)).toEpochMilli())
-            .timeWindowDuration(Duration.ofMinutes(1).getSeconds());
-
-    // Persist an existing copy of this event into the database.
-    fakeClock.setInstant(NOW.minus(Duration.ofMinutes(2L)));
-    egressEventDao.save(
-        new DbEgressEvent()
-            .setEgressWindowSeconds(oldEgressEvent.getTimeWindowDuration())
-            .setUser(dbUser1)
-            .setWorkspace(dbWorkspace)
-            .setStatus(DbEgressEventStatus.PENDING));
-
-    fakeClock.setInstant(NOW);
-    egressEventService.handleEvent(oldEgressEvent);
-    verify(mockEgressEventAuditor).fireEgressEventForUser(oldEgressEvent, dbUser1);
-    verify(mockTaskQueueService).pushEgressEventTask(anyLong(), anyBoolean());
-
-    Iterable<DbEgressEvent> dbEvents = egressEventDao.findAll();
-    assertThat(dbEvents).hasSize(2);
-  }
-
-  @Test
   public void testHandleVwbEgressEvent() {
     VwbEgressEventRequest vwbEvent =
         new VwbEgressEventRequest()
@@ -314,28 +150,6 @@ public class EgressEventServiceTest {
         .isEqualTo((float) (500 * ((1 << 20) / 1e6))); // Convert MiB
     assertThat(dbEvent.getGcpProjectId()).isEqualTo("test-gcp-project");
     assertThat(dbEvent.getEgressWindowSeconds()).isEqualTo(600L);
-  }
-
-  private static SumologicEgressEvent recentEgressEventForUser(DbUser user) {
-    return new SumologicEgressEvent()
-        .projectName(DEFAULT_GOOGLE_PROJECT)
-        .vmPrefix("all-of-us-" + user.getUserId())
-        .egressMib(120.7)
-        .egressMibThreshold(100.0)
-        .timeWindowStart(NOW.minusSeconds(630).toEpochMilli())
-        .timeWindowDuration(600L);
-  }
-
-  private static SumologicEgressEvent recentAppEgressEvent(DbUser user, AppType appType) {
-    return new SumologicEgressEvent()
-        .projectName(DEFAULT_GOOGLE_PROJECT)
-        .vmName("some-vm")
-        .srcGkeServiceName(
-            "all-of-us-" + user.getUserId() + appType.toString().toLowerCase() + "random-abc")
-        .egressMib(120.7)
-        .egressMibThreshold(100.0)
-        .timeWindowStart(NOW.minusSeconds(630).toEpochMilli())
-        .timeWindowDuration(600L);
   }
 
   // I thought about adding this to a mapper, but it's such a backwards, test-only conversion,

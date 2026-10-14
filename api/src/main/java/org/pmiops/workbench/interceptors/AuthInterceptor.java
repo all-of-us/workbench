@@ -25,7 +25,6 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
-import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.ErrorCode;
 import org.pmiops.workbench.user.DevUserRegistrationService;
@@ -50,7 +49,6 @@ public class AuthInterceptor implements AsyncHandlerInterceptor {
   private static final String authName = "aou_oauth";
 
   private final UserInfoService userInfoService;
-  private final FireCloudService fireCloudService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final UserDao userDao;
   private final UserService userService;
@@ -59,13 +57,11 @@ public class AuthInterceptor implements AsyncHandlerInterceptor {
   @Autowired
   public AuthInterceptor(
       UserInfoService userInfoService,
-      FireCloudService fireCloudService,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       UserDao userDao,
       UserService userService,
       DevUserRegistrationService devUserRegistrationService) {
     this.userInfoService = userInfoService;
-    this.fireCloudService = fireCloudService;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.userDao = userDao;
     this.userService = userService;
@@ -163,23 +159,12 @@ public class AuthInterceptor implements AsyncHandlerInterceptor {
     String gsuiteDomainSuffix =
         "@" + workbenchConfigProvider.get().googleDirectoryService.gSuiteDomain;
     if (!userName.endsWith(gsuiteDomainSuffix) && !isVwbServiceAccount(userName)) {
-      // Temporarily set the authentication with no user, so we can look up what user this
-      // corresponds to in FireCloud.
-      SecurityContextHolder.getContext()
-          .setAuthentication(
-              new UserAuthentication(null, userInfo, token, UserType.SERVICE_ACCOUNT));
-      // If the email is neither in our GSuite domain nor VWB SA, try FireCloud; we could be
-      // dealing with a pet service account. In both AofU and FireCloud, the pet SA is treated as
-      // if it were the user it was created for.
-      userName = fireCloudService.getMe().getUserInfo().getUserEmail();
-      if (!userName.endsWith(gsuiteDomainSuffix)) {
-        log.info(
-            String.format(
-                "User %s isn't in domain %s, can't access the workbench",
-                userName, gsuiteDomainSuffix));
-        response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-        return false;
-      }
+      log.info(
+          String.format(
+              "User %s isn't in domain %s, can't access the workbench",
+              userName, gsuiteDomainSuffix));
+      response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+      return false;
     }
     DbUser user = userDao.findUserByUsername(userName);
     if (user == null) {

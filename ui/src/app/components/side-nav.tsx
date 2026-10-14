@@ -156,20 +156,12 @@ const vwbDataCollectionAdminActive = () => {
   return window.location.pathname.startsWith('/admin/vwb/data-collections');
 };
 
-const preprodWorkspaceMigrationActive = () => {
-  return window.location.pathname.startsWith('/admin/vwb/preprod-migration');
-};
-
 const workspaceAuditActive = () => {
   return window.location.pathname.startsWith('/admin/workspace-audit');
 };
 
 const homeActive = () => {
   return window.location.pathname === '/';
-};
-
-const libraryActive = () => {
-  return window.location.pathname === '/library';
 };
 
 const workspacesActive = () => {
@@ -182,10 +174,6 @@ const profileActive = () => {
 
 const DARActive = () => {
   return window.location.pathname === DATA_ACCESS_REQUIREMENTS_PATH;
-};
-
-const cloudEnvironmentsActive = () => {
-  return window.location.pathname === '/runtimes';
 };
 
 const institutionAdminActive = () => {
@@ -305,11 +293,6 @@ export const SideNav = (props: SideNavProps) => {
       href: DATA_ACCESS_REQUIREMENTS_PATH,
       active: DARActive(),
     },
-    {
-      label: 'Cloud Environments (BETA)',
-      href: '/runtimes',
-      active: cloudEnvironmentsActive(),
-    },
   ];
 
   return (
@@ -362,14 +345,6 @@ export const SideNav = (props: SideNavProps) => {
             onToggleSideNav={() => onToggleSideNav()}
             href='/workspaces'
             active={workspacesActive()}
-            disabled={!hasRegisteredTierAccess(profile)}
-          />
-          <SideNavItem
-            icon='star'
-            content='Featured Workspaces'
-            onToggleSideNav={() => onToggleSideNav()}
-            href='/library'
-            active={libraryActive()}
             disabled={!hasRegisteredTierAccess(profile)}
           />
         </>
@@ -491,19 +466,6 @@ export const SideNav = (props: SideNavProps) => {
             onToggleSideNav={() => onToggleSideNav()}
             href='/admin/vwb/data-collections'
             active={vwbDataCollectionAdminActive()}
-          />
-        )}
-      {environment.enableVwbAdmin &&
-        hasAuthorityForAction(
-          profile,
-          AuthorityGuardedAction.WORKSPACE_ADMIN
-        ) &&
-        showAdminOptions && (
-          <SideNavItem
-            content='Preprod WS Migration'
-            onToggleSideNav={() => onToggleSideNav()}
-            href='/admin/vwb/preprod-migration'
-            active={preprodWorkspaceMigrationActive()}
           />
         )}
       {hasAuthorityForAction(profile, AuthorityGuardedAction.WORKSPACE_AUDIT) &&

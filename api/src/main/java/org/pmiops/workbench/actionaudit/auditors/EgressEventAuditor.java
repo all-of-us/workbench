@@ -13,11 +13,6 @@ import org.pmiops.workbench.model.VwbEgressEventRequest;
  * action in response to the event.
  */
 public interface EgressEventAuditor {
-  /**
-   * Decorates a Sumologic-reported high-egress event with Workbench metadata and fires an audit
-   * event log in the target workspace.
-   */
-  void fireEgressEvent(SumologicEgressEvent event);
 
   /**
    * Decorates a Verily Workbench high-egress event with Workbench metadata and fires an audit event

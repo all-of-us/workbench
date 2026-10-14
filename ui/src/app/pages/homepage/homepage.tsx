@@ -8,9 +8,7 @@ import { StyledExternalLink } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { Header } from 'app/components/headers';
 import { ClrIcon } from 'app/components/icons';
-import { MigrationModal } from 'app/components/migration/migration-modal';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
-import { VwbCreateWorkspaceModal } from 'app/pages/workspace/vwb-create-workspace-modal';
 import { profileApi, workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, { addOpacity } from 'app/styles/colors';
 import { reactStyles, withUserProfile } from 'app/utils';
@@ -25,8 +23,6 @@ import {
   shouldShowDuccUpdateBanner,
 } from './ducc-update-banner';
 import { LegacyWorkbenchEndedBanner } from './legacy-workbench-ended-banner';
-// import { VwbBanner } from './vwb-banner';
-// import { VwbMigrationBanner } from './vwb-migration-banner';
 
 export const styles = reactStyles({
   pageWrapper: {
@@ -318,8 +314,6 @@ interface State {
   firstVisitTraining: boolean;
   loadingWorkspaces: boolean;
   userWorkspacesResponse: WorkspaceResponseListResponse;
-  showMigrationModal: boolean;
-  showCreateWorkspaceModal: boolean;
 }
 
 export const Homepage = fp.flow(
@@ -338,14 +332,8 @@ export const Homepage = fp.flow(
         firstVisitTraining: true,
         loadingWorkspaces: true,
         userWorkspacesResponse: undefined,
-        showMigrationModal: false,
-        showCreateWorkspaceModal: false,
       };
     }
-
-    closeCreateWorkspaceModal = () => {
-      this.setState({ showCreateWorkspaceModal: false });
-    };
 
     componentDidMount() {
       this.props.hideSpinner();
@@ -402,10 +390,6 @@ export const Homepage = fp.flow(
         .finally(() => this.setState({ loadingWorkspaces: false }));
     }
 
-    closeMigrationModal = () => {
-      this.setState({ showMigrationModal: false });
-    };
-
     render() {
       const {
         profileState: { profile },
@@ -446,12 +430,6 @@ export const Homepage = fp.flow(
               </FlexColumn>
             </FlexRow>
           </FlexColumn>
-          {this.state.showMigrationModal && (
-            <MigrationModal onClose={this.closeMigrationModal} />
-          )}
-          {this.state.showCreateWorkspaceModal && (
-            <VwbCreateWorkspaceModal onClose={this.closeCreateWorkspaceModal} />
-          )}
         </React.Fragment>
       );
     }

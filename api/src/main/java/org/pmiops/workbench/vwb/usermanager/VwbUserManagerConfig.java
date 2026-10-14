@@ -1,14 +1,11 @@
 package org.pmiops.workbench.vwb.usermanager;
 
-import static org.pmiops.workbench.rawls.RawlsConfig.BILLING_SCOPES;
-
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.util.List;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.ServerErrorException;
-import org.pmiops.workbench.rawls.RawlsApiClientFactory;
 import org.pmiops.workbench.vwb.user.ApiClient;
 import org.pmiops.workbench.vwb.user.api.NotificationsApi;
 import org.pmiops.workbench.vwb.user.api.OrganizationV2Api;
@@ -39,8 +36,19 @@ public class VwbUserManagerConfig {
       "VWB_SERVICE_ACCOUNT_WORKSPACE_API";
   public static final String VWB_END_USER_WORKSPACE_API = "VWB_END_USER_WORKSPACE_API";
 
+  public static final List<String> GOOGLE_SCOPES =
+      ImmutableList.of(
+          "https://www.googleapis.com/auth/userinfo.profile",
+          "https://www.googleapis.com/auth/userinfo.email");
+
   public static final List<String> SCOPES =
-      ImmutableList.<String>builder().addAll(RawlsApiClientFactory.SCOPES).build();
+      ImmutableList.<String>builder().addAll(GOOGLE_SCOPES).build();
+
+  public static final List<String> BILLING_SCOPES =
+      ImmutableList.<String>builder()
+          .addAll(GOOGLE_SCOPES)
+          .add("https://www.googleapis.com/auth/cloud-billing")
+          .build();
   public static final int TIMEOUT = 60 * 1000;
 
   /**

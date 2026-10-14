@@ -10,7 +10,6 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.Authority;
-import org.pmiops.workbench.model.PreprodMigrationRequest;
 import org.pmiops.workbench.model.PreprodWorkspace;
 import org.pmiops.workbench.model.VwbAodRequest;
 import org.pmiops.workbench.model.VwbPodDescription;
@@ -130,23 +129,6 @@ public class VwbWorkspaceAdminController implements VwbWorkspaceAdminApiDelegate
                         .userFacingId(podDescription.getUserFacingId())
                         .description(podDescription.getDescription()))
             .toList());
-  }
-
-  @Override
-  @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
-  public ResponseEntity<Void> migratePreprodWorkspace(PreprodMigrationRequest request) {
-    final String ownerEmail =
-        String.format(
-            "%s@%s",
-            request.getOwnerUsername(),
-            workbenchConfigProvider.get().googleDirectoryService.gSuiteDomain);
-    workspaceMigrationService.startPreprodWorkspaceMigration(
-        request.getPreprodWorkspace(),
-        ownerEmail,
-        request.getResearchPurpose(),
-        request.getSourceBucket(),
-        request.getBillingPod());
-    return ResponseEntity.ok().build();
   }
 
   @Override

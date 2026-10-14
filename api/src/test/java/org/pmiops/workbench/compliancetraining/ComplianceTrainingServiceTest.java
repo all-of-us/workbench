@@ -36,7 +36,6 @@ import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbComplianceTrainingVerification;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserAccessModule;
-import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.test.FakeClock;
@@ -59,7 +58,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class ComplianceTrainingServiceTest {
 
-  @MockitoBean private FireCloudService fireCloudService;
   @MockitoBean private VwbAccessService vwbAccessService;
   @MockitoBean private InstitutionService institutionService;
   @MockitoBean private UserServiceAuditor userServiceAuditor;

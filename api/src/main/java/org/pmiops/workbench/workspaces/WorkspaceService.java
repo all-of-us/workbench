@@ -2,13 +2,8 @@ package org.pmiops.workbench.workspaces;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import org.pmiops.workbench.db.model.*;
-import org.pmiops.workbench.model.UserRole;
-import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceResponse;
-import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 
 /*
  * WorkspaceService is primarily an interface for coordinating the three Workspace models.
@@ -28,62 +23,9 @@ public interface WorkspaceService {
 
   WorkspaceResponse getWorkspace(String workspaceNamespace, String workspaceTerraName);
 
-  boolean notebookTransferComplete(String workspaceNamespace, String workspaceTerraName);
-
   List<WorkspaceResponse> listWorkspaces();
-
-  List<String> getActiveWorkspaceNamespacesAsService();
-
-  List<String> getOrphanedWorkspaceNamespacesAsService();
-
-  /**
-   * Get all Featured workspaces from the DB.
-   *
-   * @return List of all Featured workspaces
-   */
-  List<WorkspaceResponse> getFeaturedWorkspaces();
-
-  /**
-   * Return the email associated with the group that we use to indicate that a workspace is
-   * published. (implementation detail: it's the RT auth domain group email)
-   */
-  String getPublishedWorkspacesGroupEmail();
-
-  void deleteWorkspace(DbWorkspace dbWorkspace);
-
-  void deleteWorkspaceAsService(DbWorkspace dbWorkspace);
-
-  /*
-   * This function will call the Google Cloud Billing API to set the given billing
-   * account name to the given workspace. It will also update the billingAccountName
-   * field on the workspace model.
-   */
-  void updateWorkspaceBillingAccount(
-      DbWorkspace workspace, String newBillingAccountName, boolean serviceAccount);
-
-  void updateWorkspaceBillingAccount(DbWorkspace workspace, String newBillingAccountName);
-
-  List<UserRole> getFirecloudUserRoles(String workspaceNamespace, String firecloudName);
-
-  List<DbUserRecentWorkspace> getRecentWorkspaces();
 
   DbUserRecentWorkspace updateRecentWorkspaces(DbWorkspace workspace);
 
-  Map<String, DbWorkspace> getWorkspacesByGoogleProject(Set<String> keySet);
-
-  DbWorkspace lookupWorkspaceByNamespace(String workspaceNamespace);
-
   List<DbWorkspace> lookupWorkspacesByNamespace(Collection<String> workspaceNamespaces);
-
-  void publishCommunityWorkspace(DbWorkspace workspace);
-
-  List<DbUser> getWorkspaceOwnerList(DbWorkspace dbWorkspace);
-
-  RawlsWorkspaceDetails createWorkspace(Workspace workspace, DbCdrVersion cdrVersion);
-
-  RawlsWorkspaceDetails cloneWorkspace(
-      String fromWorkspaceNamespace,
-      String fromWorkspaceId,
-      Workspace toWorkspace,
-      DbCdrVersion cdrVersion);
 }

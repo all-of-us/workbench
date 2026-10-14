@@ -1,55 +1,29 @@
 package org.pmiops.workbench.workspaceadmin;
 
-import com.google.cloud.storage.Blob;
-import com.google.cloud.storage.BlobInfo;
 import com.google.common.collect.Streams;
 import com.google.protobuf.util.Timestamps;
 import jakarta.annotation.Nullable;
-import jakarta.inject.Provider;
-import jakarta.mail.MessagingException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Predicate;
-import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
-import org.pmiops.workbench.actionaudit.auditors.AdminAuditor;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
-import org.pmiops.workbench.db.dao.FeaturedWorkspaceDao;
 import org.pmiops.workbench.db.dao.UserDao;
-import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.model.DbFeaturedWorkspace;
-import org.pmiops.workbench.db.model.DbFeaturedWorkspace.DbFeaturedCategory;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.exceptions.ServerErrorException;
-import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudMonitoringService;
-import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
-import org.pmiops.workbench.lab.notebooks.NotebooksService;
-import org.pmiops.workbench.mail.MailService;
-import org.pmiops.workbench.model.AccessReason;
-import org.pmiops.workbench.model.AdminLockingRequest;
-import org.pmiops.workbench.model.AdminWorkspaceCloudStorageCounts;
 import org.pmiops.workbench.model.AdminWorkspaceObjectsCounts;
-import org.pmiops.workbench.model.AdminWorkspaceResources;
 import org.pmiops.workbench.model.CloudStorageTraffic;
-import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
-import org.pmiops.workbench.model.PublishWorkspaceRequest;
 import org.pmiops.workbench.model.TimeSeriesPoint;
-import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceAdminView;
@@ -58,10 +32,8 @@ import org.pmiops.workbench.model.WorkspaceRecoveryStatus;
 import org.pmiops.workbench.model.WorkspaceUserAdminView;
 import org.pmiops.workbench.model.WorkspaceWaitingForRetrieval;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
-import org.pmiops.workbench.utils.mappers.FeaturedWorkspaceMapper;
 import org.pmiops.workbench.utils.mappers.UserMapper;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
-import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -71,68 +43,38 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   private static final Duration TRAILING_TIME_TO_QUERY = Duration.ofHours(6);
 
   private final ActionAuditQueryService actionAuditQueryService;
-  private final AdminAuditor adminAuditor;
   private final CloudMonitoringService cloudMonitoringService;
-  private final CloudStorageClient cloudStorageClient;
   private final CohortDao cohortDao;
   private final ConceptSetDao conceptSetDao;
   private final DataSetDao dataSetDao;
-  private final FeaturedWorkspaceMapper featuredWorkspaceMapper;
-  private final FeaturedWorkspaceDao featuredWorkspaceDao;
-  private final FireCloudService fireCloudService;
   private final InitialCreditsService initialCreditsService;
-  private final MailService mailService;
-  private final NotebooksService notebooksService;
   private final UserMapper userMapper;
   private final UserDao userDao;
-  private final UserService userService;
   private final WorkspaceDao workspaceDao;
   private final WorkspaceMapper workspaceMapper;
-  private final WorkspaceService workspaceService;
-  private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   public WorkspaceAdminServiceImpl(
       ActionAuditQueryService actionAuditQueryService,
-      AdminAuditor adminAuditor,
       CloudMonitoringService cloudMonitoringService,
-      CloudStorageClient cloudStorageClient,
       CohortDao cohortDao,
       ConceptSetDao conceptSetDao,
       DataSetDao dataSetDao,
-      FeaturedWorkspaceMapper featuredWorkspaceMapper,
-      FeaturedWorkspaceDao featuredWorkspaceDao,
-      FireCloudService fireCloudService,
       InitialCreditsService initialCreditsService,
-      MailService mailService,
-      NotebooksService notebooksService,
       UserMapper userMapper,
       UserDao userDao,
-      UserService userService,
       WorkspaceDao workspaceDao,
-      WorkspaceMapper workspaceMapper,
-      WorkspaceService workspaceService,
-      Provider<WorkbenchConfig> workbenchConfigProvider) {
+      WorkspaceMapper workspaceMapper) {
     this.actionAuditQueryService = actionAuditQueryService;
-    this.adminAuditor = adminAuditor;
     this.cloudMonitoringService = cloudMonitoringService;
-    this.cloudStorageClient = cloudStorageClient;
     this.cohortDao = cohortDao;
     this.conceptSetDao = conceptSetDao;
     this.dataSetDao = dataSetDao;
-    this.featuredWorkspaceMapper = featuredWorkspaceMapper;
-    this.featuredWorkspaceDao = featuredWorkspaceDao;
-    this.fireCloudService = fireCloudService;
     this.initialCreditsService = initialCreditsService;
-    this.mailService = mailService;
-    this.notebooksService = notebooksService;
     this.userMapper = userMapper;
     this.userDao = userDao;
-    this.userService = userService;
     this.workspaceDao = workspaceDao;
     this.workspaceMapper = workspaceMapper;
-    this.workspaceService = workspaceService;
-    this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
   @Override
@@ -149,31 +91,6 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
         .cohortCount(cohortCount)
         .conceptSetCount(conceptSetCount)
         .datasetCount(dataSetCount);
-  }
-
-  @Override
-  public AdminWorkspaceCloudStorageCounts getAdminWorkspaceCloudStorageCounts(
-      String workspaceNamespace, String workspaceTerraName) {
-    String bucketName =
-        fireCloudService
-            .getWorkspaceAsService(workspaceNamespace, workspaceTerraName)
-            .getWorkspace()
-            .getBucketName();
-
-    // NOTE: all of these may be undercounts, because we're only looking at the first Page of
-    // Storage List results
-    int notebookFilesCount =
-        notebooksService
-            .getNotebooksAsService(bucketName, workspaceNamespace, workspaceTerraName)
-            .size();
-    int nonNotebookFilesCount = getNonNotebookFileCount(bucketName);
-    long storageSizeBytes = getStorageSizeBytes(bucketName);
-
-    return new AdminWorkspaceCloudStorageCounts()
-        .notebookFileCount(notebookFilesCount)
-        .nonNotebookFileCount(nonNotebookFilesCount)
-        .storageBytesUsed(storageSizeBytes)
-        .storageBucketPath(String.format("gs://%s", bucketName));
   }
 
   @Override
@@ -201,46 +118,21 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     final DbWorkspace dbWorkspace = getWorkspaceByNamespaceOrThrow(workspaceNamespace);
 
     return dbWorkspace.isActive()
-        ? getActiveWorkspaceAdminView(dbWorkspace, workspaceNamespace)
+        ? getActiveWorkspaceAdminView(dbWorkspace)
         : getDeletedWorkspaceAdminView(dbWorkspace);
   }
 
-  private WorkspaceAdminView getActiveWorkspaceAdminView(
-      DbWorkspace dbWorkspace, String workspaceNamespace) {
-    final String workspaceFirecloudName = dbWorkspace.getFirecloudName();
-
-    var userRoles =
-        workspaceService.getFirecloudUserRoles(workspaceNamespace, workspaceFirecloudName);
-    var userMap =
-        userService.getUsersMappedByUsernames(userRoles.stream().map(UserRole::getEmail).toList());
+  private WorkspaceAdminView getActiveWorkspaceAdminView(DbWorkspace dbWorkspace) {
 
     final List<WorkspaceUserAdminView> collaborators =
-        userRoles.stream()
-            .map(ur -> toWorkspaceUserAdminView(ur, userMap.get(ur.getEmail())))
-            .toList();
+        getWorkspaceCollaborators(dbWorkspace.getWorkspaceNamespace());
 
-    final AdminWorkspaceCloudStorageCounts adminWorkspaceCloudStorageCounts =
-        getAdminWorkspaceCloudStorageCounts(
-            dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
-
-    final AdminWorkspaceResources adminWorkspaceResources =
-        new AdminWorkspaceResources()
-            .workspaceObjects(getAdminWorkspaceObjects(dbWorkspace.getWorkspaceId()))
-            .cloudStorage(adminWorkspaceCloudStorageCounts);
-
-    final RawlsWorkspaceDetails firecloudWorkspace =
-        fireCloudService
-            .getWorkspaceAsService(workspaceNamespace, workspaceFirecloudName)
-            .getWorkspace();
-
-    Workspace workspace =
-        workspaceMapper.toApiWorkspace(dbWorkspace, firecloudWorkspace, initialCreditsService);
+    Workspace workspace = workspaceMapper.toApiWorkspace(dbWorkspace, null, initialCreditsService);
 
     return new WorkspaceAdminView()
         .workspace(workspace)
         .workspaceDatabaseId(dbWorkspace.getWorkspaceId())
         .collaborators(collaborators)
-        .resources(adminWorkspaceResources)
         .activeStatus(dbWorkspace.getWorkspaceActiveStatusEnum());
   }
 
@@ -295,216 +187,6 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
                             .map(ts -> ts.getTime())
                             .orElse(null)))
         .toList();
-  }
-
-  @Override
-  public String getReadOnlyNotebook(
-      String workspaceNamespace, String notebookNameWithFileExtension, AccessReason accessReason) {
-    if (StringUtils.isBlank(accessReason.getReason())) {
-      throw new BadRequestException("Notebook viewing access reason is required");
-    }
-
-    final String workspaceName =
-        getWorkspaceByNamespaceOrThrow(workspaceNamespace).getFirecloudName();
-    adminAuditor.fireViewNotebookAction(
-        workspaceNamespace, workspaceName, notebookNameWithFileExtension, accessReason);
-    return notebooksService.adminGetReadOnlyHtml(
-        workspaceNamespace, workspaceName, notebookNameWithFileExtension);
-  }
-
-  @Override
-  public void setAdminLockedState(
-      String workspaceNamespace, AdminLockingRequest adminLockingRequest) {
-    log.info(String.format("called setAdminLockedState on wsns %s", workspaceNamespace));
-
-    DbWorkspace dbWorkspace =
-        workspaceDao.save(
-            getWorkspaceByNamespaceOrThrow(workspaceNamespace)
-                .setAdminLocked(true)
-                .setAdminLockedReason(adminLockingRequest.getRequestReason()));
-    adminAuditor.fireLockWorkspaceAction(dbWorkspace.getWorkspaceId(), adminLockingRequest);
-
-    try {
-      mailService.sendWorkspaceAdminLockingEmail(
-          dbWorkspace,
-          adminLockingRequest.getRequestReason(),
-          workspaceService.getWorkspaceOwnerList(dbWorkspace));
-    } catch (final MessagingException e) {
-      log.log(Level.WARNING, e.getMessage());
-    }
-  }
-
-  @Override
-  public void setAdminUnlockedState(String workspaceNamespace) {
-    log.info(String.format("called setAdminUnlockedState on wsns %s", workspaceNamespace));
-
-    DbWorkspace dbWorkspace =
-        workspaceDao.save(getWorkspaceByNamespaceOrThrow(workspaceNamespace).setAdminLocked(false));
-    adminAuditor.fireUnlockWorkspaceAction(dbWorkspace.getWorkspaceId());
-  }
-
-  @Override
-  public void publishWorkspaceViaDB(
-      String workspaceNamespace, PublishWorkspaceRequest publishWorkspaceRequest) {
-    final DbWorkspace dbWorkspace =
-        workspaceDao
-            .getByNamespace(workspaceNamespace)
-            .orElseThrow(
-                () ->
-                    new NotFoundException(
-                        String.format("Workspace Namespace %s was not found", workspaceNamespace)));
-
-    featuredWorkspaceDao
-        .findByWorkspace(dbWorkspace)
-        .ifPresentOrElse(
-            dbFeaturedWorkspace -> {
-              // Check if category in database is same as requested: If true do nothing, else update
-              // database
-              DbFeaturedCategory requestedCategory =
-                  featuredWorkspaceMapper.toDbFeaturedCategory(
-                      publishWorkspaceRequest.getCategory());
-
-              DbFeaturedCategory existingCategory = dbFeaturedWorkspace.getCategory();
-              if (existingCategory.equals(requestedCategory)) {
-                log.warning(
-                    String.format(
-                        "Workspace %s is already published in the same category",
-                        workspaceNamespace));
-                return;
-              }
-
-              log.info(
-                  String.format(
-                      "Featured Workspace %s under category %s will be re-published by Admin under new category %s ",
-                      workspaceNamespace, existingCategory, requestedCategory));
-              DbFeaturedWorkspace dbFeaturedWorkspaceToUpdate =
-                  featuredWorkspaceMapper.toDbFeaturedWorkspace(
-                      dbFeaturedWorkspace, publishWorkspaceRequest);
-              publishWorkspace(dbFeaturedWorkspaceToUpdate, existingCategory.toString());
-            },
-            () -> {
-              // Update Acl in firecloud so that everyone can view the workspace
-              fireCloudService.updateWorkspaceAclForPublishing(
-                  dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName(), true);
-              DbFeaturedWorkspace dbFeaturedWorkspaceToSave =
-                  featuredWorkspaceMapper.toDbFeaturedWorkspace(
-                      publishWorkspaceRequest, dbWorkspace);
-              publishWorkspace(dbFeaturedWorkspaceToSave, null);
-            });
-  }
-
-  private void publishWorkspace(
-      DbFeaturedWorkspace dbFeaturedWorkspace, @Nullable String prevCategoryIfAny) {
-    DbWorkspace dbWorkspace = dbFeaturedWorkspace.getWorkspace();
-
-    FeaturedWorkspaceCategory requestedCategory =
-        featuredWorkspaceMapper.toFeaturedWorkspaceCategory(dbFeaturedWorkspace.getCategory());
-
-    // Save in database
-    featuredWorkspaceDao.save(dbFeaturedWorkspace);
-
-    // Fire Publish action type Audit action
-    adminAuditor.firePublishWorkspaceAction(
-        dbWorkspace.getWorkspaceId(), requestedCategory.toString(), prevCategoryIfAny);
-    log.info(
-        String.format(
-            "Workspace %s has been published by Admin", dbWorkspace.getWorkspaceNamespace()));
-
-    // send an email to all workspace owners to let them know that the workspace has been
-    // published, but only if it's a newly published Community Workspace
-
-    if (requestedCategory.equals(FeaturedWorkspaceCategory.COMMUNITY)
-        && prevCategoryIfAny == null) {
-      try {
-        mailService.sendPublishCommunityWorkspaceEmails(
-            dbWorkspace, workspaceService.getWorkspaceOwnerList(dbWorkspace));
-      } catch (final MessagingException e) {
-        log.log(Level.WARNING, e.getMessage());
-      }
-    }
-  }
-
-  @Override
-  public void unpublishWorkspaceViaDB(String workspaceNamespace) {
-    final DbWorkspace dbWorkspace =
-        workspaceDao
-            .getByNamespace(workspaceNamespace)
-            .orElseThrow(
-                () ->
-                    new NotFoundException(
-                        String.format("Workspace Namespace %s was not found", workspaceNamespace)));
-    Optional<DbFeaturedWorkspace> dbFeaturedWorkspaceOptional =
-        featuredWorkspaceDao.findByWorkspace(dbWorkspace);
-
-    dbFeaturedWorkspaceOptional.ifPresentOrElse(
-        dbFeaturedWorkspace -> {
-          String featuredCategory = dbFeaturedWorkspace.getCategory().toString();
-
-          fireCloudService.updateWorkspaceAclForPublishing(
-              dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName(), false);
-
-          featuredWorkspaceDao.delete(dbFeaturedWorkspace);
-          adminAuditor.fireUnpublishWorkspaceAction(dbWorkspace.getWorkspaceId(), featuredCategory);
-          log.info(String.format("Workspace %s has been Unpublished by Admin", workspaceNamespace));
-
-          // Send email to all workspace owners to let them know workspace has been unpublished
-          try {
-            mailService.sendAdminUnpublishWorkspaceEmails(
-                dbWorkspace, workspaceService.getWorkspaceOwnerList(dbWorkspace));
-          } catch (final MessagingException e) {
-            log.log(Level.WARNING, e.getMessage());
-          }
-        },
-        () ->
-            // If there is no entry in featuredWorkspace table i.e workspace has been unpublished do
-            // nothing
-            log.warning(String.format("Workspace %s is already Unpublished", workspaceNamespace)));
-  }
-
-  // NOTE: may be an undercount since we only retrieve the first Page of Storage List results
-  private int getNonNotebookFileCount(String bucketName) {
-    return (int)
-        cloudStorageClient.getBlobPage(bucketName).stream()
-            .filter(((Predicate<Blob>) notebooksService::isManagedNotebookBlob).negate())
-            .count();
-  }
-
-  // NOTE: may be an undercount since we only retrieve the first Page of Storage List results
-  private long getStorageSizeBytes(String bucketName) {
-    return cloudStorageClient.getBlobPage(bucketName).stream()
-        .map(BlobInfo::getSize)
-        .reduce(0L, Long::sum);
-  }
-
-  // This is somewhat awkward, as we want to tolerate collaborators who aren't in the database
-  // anymore.
-  // TODO(jaycarlton): is this really what we want, or can we make this return an Optional that's
-  // empty
-  // when the user isn't in the DB. The assumption is that the fields agree between the UserRole and
-  // the DbUser, but we don't check that here.
-  private WorkspaceUserAdminView toWorkspaceUserAdminView(
-      UserRole userRole, @Nullable DbUser userMaybe) {
-    return userMaybe == null
-        ?
-        // the MapStruct-generated method won't handle a partial conversion
-        new WorkspaceUserAdminView()
-            .role(userRole.getRole())
-            .userModel(userMapper.toApiUser(userRole, null))
-        : userMapper.toWorkspaceUserAdminView(userMaybe, userRole);
-  }
-
-  @Override
-  public void updateBillingToCredits(String workspaceNamespace, String terraName) {
-    try {
-      DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, terraName);
-      workspaceService.updateWorkspaceBillingAccount(
-          dbWorkspace,
-          workbenchConfigProvider.get().billing.initialCreditsBillingAccountName(),
-          true);
-    } catch (ServerErrorException e) {
-      throw new ServerErrorException(
-          "Could not update the billing account for " + workspaceNamespace, e);
-    }
   }
 
   @Override

@@ -40,9 +40,6 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudMe;
-import org.pmiops.workbench.firecloud.model.FirecloudUserInfo;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.user.DevUserRegistrationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,7 +73,6 @@ public class AuthInterceptorTest {
   private static final long USER_ID = 123L;
 
   @MockitoBean private UserInfoService userInfoService;
-  @MockitoBean private FireCloudService fireCloudService;
   @MockitoBean private UserDao userDao;
   @MockitoBean private DevUserRegistrationService devUserRegistrationService;
 
@@ -210,36 +206,6 @@ public class AuthInterceptorTest {
   }
 
   @Test
-  public void preHandleGet_firecloudLookupFails() {
-    mockGetCallWithBearerToken();
-
-    Userinfo userInfo = new Userinfo();
-    userInfo.setEmail("bob@bad-domain.org");
-    when(userInfoService.getUserInfo("foo")).thenReturn(userInfo);
-    when(fireCloudService.getMe()).thenThrow(new NotFoundException());
-
-    assertThrows(
-        NotFoundException.class,
-        () -> interceptor.preHandle(mockRequest, mockResponse, mockHandler));
-  }
-
-  @Test
-  public void preHandleGet_firecloudLookupSucceeds() throws Exception {
-    mockGetCallWithBearerToken();
-    Userinfo userInfo = new Userinfo();
-    userInfo.setEmail("bob@bad-domain.org");
-    when(userInfoService.getUserInfo("foo")).thenReturn(userInfo);
-    FirecloudUserInfo fcUserInfo = new FirecloudUserInfo();
-    fcUserInfo.setUserEmail("bob@fake-domain.org");
-    FirecloudMe me = new FirecloudMe();
-    me.setUserInfo(fcUserInfo);
-    when(fireCloudService.getMe()).thenReturn(me);
-    when(userDao.findUserByUsername("bob@fake-domain.org")).thenReturn(user);
-
-    assertThat(interceptor.preHandle(mockRequest, mockResponse, mockHandler)).isTrue();
-  }
-
-  @Test
   public void preHandleGet_isVwbSA() throws Exception {
     mockGetCallWithBearerToken();
     workbenchConfig.vwb.exfilManagerServiceAccount = "exfil@vwb.org";
@@ -252,23 +218,6 @@ public class AuthInterceptorTest {
     when(mockRequest.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn("Bearer foo");
 
     assertThat(interceptor.preHandle(mockRequest, mockResponse, mockHandler)).isTrue();
-  }
-
-  @Test
-  public void preHandleGet_firecloudLookupSucceedsNoUserRecordWrongDomain() throws Exception {
-    mockGetCallWithBearerToken();
-    Userinfo userInfo = new Userinfo();
-    userInfo.setEmail("bob@bad-domain.org");
-    when(userInfoService.getUserInfo("foo")).thenReturn(userInfo);
-    FirecloudUserInfo fcUserInfo = new FirecloudUserInfo();
-    fcUserInfo.setUserEmail("bob@also-bad-domain.org");
-    FirecloudMe me = new FirecloudMe();
-    me.setUserInfo(fcUserInfo);
-    when(fireCloudService.getMe()).thenReturn(me);
-    when(userDao.findUserByUsername("bob@also-bad-domain.org")).thenReturn(null);
-
-    assertThat(interceptor.preHandle(mockRequest, mockResponse, mockHandler)).isFalse();
-    verify(mockResponse).sendError(HttpServletResponse.SC_UNAUTHORIZED);
   }
 
   private void mockUserInfoSuccess() {

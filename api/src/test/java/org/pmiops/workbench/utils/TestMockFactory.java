@@ -2,7 +2,6 @@ package org.pmiops.workbench.utils;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.pmiops.workbench.utils.BillingUtils.fullBillingAccountName;
@@ -17,7 +16,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.UUID;
 import org.javers.common.collections.Lists;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.db.dao.AccessModuleDao;
@@ -30,7 +28,6 @@ import org.pmiops.workbench.db.model.DbFeaturedWorkspace.DbFeaturedCategory;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserCodeOfConductAgreement;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.DemographicSurveyV2;
 import org.pmiops.workbench.model.DisseminateResearchEnum;
 import org.pmiops.workbench.model.EducationV2;
@@ -44,9 +41,7 @@ import org.pmiops.workbench.model.SexualOrientationV2;
 import org.pmiops.workbench.model.User;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.YesNoPreferNot;
-import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
-import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 
 public class TestMockFactory {
   public static final String WORKSPACE_BUCKET_NAME = "fc-secure-111111-2222-AAAA-BBBB-000000000000";
@@ -157,37 +152,6 @@ public class TestMockFactory {
         .workspaceId(WORKSPACE_TERRA_UUID)
         .bucketName(WORKSPACE_BUCKET_NAME)
         .googleProject(DEFAULT_GOOGLE_PROJECT);
-  }
-
-  public static void stubCreateFcWorkspace(FireCloudService fireCloudService) {
-    doAnswer(
-            invocation -> {
-              String capturedWorkspaceNamespace = (String) invocation.getArguments()[0];
-              String capturedWorkspaceTerraName = (String) invocation.getArguments()[1];
-              RawlsWorkspaceDetails fcWorkspace =
-                  createTerraWorkspace(
-                      capturedWorkspaceNamespace, capturedWorkspaceTerraName, null);
-
-              RawlsWorkspaceResponse fcResponse = new RawlsWorkspaceResponse();
-              fcResponse.setWorkspace(fcWorkspace);
-              fcResponse.setAccessLevel(RawlsWorkspaceAccessLevel.OWNER);
-
-              doReturn(fcResponse)
-                  .when(fireCloudService)
-                  .getWorkspace(capturedWorkspaceNamespace, capturedWorkspaceTerraName);
-              return fcWorkspace;
-            })
-        .when(fireCloudService)
-        .createWorkspace(anyString(), anyString(), anyString());
-  }
-
-  public static void stubCreateBillingProject(FireCloudService fireCloudService) {
-    stubCreateBillingProject(fireCloudService, UUID.randomUUID().toString());
-  }
-
-  public static void stubCreateBillingProject(
-      FireCloudService fireCloudService, String billingProjectId) {
-    doReturn(billingProjectId).when(fireCloudService).createBillingProjectName();
   }
 
   public static Cloudbilling createMockedCloudbilling() {
