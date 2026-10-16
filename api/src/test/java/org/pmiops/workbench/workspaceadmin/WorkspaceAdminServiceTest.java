@@ -13,8 +13,10 @@ import com.google.monitoring.v3.TimeInterval;
 import com.google.monitoring.v3.TimeSeries;
 import com.google.monitoring.v3.TypedValue;
 import com.google.protobuf.util.Timestamps;
+import java.sql.Timestamp;
 import java.time.Duration;
 import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,10 +35,12 @@ import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.FeaturedWorkspaceDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.dao.WorkspaceRecoveryErrorLogDao;
 import org.pmiops.workbench.db.jdbc.ReportingQueryService;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.db.model.DbWorkspaceRecoveryErrorLog;
 import org.pmiops.workbench.google.CloudMonitoringService;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
@@ -51,6 +55,7 @@ import org.pmiops.workbench.model.CloudStorageTraffic;
 import org.pmiops.workbench.model.TimeSeriesPoint;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAdminView;
+import org.pmiops.workbench.model.WorkspaceRecoveryErrorLog;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.FeaturedWorkspaceMapper;
@@ -107,6 +112,7 @@ public class WorkspaceAdminServiceTest {
   @Autowired private CdrVersionDao cdrVersionDao;
   @Autowired private AccessTierDao accessTierDao;
   @Autowired private WorkspaceDao workspaceDao;
+  @Autowired private WorkspaceRecoveryErrorLogDao workspaceRecoveryErrorLogDao;
   @Autowired private WorkspaceAdminService workspaceAdminService;
 
   private DbCdrVersion cdrVersion;
@@ -202,5 +208,27 @@ public class WorkspaceAdminServiceTest {
     assertThat(workspaceDetailsResponse.getWorkspace().getName()).isEqualTo(WORKSPACE_DISPLAY_NAME);
     assertThat(workspaceDetailsResponse.getWorkspace().getDisplayName())
         .isEqualTo(WORKSPACE_DISPLAY_NAME);
+  }
+
+  @Test
+  public void getWorkspaceRecoveryErrorLogs_returnsNewestFirstAndLimitedTo50() {
+    long workspaceId = dbWorkspace.getWorkspaceId();
+    for (int i = 0; i < 55; i++) {
+      workspaceRecoveryErrorLogDao.save(
+          new DbWorkspaceRecoveryErrorLog()
+              .setWorkspaceId(workspaceId)
+              .setErrorType("RECOVERY_FAILED")
+              .setErrorMessage("error-" + i)
+              .setCreatedTime(new Timestamp(1000L + i)));
+    }
+
+    List<WorkspaceRecoveryErrorLog> logs =
+        workspaceAdminService.getWorkspaceRecoveryErrorLogs(WORKSPACE_NAMESPACE);
+
+    assertThat(logs).hasSize(50);
+    assertThat(logs.get(0).getErrorMessage()).isEqualTo("error-54");
+    assertThat(logs.get(49).getErrorMessage()).isEqualTo("error-5");
+    assertThat(logs.get(0).getWorkspaceId()).isEqualTo(workspaceId);
+    assertThat(logs.get(0).getErrorType()).isEqualTo("RECOVERY_FAILED");
   }
 }

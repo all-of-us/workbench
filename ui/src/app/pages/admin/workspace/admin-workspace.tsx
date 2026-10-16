@@ -25,6 +25,7 @@ import { showAIANResearchPurpose } from 'app/utils/workspace-utils';
 import { AdminWorkspaceRecoveryModal } from './admin-workspace-recovery-modal';
 import { BasicInformation } from './basic-information';
 import { Collaborators } from './collaborators';
+import { RecoveryErrorLogsTable } from './recovery-error-logs-table';
 import { WorkspaceArchiveInfo } from './workspace-archival-info';
 import { WorkspaceMigrationInfo } from './workspace-migration-info';
 
@@ -112,6 +113,10 @@ const AdminWorkspaceImpl = (props: Props) => {
             loadingCollaborators={loadingCollaborators}
             workspace={workspace}
             onRecover={() => setShowRecoveryModal(true)}
+          />
+          <RecoveryErrorLogsTable
+            namespace={workspace.namespace}
+            recoveryState={workspace.recoveryState}
           />
           <Accordion>
             <AccordionTab header='Research Purpose'>

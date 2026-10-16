@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+    <changeSet author="alaidaa" id="changelog-289-add-workspace-recovery-error-log-table">
+        <createTable tableName="workspace_recovery_error_log">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="workspace_id" type="bigint">
+                <constraints
+                        nullable="false"
+                        foreignKeyName="fk_workspace_recovery_error_log_workspace_id"
+                        references="workspace(workspace_id)"
+                        deleteCascade="true"/>
+            </column>
+            <column name="error_message" type="varchar(1024)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="error_type" type="varchar(128)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_time" type="datetime" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createIndex
+                indexName="idx_workspace_recovery_error_log_workspace_id"
+                tableName="workspace_recovery_error_log">
+            <column name="workspace_id"/>
+        </createIndex>
+
+        <createIndex
+                indexName="idx_workspace_recovery_error_log_created_time"
+                tableName="workspace_recovery_error_log">
+            <column name="created_time"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>
+

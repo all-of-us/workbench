@@ -27,6 +27,7 @@ import org.pmiops.workbench.config.WorkbenchConfig.VwbConfig.CdrVersionForMigrat
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceBucketArchiveDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.dao.WorkspaceRecoveryErrorLogDao;
 import org.pmiops.workbench.db.model.*;
 import org.pmiops.workbench.google.StorageTransferClient;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
@@ -43,6 +44,7 @@ import org.pmiops.workbench.wsmanager.model.CreatedControlledGcpGcsBucket;
 import org.pmiops.workbench.wsmanager.model.GcpGcsBucketAttributes;
 import org.pmiops.workbench.wsmanager.model.GcpGcsBucketResource;
 import org.pmiops.workbench.wsmanager.model.JobReport;
+import org.pmiops.workbench.wsmanager.model.WorkspaceDescription;
 
 @ExtendWith(MockitoExtension.class)
 public class WorkspaceMigrationServiceImplTest {
@@ -83,6 +85,7 @@ public class WorkspaceMigrationServiceImplTest {
   @Mock private StorageTransferClient storageTransferClient;
   @Mock private TaskQueueService taskQueueService;
   @Mock private WorkspaceBucketArchiveDao workspaceBucketArchiveDao;
+  @Mock private WorkspaceRecoveryErrorLogDao workspaceRecoveryErrorLogDao;
   @Mock private MailService mailService;
   @Mock private WorkspaceService workspaceService;
   // Clock MOCK
@@ -166,6 +169,14 @@ public class WorkspaceMigrationServiceImplTest {
     assertThat(ex.getMessage()).contains("Recovery failed to start");
     assertThat(ex.getCause()).isNotNull();
     assertThat(ex.getCause().getMessage()).contains("Archive metadata not found");
+
+    verify(workspaceRecoveryErrorLogDao)
+        .save(
+            argThat(
+                log ->
+                    "ARCHIVE_METADATA_NOT_FOUND".equals(log.getErrorType())
+                        && "Archive metadata not found".equals(log.getErrorMessage())
+                        && log.getWorkspaceId() == 123L));
   }
 
   @Test
@@ -237,6 +248,105 @@ public class WorkspaceMigrationServiceImplTest {
     verify(workspaceDao)
         .save(argThat(ws -> WorkspaceRecoveryStatus.FAILED.name().equals(ws.getRecoveryState())));
 
+    verify(workspaceRecoveryErrorLogDao)
+        .save(
+            argThat(
+                log ->
+                    "TRANSFER_FAILED".equals(log.getErrorType())
+                        && log.getErrorMessage().startsWith("Recovery transfer failed")));
+
     verify(storageTransferClient).deleteTransferJob(SERVER_PROJECT, RECOVERY_JOB_NAME);
+  }
+
+  @Test
+  void startWorkspaceRecovery_logsBqCloneFailed() {
+    DbUser creator = new DbUser().setUserId(42L).setUsername(CREATOR);
+    dbWorkspace.setWorkspaceId(123L);
+    dbWorkspace.setCreator(creator);
+    dbWorkspace.setRecoveryState(WorkspaceRecoveryStatus.REQUESTED.name());
+
+    when(workspaceBucketArchiveDao.findByLegacyWorkspaceId(anyLong()))
+        .thenReturn(
+            List.of(
+                new DbWorkspaceBucketArchive()
+                    .setStatus(WorkspaceArchiveStatus.ARCHIVED.toString())
+                    .setGcsPath(ARCHIVE_PATH)));
+    when(userDao.findUserByUserId(eq(creator.getUserId()))).thenReturn(creator);
+    when(wsmClient.createWorkspaceAsService(any(), anyString()))
+        .thenReturn(
+            new WorkspaceDescription()
+                .id(UUID.randomUUID())
+                .userFacingId(UUID.randomUUID().toString()));
+    when(auditQueryService.getWorkspaceUsersById(anyLong())).thenReturn(List.of());
+    doThrow(new RuntimeException("bq failed"))
+        .when(wsmClient)
+        .cloneBQDataset(any(), anyString(), any(), anyString());
+
+    RuntimeException ex =
+        assertThrows(
+            RuntimeException.class,
+            () -> service.startWorkspaceRecovery(NAMESPACE, RESEARCH_PURPOSE, POD_ID));
+
+    assertThat(ex.getMessage()).contains("Recovery failed to start");
+    verify(workspaceRecoveryErrorLogDao)
+        .save(
+            argThat(
+                log ->
+                    "BQ_CLONE_FAILED".equals(log.getErrorType())
+                        && "BQ clone failed".equals(log.getErrorMessage())
+                        && log.getWorkspaceId() == 123L));
+  }
+
+  @Test
+  void startWorkspaceRecovery_logsGenericRecoveryFailed() {
+    DbUser creator = new DbUser().setUserId(42L).setUsername(CREATOR);
+    dbWorkspace.setWorkspaceId(123L);
+    dbWorkspace.setCreator(creator);
+    dbWorkspace.setRecoveryState(WorkspaceRecoveryStatus.REQUESTED.name());
+
+    when(workspaceBucketArchiveDao.findByLegacyWorkspaceId(anyLong()))
+        .thenReturn(
+            List.of(
+                new DbWorkspaceBucketArchive()
+                    .setStatus(WorkspaceArchiveStatus.ARCHIVED.toString())
+                    .setGcsPath(ARCHIVE_PATH)));
+    when(userDao.findUserByUserId(eq(creator.getUserId()))).thenReturn(creator);
+    doThrow(new RuntimeException("workspace creation boom"))
+        .when(wsmClient)
+        .createWorkspaceAsService(any(), anyString());
+
+    assertThrows(
+        RuntimeException.class,
+        () -> service.startWorkspaceRecovery(NAMESPACE, RESEARCH_PURPOSE, POD_ID));
+
+    verify(workspaceRecoveryErrorLogDao)
+        .save(
+            argThat(
+                log ->
+                    "RECOVERY_FAILED".equals(log.getErrorType())
+                        && log.getErrorMessage().contains("Recovery failed to start")
+                        && log.getErrorMessage().contains("workspace creation boom")
+                        && log.getWorkspaceId() == 123L));
+  }
+
+  @Test
+  void startWorkspaceRecovery_preservesOriginalErrorWhenLogPersistenceFails() {
+    DbWorkspace dbWorkspace = new DbWorkspace();
+    dbWorkspace.setWorkspaceId(123L);
+    dbWorkspace.setRecoveryState(WorkspaceRecoveryStatus.REQUESTED.name());
+    when(workspaceDao.findByWorkspaceNamespace(eq(NAMESPACE))).thenReturn(dbWorkspace);
+    when(workspaceBucketArchiveDao.findByLegacyWorkspaceId(anyLong())).thenReturn(List.of());
+    doThrow(new RuntimeException("db down"))
+        .when(workspaceRecoveryErrorLogDao)
+        .save(any(DbWorkspaceRecoveryErrorLog.class));
+
+    RuntimeException ex =
+        assertThrows(
+            RuntimeException.class,
+            () -> service.startWorkspaceRecovery(NAMESPACE, RESEARCH_PURPOSE, POD_ID));
+
+    assertThat(ex.getMessage()).contains("Recovery failed to start");
+    assertThat(ex.getCause()).isNotNull();
+    assertThat(ex.getCause().getMessage()).contains("Archive metadata not found");
   }
 }

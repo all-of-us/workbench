@@ -7,6 +7,7 @@ import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.CloudStorageTraffic;
 import org.pmiops.workbench.model.WorkspaceAdminView;
 import org.pmiops.workbench.model.WorkspaceAuditLogQueryResponse;
+import org.pmiops.workbench.model.WorkspaceRecoveryErrorLog;
 import org.pmiops.workbench.model.WorkspaceUserAdminView;
 import org.pmiops.workbench.model.WorkspaceWaitingForRetrievalListResponse;
 import org.pmiops.workbench.workspaceadmin.WorkspaceAdminService;
@@ -70,5 +71,12 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
   @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
   public ResponseEntity<List<WorkspaceUserAdminView>> getWorkspaceCollaborators(String namespace) {
     return ResponseEntity.ok(workspaceAdminService.getWorkspaceCollaborators(namespace));
+  }
+
+  @Override
+  @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
+  public ResponseEntity<List<WorkspaceRecoveryErrorLog>> getWorkspaceRecoveryErrorLogs(
+      String namespace) {
+    return ResponseEntity.ok(workspaceAdminService.getWorkspaceRecoveryErrorLogs(namespace));
   }
 }
