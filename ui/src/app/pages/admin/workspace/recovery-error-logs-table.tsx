@@ -3,19 +3,14 @@ import { useEffect, useState } from 'react';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 
-import { Workspace, WorkspaceRecoveryStatus } from 'generated/fetch';
+import {
+  Workspace,
+  WorkspaceRecoveryErrorLog,
+  WorkspaceRecoveryStatus,
+} from 'generated/fetch';
 
 import { Spinner } from 'app/components/spinners';
 import { workspaceAdminApi } from 'app/services/swagger-fetch-clients';
-
-interface WorkspaceRecoveryErrorLog {
-  id?: number;
-  workspaceId?: number;
-  errorMessage?: string;
-  errorType?: string;
-  stackTrace?: string;
-  createdTime?: string;
-}
 
 interface Props {
   workspace: Workspace;
@@ -25,9 +20,6 @@ export const RecoveryErrorLogsTable = ({ workspace }: Props) => {
   const [logs, setLogs] = useState<WorkspaceRecoveryErrorLog[]>([]);
   const [loading, setLoading] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
-  const [expandedRows, setExpandedRows] = useState<{ [key: number]: boolean }>(
-    {}
-  );
 
   useEffect(() => {
     // Only fetch logs if recovery status is FAILED
@@ -84,38 +76,17 @@ export const RecoveryErrorLogsTable = ({ workspace }: Props) => {
       {!loading && !fetchError && logs.length > 0 && (
         <DataTable
           value={logs}
-          expandedRows={expandedRows}
-          onRowToggle={(e) => setExpandedRows(e.data)}
-          rowExpansionTemplate={(log: WorkspaceRecoveryErrorLog) => (
-            <div style={{ padding: '1rem', backgroundColor: '#f5f5f5' }}>
-              <h4>Error Details for {log.errorType}</h4>
-              {log.stackTrace && (
-                <div>
-                  <h5>Stack Trace:</h5>
-                  <pre
-                    style={{
-                      backgroundColor: '#fff',
-                      padding: '1rem',
-                      borderRadius: '4px',
-                      overflow: 'auto',
-                      maxHeight: '400px',
-                      border: '1px solid #ddd',
-                      fontSize: '0.85rem',
-                      fontFamily: 'monospace',
-                    }}
-                  >
-                    {log.stackTrace}
-                  </pre>
-                </div>
-              )}
-            </div>
-          )}
           scrollable
           paginator
           rows={10}
           rowsPerPageOptions={[5, 10, 20]}
         >
-          <Column expander style={{ width: '3em' }} />
+          <Column field='id' header='ID' style={{ minWidth: '90px' }} />
+          <Column
+            field='workspaceId'
+            header='Workspace ID'
+            style={{ minWidth: '140px' }}
+          />
           <Column
             field='errorType'
             header='Error Type'
@@ -146,9 +117,11 @@ export const RecoveryErrorLogsTable = ({ workspace }: Props) => {
             field='createdTime'
             header='Time'
             style={{ minWidth: '200px' }}
-            body={(log: WorkspaceRecoveryErrorLog) => {
-              return new Date(log.createdTime).toLocaleString();
-            }}
+            body={(log: WorkspaceRecoveryErrorLog) =>
+              log.createdTime
+                ? new Date(log.createdTime).toLocaleString()
+                : 'N/A'
+            }
           />
         </DataTable>
       )}

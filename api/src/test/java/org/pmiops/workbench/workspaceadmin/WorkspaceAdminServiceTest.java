@@ -20,6 +20,7 @@ import jakarta.mail.MessagingException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,12 +40,14 @@ import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.FeaturedWorkspaceDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.dao.WorkspaceRecoveryErrorLogDao;
 import org.pmiops.workbench.db.jdbc.ReportingQueryService;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbFeaturedWorkspace;
 import org.pmiops.workbench.db.model.DbFeaturedWorkspace.DbFeaturedCategory;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.db.model.DbWorkspaceRecoveryErrorLog;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.google.CloudMonitoringService;
@@ -128,6 +131,7 @@ public class WorkspaceAdminServiceTest {
   @Autowired private CdrVersionDao cdrVersionDao;
   @Autowired private AccessTierDao accessTierDao;
   @Autowired private WorkspaceDao workspaceDao;
+  @Autowired private WorkspaceRecoveryErrorLogDao workspaceRecoveryErrorLogDao;
   @Autowired private WorkspaceAdminService workspaceAdminService;
 
   private DbCdrVersion cdrVersion;
@@ -459,6 +463,25 @@ public class WorkspaceAdminServiceTest {
         .updateWorkspaceAclForPublishing(
             mockDbWorkspace.getWorkspaceNamespace(), mockDbWorkspace.getFirecloudName(), false);
     verify(mockFirecloudService, never()).updateWorkspaceACL(anyString(), anyString(), any());
+  }
+
+  @Test
+  public void testGetWorkspaceRecoveryErrorLogs_returnsEssentialFieldsOnly() {
+    workspaceRecoveryErrorLogDao.save(
+        new DbWorkspaceRecoveryErrorLog(
+            dbWorkspace.getWorkspaceId(),
+            "Archive metadata not found",
+            "ARCHIVE_METADATA_NOT_FOUND"));
+
+    List<org.pmiops.workbench.model.WorkspaceRecoveryErrorLog> logs =
+        workspaceAdminService.getWorkspaceRecoveryErrorLogs(WORKSPACE_NAMESPACE);
+
+    assertThat(logs).isNotEmpty();
+    org.pmiops.workbench.model.WorkspaceRecoveryErrorLog first = logs.get(0);
+    assertThat(first.getWorkspaceId()).isEqualTo(dbWorkspace.getWorkspaceId());
+    assertThat(first.getErrorMessage()).isEqualTo("Archive metadata not found");
+    assertThat(first.getErrorType()).isEqualTo("ARCHIVE_METADATA_NOT_FOUND");
+    assertThat(first.getCreatedTime()).isNotNull();
   }
 
   private DbWorkspace stubWorkspace(String namespace, String name) {

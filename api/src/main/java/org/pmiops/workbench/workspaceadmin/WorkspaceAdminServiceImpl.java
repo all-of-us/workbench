@@ -564,7 +564,6 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
                     .workspaceId(dbLog.getWorkspaceId())
                     .errorMessage(dbLog.getErrorMessage())
                     .errorType(dbLog.getErrorType())
-                    .stackTrace(dbLog.getStackTrace())
                     .createdTime(
                         dbLog.getCreatedTime() != null
                             ? dbLog.getCreatedTime().toInstant().toString()

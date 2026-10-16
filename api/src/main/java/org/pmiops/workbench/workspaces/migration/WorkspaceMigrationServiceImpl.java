@@ -83,6 +83,8 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
   private static final String REGISTERED_TIER_ARCHIVE_BUCKET =
       "all-of-us-archive-rt-bucket-wb-potent-lentil-2807";
 
+  private record RecoveryErrorDetails(String errorMessage, String errorType) {}
+
   @Autowired
   public WorkspaceMigrationServiceImpl(
       WsmClient wsmClient,
@@ -1460,12 +1462,11 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
 
       logger.log(Level.SEVERE, namespace + ": Recovery failed", e);
 
+      RecoveryErrorDetails errorDetails = classifyRecoveryError(e);
+
       // Log error details to the database
       logRecoveryError(
-          dbWorkspace.getWorkspaceId(),
-          "Recovery operation failed: " + e.getMessage(),
-          e.getClass().getSimpleName(),
-          getStackTrace(e));
+          dbWorkspace.getWorkspaceId(), errorDetails.errorMessage(), errorDetails.errorType());
 
       dbWorkspace.setRecoveryState(WorkspaceRecoveryStatus.FAILED.name());
 
@@ -1477,25 +1478,50 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
     }
   }
 
-  private void logRecoveryError(
-      long workspaceId, String errorMessage, String errorType, String stackTrace) {
+  private void logRecoveryError(long workspaceId, String errorMessage, String errorType) {
     try {
       DbWorkspaceRecoveryErrorLog errorLog =
-          new DbWorkspaceRecoveryErrorLog(workspaceId, errorMessage, errorType, stackTrace);
+          new DbWorkspaceRecoveryErrorLog(workspaceId, errorMessage, errorType);
       workspaceRecoveryErrorLogDao.save(errorLog);
     } catch (Exception e) {
       logger.log(Level.WARNING, "Failed to log recovery error for workspace " + workspaceId, e);
     }
   }
 
-  private String getStackTrace(Exception e) {
-    if (e == null) {
+  private RecoveryErrorDetails classifyRecoveryError(Exception e) {
+    String rawMessage = Optional.ofNullable(e.getMessage()).orElse("Recovery operation failed");
+    String message = stripNamespacePrefix(rawMessage);
+
+    if (message.contains("Archive metadata not found")) {
+      return new RecoveryErrorDetails("Archive metadata not found", "ARCHIVE_METADATA_NOT_FOUND");
+    }
+
+    if (message.contains("Workspace is not archived")) {
+      return new RecoveryErrorDetails(message, "WORKSPACE_NOT_ARCHIVED");
+    }
+
+    if (message.contains("BQ clone failed")) {
+      return new RecoveryErrorDetails("BQ clone failed", "BQ_CLONE_FAILED");
+    }
+
+    return new RecoveryErrorDetails(message, "RECOVERY_FAILED");
+  }
+
+  private String stripNamespacePrefix(String message) {
+    if (message == null) {
       return null;
     }
-    java.io.StringWriter sw = new java.io.StringWriter();
-    java.io.PrintWriter pw = new java.io.PrintWriter(sw);
-    e.printStackTrace(pw);
-    return sw.toString();
+    int separator = message.indexOf(": ");
+    if (separator <= 0) {
+      return message;
+    }
+
+    String prefix = message.substring(0, separator);
+    if (prefix.contains(" ")) {
+      return message;
+    }
+
+    return message.substring(separator + 2);
   }
 
   @Override
@@ -1535,8 +1561,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
         logRecoveryError(
             dbWorkspace.getWorkspaceId(),
             "Storage transfer failed: " + transferOperation.getErrorBreakdownsList(),
-            "TRANSFER_FAILED",
-            null);
+            "TRANSFER_FAILED");
 
         dbWorkspace.setRecoveryState(WorkspaceRecoveryStatus.FAILED.name());
 

@@ -17,17 +17,14 @@ public class DbWorkspaceRecoveryErrorLog {
   private long workspaceId;
   private String errorMessage;
   private String errorType;
-  private String stackTrace;
   private Timestamp createdTime;
 
   public DbWorkspaceRecoveryErrorLog() {}
 
-  public DbWorkspaceRecoveryErrorLog(
-      long workspaceId, String errorMessage, String errorType, String stackTrace) {
+  public DbWorkspaceRecoveryErrorLog(long workspaceId, String errorMessage, String errorType) {
     this.workspaceId = workspaceId;
     this.errorMessage = errorMessage;
     this.errorType = errorType;
-    this.stackTrace = stackTrace;
   }
 
   @Id
@@ -69,16 +66,6 @@ public class DbWorkspaceRecoveryErrorLog {
 
   public DbWorkspaceRecoveryErrorLog setErrorType(String errorType) {
     this.errorType = errorType;
-    return this;
-  }
-
-  @Column(name = "stack_trace", nullable = true, columnDefinition = "TEXT")
-  public String getStackTrace() {
-    return stackTrace;
-  }
-
-  public DbWorkspaceRecoveryErrorLog setStackTrace(String stackTrace) {
-    this.stackTrace = stackTrace;
     return this;
   }
 

@@ -47,7 +47,9 @@ describe('RecoveryErrorLogsTable', () => {
     renderWithRouter(<RecoveryErrorLogsTable workspace={workspace} />);
 
     await waitFor(() => {
-      expect(screen.getByText('ARCHIVE_METADATA_NOT_FOUND')).toBeInTheDocument();
+      expect(
+        screen.getByText('ARCHIVE_METADATA_NOT_FOUND')
+      ).toBeInTheDocument();
     });
 
     expect(screen.getByText('ID')).toBeInTheDocument();
@@ -63,4 +65,3 @@ describe('RecoveryErrorLogsTable', () => {
     ).not.toBeInTheDocument();
   });
 });
-

@@ -17,7 +17,6 @@
         <constraints nullable="false"/>
       </column>
       <column name="error_type" type="VARCHAR(255)"/>
-      <column name="stack_trace" type="TEXT"/>
        <column name="created_time" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
          <constraints nullable="false"/>
        </column>

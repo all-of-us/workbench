@@ -4839,9 +4839,6 @@ components:
          errorType:
            type: string
            description: The type or category of the error
-         stackTrace:
-           type: string
-           description: The stack trace of the error for debugging
          createdTime:
            type: string
            description: Timestamp when the error was logged

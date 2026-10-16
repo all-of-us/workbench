@@ -92,7 +92,6 @@ public class WorkspaceMigrationServiceImplTest {
   @Mock private WorkspaceService workspaceService;
   @Mock private WorkspaceRecoveryErrorLogDao workspaceRecoveryErrorLogDao;
   @Mock private org.pmiops.workbench.actionaudit.ActionAuditQueryService actionAuditQueryService;
-  @Mock private org.pmiops.workbench.user.VwbUserService vwbUserService;
   // Clock MOCK
   @Mock private Clock clock;
 
@@ -503,6 +502,14 @@ public class WorkspaceMigrationServiceImplTest {
     assertThat(ex.getMessage()).contains("Recovery failed to start");
     assertThat(ex.getCause()).isNotNull();
     assertThat(ex.getCause().getMessage()).contains("Archive metadata not found");
+
+    verify(workspaceRecoveryErrorLogDao)
+        .save(
+            argThat(
+                errorLog ->
+                    errorLog.getWorkspaceId() == dbWorkspace.getWorkspaceId()
+                        && "Archive metadata not found".equals(errorLog.getErrorMessage())
+                        && "ARCHIVE_METADATA_NOT_FOUND".equals(errorLog.getErrorType())));
   }
 
   @Test
@@ -646,9 +653,8 @@ public class WorkspaceMigrationServiceImplTest {
             argThat(
                 errorLog ->
                     errorLog.getWorkspaceId() == dbWorkspace.getWorkspaceId()
-                        && errorLog.getErrorMessage().contains("BQ clone failed")
-                        && errorLog.getErrorType() != null
-                        && errorLog.getStackTrace() != null));
+                        && "BQ clone failed".equals(errorLog.getErrorMessage())
+                        && "BQ_CLONE_FAILED".equals(errorLog.getErrorType())));
   }
 
   @Test
