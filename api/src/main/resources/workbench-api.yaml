@@ -1052,6 +1052,27 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/WorkspaceUserAdminView'
+  /v1/admin/workspaces/{namespace}/recoveryErrorLogs:
+    get:
+      tags:
+        - workspaceAdmin
+      description: Retrieves all recovery error logs for a workspace
+      operationId: getWorkspaceRecoveryErrorLogs
+      parameters:
+        - name: namespace
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of workspace recovery error logs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WorkspaceRecoveryErrorLog'
   /v1/admin/egressEvents:
     post:
       tags:
@@ -3886,6 +3907,27 @@ components:
         - RECOVERING
         - RECOVERED
         - FAILED
+    WorkspaceRecoveryErrorLog:
+      type: object
+      description: Log entry for workspace recovery errors
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Unique identifier for this error log entry
+        workspaceId:
+          type: integer
+          format: int64
+          description: The ID of the workspace that encountered the error
+        errorMessage:
+          type: string
+          description: The error message describing what went wrong
+        errorType:
+          type: string
+          description: The type or category of the error
+        createdTime:
+          type: string
+          description: Timestamp when the error was logged
     WorkspaceBillingUsageResponse:
       required:
       - cost

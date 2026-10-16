@@ -8,6 +8,7 @@ import org.pmiops.workbench.model.AdminWorkspaceObjectsCounts;
 import org.pmiops.workbench.model.CloudStorageTraffic;
 import org.pmiops.workbench.model.WorkspaceAdminView;
 import org.pmiops.workbench.model.WorkspaceAuditLogQueryResponse;
+import org.pmiops.workbench.model.WorkspaceRecoveryErrorLog;
 import org.pmiops.workbench.model.WorkspaceUserAdminView;
 import org.pmiops.workbench.model.WorkspaceWaitingForRetrieval;
 
@@ -29,4 +30,6 @@ public interface WorkspaceAdminService {
   List<WorkspaceWaitingForRetrieval> getWorkspacesWaitingForRetrieval();
 
   List<WorkspaceUserAdminView> getWorkspaceCollaborators(String namespace);
+
+  List<WorkspaceRecoveryErrorLog> getWorkspaceRecoveryErrorLogs(String namespace);
 }

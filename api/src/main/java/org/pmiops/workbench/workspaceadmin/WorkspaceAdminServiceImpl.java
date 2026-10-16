@@ -16,8 +16,10 @@ import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.dao.WorkspaceRecoveryErrorLogDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.db.model.DbWorkspaceRecoveryErrorLog;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.google.CloudMonitoringService;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
@@ -28,6 +30,7 @@ import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceAdminView;
 import org.pmiops.workbench.model.WorkspaceAuditLogQueryResponse;
+import org.pmiops.workbench.model.WorkspaceRecoveryErrorLog;
 import org.pmiops.workbench.model.WorkspaceRecoveryStatus;
 import org.pmiops.workbench.model.WorkspaceUserAdminView;
 import org.pmiops.workbench.model.WorkspaceWaitingForRetrieval;
@@ -51,6 +54,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   private final UserMapper userMapper;
   private final UserDao userDao;
   private final WorkspaceDao workspaceDao;
+  private final WorkspaceRecoveryErrorLogDao workspaceRecoveryErrorLogDao;
   private final WorkspaceMapper workspaceMapper;
 
   @Autowired
@@ -64,6 +68,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
       UserMapper userMapper,
       UserDao userDao,
       WorkspaceDao workspaceDao,
+      WorkspaceRecoveryErrorLogDao workspaceRecoveryErrorLogDao,
       WorkspaceMapper workspaceMapper) {
     this.actionAuditQueryService = actionAuditQueryService;
     this.cloudMonitoringService = cloudMonitoringService;
@@ -74,6 +79,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     this.userMapper = userMapper;
     this.userDao = userDao;
     this.workspaceDao = workspaceDao;
+    this.workspaceRecoveryErrorLogDao = workspaceRecoveryErrorLogDao;
     this.workspaceMapper = workspaceMapper;
   }
 
@@ -215,5 +221,28 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
             })
         .filter(Objects::nonNull)
         .toList();
+  }
+
+  @Override
+  public List<WorkspaceRecoveryErrorLog> getWorkspaceRecoveryErrorLogs(String namespace) {
+    long workspaceId = getWorkspaceByNamespaceOrThrow(namespace).getWorkspaceId();
+    return workspaceRecoveryErrorLogDao
+        .findTop50ByWorkspaceIdOrderByCreatedTimeDesc(workspaceId)
+        .stream()
+        .map(this::toWorkspaceRecoveryErrorLog)
+        .toList();
+  }
+
+  private WorkspaceRecoveryErrorLog toWorkspaceRecoveryErrorLog(
+      DbWorkspaceRecoveryErrorLog dbWorkspaceRecoveryErrorLog) {
+    return new WorkspaceRecoveryErrorLog()
+        .id(dbWorkspaceRecoveryErrorLog.getId())
+        .workspaceId(dbWorkspaceRecoveryErrorLog.getWorkspaceId())
+        .errorType(dbWorkspaceRecoveryErrorLog.getErrorType())
+        .errorMessage(dbWorkspaceRecoveryErrorLog.getErrorMessage())
+        .createdTime(
+            Optional.ofNullable(dbWorkspaceRecoveryErrorLog.getCreatedTime())
+                .map(timestamp -> timestamp.toInstant().toString())
+                .orElse(null));
   }
 }
