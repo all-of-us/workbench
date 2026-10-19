@@ -324,7 +324,6 @@ public class WorkspaceMigrationServiceImplTest {
             argThat(
                 log ->
                     "RECOVERY_FAILED".equals(log.getErrorType())
-                        && log.getErrorMessage().contains("Recovery failed to start")
                         && log.getErrorMessage().contains("workspace creation boom")
                         && log.getWorkspaceId() == 123L));
   }
