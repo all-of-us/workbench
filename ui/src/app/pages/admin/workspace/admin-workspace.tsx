@@ -5,6 +5,7 @@ import { Accordion, AccordionTab } from 'primereact/accordion';
 import {
   WorkspaceActiveStatus,
   WorkspaceAdminView,
+  WorkspaceRecoveryStatus,
   WorkspaceUserAdminView,
 } from 'generated/fetch';
 
@@ -77,6 +78,24 @@ const AdminWorkspaceImpl = (props: Props) => {
     populateFederatedWorkspaceInformation();
   }, [props.match.params.ns]);
 
+  useEffect(() => {
+    if (
+      workspaceDetails?.workspace?.recoveryState !==
+      WorkspaceRecoveryStatus.RECOVERING
+    ) {
+      return;
+    }
+
+    const intervalId = window.setInterval(() => {
+      workspaceAdminApi()
+        .getWorkspaceAdminView(props.match.params.ns)
+        .then(setWorkspaceDetails)
+        .catch(handleDataLoadError);
+    }, 5000);
+
+    return () => window.clearInterval(intervalId);
+  }, [props.match.params.ns, workspaceDetails?.workspace?.recoveryState]);
+
   const populateWorkspaceDetails = async () => {
     const { ns } = props.match.params;
     setLoadingWorkspace(true);
@@ -118,7 +137,7 @@ const AdminWorkspaceImpl = (props: Props) => {
             namespace={workspace.namespace}
             recoveryState={workspace.recoveryState}
           />
-          <Accordion>
+          <Accordion style={{ marginTop: '1.5rem' }}>
             <AccordionTab header='Research Purpose'>
               <ResearchPurposeSection
                 {...{ researchPurpose }}

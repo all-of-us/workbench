@@ -17,6 +17,7 @@ interface Props {
 }
 
 const PAGE_SIZE = 10;
+const REFRESH_INTERVAL_MS = 5000;
 
 const formatTimestamp = (createdTime: string | number | undefined) => {
   if (createdTime === undefined || createdTime === null) {
@@ -45,43 +46,51 @@ export const RecoveryErrorLogsTable = ({ namespace, recoveryState }: Props) => {
   const activeRequestId = useRef(0);
 
   useEffect(() => {
-    activeRequestId.current += 1;
-    const requestId = activeRequestId.current;
+    let cancelled = false;
+
+    const loadLogs = () => {
+      activeRequestId.current += 1;
+      const requestId = activeRequestId.current;
+
+      setLoading(true);
+      setError(undefined);
+
+      workspaceAdminApi()
+        .getWorkspaceRecoveryErrorLogs(namespace)
+        .then((response) => {
+          if (!cancelled && requestId === activeRequestId.current) {
+            setLogs(response || []);
+          }
+        })
+        .catch(() => {
+          if (!cancelled && requestId === activeRequestId.current) {
+            setError(
+              'Failed to load recovery error logs. Please refresh and try again.'
+            );
+            setLogs([]);
+          }
+        })
+        .finally(() => {
+          if (!cancelled && requestId === activeRequestId.current) {
+            setLoading(false);
+          }
+        });
+    };
 
     if (!namespace || recoveryState !== WorkspaceRecoveryStatus.FAILED) {
+      activeRequestId.current += 1;
       setLogs([]);
       setError(undefined);
       setLoading(false);
       return;
     }
 
-    let cancelled = false;
-    setLoading(true);
-    setError(undefined);
-
-    workspaceAdminApi()
-      .getWorkspaceRecoveryErrorLogs(namespace)
-      .then((response) => {
-        if (!cancelled && requestId === activeRequestId.current) {
-          setLogs(response || []);
-        }
-      })
-      .catch(() => {
-        if (!cancelled && requestId === activeRequestId.current) {
-          setError(
-            'Failed to load recovery error logs. Please refresh and try again.'
-          );
-          setLogs([]);
-        }
-      })
-      .finally(() => {
-        if (!cancelled && requestId === activeRequestId.current) {
-          setLoading(false);
-        }
-      });
+    loadLogs();
+    const intervalId = window.setInterval(loadLogs, REFRESH_INTERVAL_MS);
 
     return () => {
       cancelled = true;
+      window.clearInterval(intervalId);
     };
   }, [namespace, recoveryState]);
 

@@ -107,7 +107,9 @@ describe('RecoveryErrorLogsTable', () => {
       />
     );
 
-    expect(screen.getByText('Loading')).toBeInTheDocument();
+    expect(
+      document.querySelector('.p-datatable-loading-overlay')
+    ).toBeInTheDocument();
 
     releaseRequest([]);
     await screen.findByText('No recovery errors found for this workspace.');
