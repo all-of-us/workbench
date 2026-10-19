@@ -388,11 +388,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
       if (e instanceof RecoveryException recoveryException) {
         saveRecoveryErrorLog(dbWorkspace, namespace, recoveryException.errorType, e.getMessage());
       } else {
-        saveRecoveryErrorLog(
-            dbWorkspace,
-            namespace,
-            "RECOVERY_FAILED",
-            namespace + ": Recovery failed to start: " + getSafeExceptionMessage(e));
+        saveRecoveryErrorLog(dbWorkspace, namespace, "RECOVERY_FAILED", getSafeExceptionMessage(e));
       }
 
       dbWorkspace.setRecoveryState(WorkspaceRecoveryStatus.FAILED.name());
