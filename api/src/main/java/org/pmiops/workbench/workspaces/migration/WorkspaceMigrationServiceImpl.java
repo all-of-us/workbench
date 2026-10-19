@@ -17,6 +17,7 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.VwbSaCleanupDao;
 import org.pmiops.workbench.db.dao.WorkspaceBucketArchiveDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.dao.WorkspaceRecoveryErrorLogDao;
 import org.pmiops.workbench.db.model.*;
 import org.pmiops.workbench.db.model.DbVwbSaCleanup.CleanupState;
 import org.pmiops.workbench.google.StorageTransferClient;
@@ -53,6 +54,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
   private final Provider<DbUser> userProvider;
   private final Clock clock;
   private final WorkspaceBucketArchiveDao workspaceBucketArchiveDao;
+  private final WorkspaceRecoveryErrorLogDao workspaceRecoveryErrorLogDao;
   private final ActionAuditQueryService actionAuditQueryService;
 
   @Autowired
@@ -70,6 +72,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
       Provider<DbUser> userProvider,
       Clock clock,
       WorkspaceBucketArchiveDao workspaceBucketArchiveDao,
+      WorkspaceRecoveryErrorLogDao workspaceRecoveryErrorLogDao,
       ActionAuditQueryService actionAuditQueryService) {
 
     this.wsmClient = wsmClient;
@@ -85,6 +88,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
     this.userProvider = userProvider;
     this.clock = clock;
     this.workspaceBucketArchiveDao = workspaceBucketArchiveDao;
+    this.workspaceRecoveryErrorLogDao = workspaceRecoveryErrorLogDao;
     this.actionAuditQueryService = actionAuditQueryService;
   }
 
@@ -165,14 +169,16 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
           workspaceBucketArchiveDao.findByLegacyWorkspaceId(dbWorkspace.getWorkspaceId());
 
       if (archives.isEmpty()) {
-        throw new RuntimeException(namespace + ": Archive metadata not found");
+        throw new RecoveryException(
+            "ARCHIVE_METADATA_NOT_FOUND", namespace + ": Archive metadata not found");
       }
 
       DbWorkspaceBucketArchive archive = archives.get(0);
 
       if (!WorkspaceArchiveStatus.ARCHIVED.toString().equals(archive.getStatus())) {
 
-        throw new RuntimeException(
+        throw new RecoveryException(
+            "WORKSPACE_NOT_ARCHIVED",
             namespace + ": Workspace is not archived. Current state=" + archive.getStatus());
       }
 
@@ -330,7 +336,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
 
         logger.log(Level.INFO, namespace + ": BQ clone complete");
       } catch (Exception e) {
-        throw new RuntimeException(namespace + ": BQ clone failed", e);
+        throw new RecoveryException("BQ_CLONE_FAILED", namespace + ": BQ clone failed", e);
       }
 
       CreatedControlledGcpGcsBucket controlledBucket =
@@ -352,19 +358,24 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
 
       logger.log(Level.INFO, namespace + ": Creating recovery transfer");
 
-      String jobName =
-          storageTransferClient.createTransferJob(
-              archiveBucket,
-              archivePrefix,
-              destinationBucket,
-              null,
-              "recovery-" + namespace,
-              projectId,
-              null,
-              serviceAccountEmail,
-              false);
+      try {
+        String jobName =
+            storageTransferClient.createTransferJob(
+                archiveBucket,
+                archivePrefix,
+                destinationBucket,
+                null,
+                "recovery-" + namespace,
+                projectId,
+                null,
+                serviceAccountEmail,
+                false);
 
-      storageTransferClient.runTransferJob(projectId, jobName);
+        storageTransferClient.runTransferJob(projectId, jobName);
+      } catch (Exception e) {
+        throw new RecoveryException(
+            "TRANSFER_FAILED", namespace + ": Recovery storage transfer failed", e);
+      }
 
       logger.log(Level.INFO, namespace + ": Recovery transfer started");
 
@@ -373,6 +384,12 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
     } catch (Exception e) {
 
       logger.log(Level.SEVERE, namespace + ": Recovery failed", e);
+
+      if (e instanceof RecoveryException recoveryException) {
+        saveRecoveryErrorLog(dbWorkspace, namespace, recoveryException.errorType, e.getMessage());
+      } else {
+        saveRecoveryErrorLog(dbWorkspace, namespace, "RECOVERY_FAILED", getSafeExceptionMessage(e));
+      }
 
       dbWorkspace.setRecoveryState(WorkspaceRecoveryStatus.FAILED.name());
 
@@ -416,6 +433,15 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
             namespace
                 + ": Recovery transfer failed: "
                 + transferOperation.getErrorBreakdownsList());
+        if (!WorkspaceRecoveryStatus.FAILED.name().equals(dbWorkspace.getRecoveryState())) {
+          saveRecoveryErrorLog(
+              dbWorkspace,
+              namespace,
+              "TRANSFER_FAILED",
+              namespace
+                  + ": Recovery transfer failed: "
+                  + transferOperation.getErrorBreakdownsList());
+        }
         dbWorkspace.setRecoveryState(WorkspaceRecoveryStatus.FAILED.name());
 
         workspaceDao.save(dbWorkspace);
@@ -493,5 +519,48 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
         yield null;
       }
     };
+  }
+
+  private void saveRecoveryErrorLog(
+      DbWorkspace dbWorkspace, String namespace, String errorType, String errorMessage) {
+    try {
+      workspaceRecoveryErrorLogDao.save(
+          new DbWorkspaceRecoveryErrorLog()
+              .setWorkspaceId(dbWorkspace.getWorkspaceId())
+              .setErrorType(errorType)
+              .setErrorMessage(trimWorkspacePrefix(namespace, errorMessage))
+              .setCreatedTime(new Timestamp(clock.instant().toEpochMilli())));
+    } catch (Exception e) {
+      logger.log(Level.WARNING, namespace + ": Failed to persist recovery error log", e);
+    }
+  }
+
+  private String trimWorkspacePrefix(String namespace, String errorMessage) {
+    if (errorMessage == null) {
+      return "Unknown recovery error";
+    }
+    String prefix = namespace + ": ";
+    if (errorMessage.startsWith(prefix)) {
+      return errorMessage.substring(prefix.length());
+    }
+    return errorMessage;
+  }
+
+  private String getSafeExceptionMessage(Exception e) {
+    return Optional.ofNullable(e.getMessage()).orElse(e.getClass().getSimpleName());
+  }
+
+  private static class RecoveryException extends RuntimeException {
+    private final String errorType;
+
+    private RecoveryException(String errorType, String message) {
+      super(message);
+      this.errorType = errorType;
+    }
+
+    private RecoveryException(String errorType, String message, Throwable cause) {
+      super(message, cause);
+      this.errorType = errorType;
+    }
   }
 }

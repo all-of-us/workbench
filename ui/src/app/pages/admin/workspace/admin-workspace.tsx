@@ -25,6 +25,7 @@ import { showAIANResearchPurpose } from 'app/utils/workspace-utils';
 import { AdminWorkspaceRecoveryModal } from './admin-workspace-recovery-modal';
 import { BasicInformation } from './basic-information';
 import { Collaborators } from './collaborators';
+import { RecoveryErrorLogsTable } from './recovery-error-logs-table';
 import { WorkspaceArchiveInfo } from './workspace-archival-info';
 import { WorkspaceMigrationInfo } from './workspace-migration-info';
 
@@ -40,6 +41,7 @@ const AdminWorkspaceImpl = (props: Props) => {
   const [loadingWorkspace, setLoadingWorkspace] = useState<boolean>(false);
   const [dataLoadError, setDataLoadError] = useState<Response>();
   const [showRecoveryModal, setShowRecoveryModal] = useState(false);
+  const [recoveryLogsRefreshKey, setRecoveryLogsRefreshKey] = useState(0);
   const [workspaceCollaborators, setWorkspaceCollaborators] =
     useState<WorkspaceUserAdminView[]>();
 
@@ -113,7 +115,12 @@ const AdminWorkspaceImpl = (props: Props) => {
             workspace={workspace}
             onRecover={() => setShowRecoveryModal(true)}
           />
-          <Accordion>
+          <RecoveryErrorLogsTable
+            namespace={workspace.namespace}
+            recoveryState={workspace.recoveryState}
+            refreshKey={recoveryLogsRefreshKey}
+          />
+          <Accordion style={{ marginTop: '1.5rem' }}>
             <AccordionTab header='Research Purpose'>
               <ResearchPurposeSection
                 {...{ researchPurpose }}
@@ -149,6 +156,9 @@ const AdminWorkspaceImpl = (props: Props) => {
               workspace={workspace}
               collaborators={collaborators || workspaceCollaborators}
               onClose={() => setShowRecoveryModal(false)}
+              onFailure={() =>
+                setRecoveryLogsRefreshKey((currentKey) => currentKey + 1)
+              }
               reload={populateWorkspaceDetails}
             />
           )}
