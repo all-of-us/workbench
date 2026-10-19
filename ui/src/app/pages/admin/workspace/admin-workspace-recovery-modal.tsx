@@ -196,11 +196,13 @@ export const AdminWorkspaceRecoveryModal = ({
   workspace,
   collaborators,
   onClose,
+  onFailure,
   reload,
 }: {
   workspace: Workspace;
   collaborators: WorkspaceUserAdminView[];
   onClose: () => void;
+  onFailure?: () => void;
   reload: () => void;
 }) => {
   const [startingRecovery, setStartingRecovery] = useState(false);
@@ -252,6 +254,7 @@ export const AdminWorkspaceRecoveryModal = ({
       onClose();
     } catch (e) {
       console.error(e);
+      onFailure?.();
     } finally {
       setStartingRecovery(false);
     }

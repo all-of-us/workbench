@@ -6,7 +6,7 @@ import {
   WorkspaceRecoveryStatus,
 } from 'generated/fetch';
 
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 
 import { RecoveryErrorLogsTable } from './recovery-error-logs-table';
@@ -164,5 +164,32 @@ describe('RecoveryErrorLogsTable', () => {
       screen.queryByText(/sensitive stack trace that should never be shown/i)
     ).not.toBeInTheDocument();
     expect(screen.queryByText(/stackTrace/i)).not.toBeInTheDocument();
+  });
+
+  it('refetches logs when refreshKey changes while recovery status is FAILED', async () => {
+    const api = new WorkspaceAdminApiRecoveryLogsStub(() =>
+      Promise.resolve([])
+    );
+    registerApiClient(WorkspaceAdminApi, api);
+
+    const { rerender } = render(
+      <RecoveryErrorLogsTable
+        namespace='aou-rw-test'
+        recoveryState={WorkspaceRecoveryStatus.FAILED}
+        refreshKey={0}
+      />
+    );
+
+    await waitFor(() => expect(api.getWorkspaceRecoveryErrorLogsCalls).toBe(1));
+
+    rerender(
+      <RecoveryErrorLogsTable
+        namespace='aou-rw-test'
+        recoveryState={WorkspaceRecoveryStatus.FAILED}
+        refreshKey={1}
+      />
+    );
+
+    await waitFor(() => expect(api.getWorkspaceRecoveryErrorLogsCalls).toBe(2));
   });
 });

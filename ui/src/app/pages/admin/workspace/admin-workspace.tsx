@@ -5,7 +5,6 @@ import { Accordion, AccordionTab } from 'primereact/accordion';
 import {
   WorkspaceActiveStatus,
   WorkspaceAdminView,
-  WorkspaceRecoveryStatus,
   WorkspaceUserAdminView,
 } from 'generated/fetch';
 
@@ -42,6 +41,7 @@ const AdminWorkspaceImpl = (props: Props) => {
   const [loadingWorkspace, setLoadingWorkspace] = useState<boolean>(false);
   const [dataLoadError, setDataLoadError] = useState<Response>();
   const [showRecoveryModal, setShowRecoveryModal] = useState(false);
+  const [recoveryLogsRefreshKey, setRecoveryLogsRefreshKey] = useState(0);
   const [workspaceCollaborators, setWorkspaceCollaborators] =
     useState<WorkspaceUserAdminView[]>();
 
@@ -77,24 +77,6 @@ const AdminWorkspaceImpl = (props: Props) => {
   useEffect(() => {
     populateFederatedWorkspaceInformation();
   }, [props.match.params.ns]);
-
-  useEffect(() => {
-    if (
-      workspaceDetails?.workspace?.recoveryState !==
-      WorkspaceRecoveryStatus.RECOVERING
-    ) {
-      return;
-    }
-
-    const intervalId = window.setInterval(() => {
-      workspaceAdminApi()
-        .getWorkspaceAdminView(props.match.params.ns)
-        .then(setWorkspaceDetails)
-        .catch(handleDataLoadError);
-    }, 5000);
-
-    return () => window.clearInterval(intervalId);
-  }, [props.match.params.ns, workspaceDetails?.workspace?.recoveryState]);
 
   const populateWorkspaceDetails = async () => {
     const { ns } = props.match.params;
@@ -136,6 +118,7 @@ const AdminWorkspaceImpl = (props: Props) => {
           <RecoveryErrorLogsTable
             namespace={workspace.namespace}
             recoveryState={workspace.recoveryState}
+            refreshKey={recoveryLogsRefreshKey}
           />
           <Accordion style={{ marginTop: '1.5rem' }}>
             <AccordionTab header='Research Purpose'>
@@ -173,6 +156,9 @@ const AdminWorkspaceImpl = (props: Props) => {
               workspace={workspace}
               collaborators={collaborators || workspaceCollaborators}
               onClose={() => setShowRecoveryModal(false)}
+              onFailure={() =>
+                setRecoveryLogsRefreshKey((currentKey) => currentKey + 1)
+              }
               reload={populateWorkspaceDetails}
             />
           )}
