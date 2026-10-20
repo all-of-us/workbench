@@ -66,13 +66,18 @@ const TEST_AUDIT_LOGS: VwbWorkspaceAuditLog[] = [
     changeType: 'CREATE_WORKSPACE',
     changeTime: '2024-01-01T00:00:00Z',
     actorEmail: 'creator@example.com',
-  },
+    appType: 'VWB',
+    changeSubjectId: 'workspace-uuid-123',
+    properties: '{"appType":"VWB"}',
+  } as unknown as VwbWorkspaceAuditLog,
   {
     workspaceId: 'workspace-uuid-123',
     changeType: 'GRANT_WORKSPACE_ROLE',
     changeTime: '2024-01-02T00:00:00Z',
     actorEmail: 'owner@example.com',
-  },
+    changeSubjectId: 'collaborator@example.com',
+    properties: '{"role":"WRITER"}',
+  } as unknown as VwbWorkspaceAuditLog,
 ];
 
 class VwbWorkspaceAdminApiStub extends VwbWorkspaceAdminApi {
@@ -86,7 +91,11 @@ class VwbWorkspaceAdminApiStub extends VwbWorkspaceAdminApi {
   );
 
   getVwbWorkspaceAuditLogs = jest.fn(
-    async (_workspaceId: string): Promise<VwbWorkspaceAuditLog[]> => {
+    async (
+      _workspaceId: string,
+      _arg2?: any,
+      _arg3?: any
+    ): Promise<VwbWorkspaceAuditLog[]> => {
       return TEST_AUDIT_LOGS;
     }
   );
@@ -191,7 +200,17 @@ describe('AdminVwbWorkspace', () => {
     await waitFor(() => {
       expect(
         vwbWorkspaceAdminApiStub.getVwbWorkspaceAuditLogs
-      ).toHaveBeenCalledWith('workspace-uuid-123');
+      ).toHaveBeenCalledWith('workspace-uuid-123', 10, 0);
+    });
+  });
+
+  it('should render app type and details when available', async () => {
+    component();
+    await waitUntilPageLoaded();
+
+    await waitFor(() => {
+      expect(screen.getByText('VWB')).toBeInTheDocument();
+      expect(screen.getByText('{"role":"WRITER"}')).toBeInTheDocument();
     });
   });
 

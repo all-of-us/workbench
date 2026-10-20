@@ -201,16 +201,44 @@ public class VwbWorkspaceAdminControllerTest {
 
   @Test
   public void testGetVwbWorkspaceAuditLogs() {
-    when(mockVwbAdminQueryService.queryVwbWorkspaceActivity("workspace-uuid-123"))
+    when(mockVwbAdminQueryService.queryVwbWorkspaceActivity("workspace-uuid-123", 10, 0))
         .thenReturn(testAuditLogs);
 
     ResponseEntity<List<VwbWorkspaceAuditLog>> response =
-        controller.getVwbWorkspaceAuditLogs("workspace-uuid-123");
+        controller.getVwbWorkspaceAuditLogs("workspace-uuid-123", null, null);
 
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     assertThat(response.getBody()).hasSize(1);
     assertThat(response.getBody().get(0).getChangeType()).isEqualTo("CREATE_WORKSPACE");
-    verify(mockVwbAdminQueryService).queryVwbWorkspaceActivity("workspace-uuid-123");
+    verify(mockVwbAdminQueryService).queryVwbWorkspaceActivity("workspace-uuid-123", 10, 0);
+  }
+
+  @Test
+  public void testGetVwbWorkspaceAuditLogs_InvalidLimit() {
+    assertThrows(
+        BadRequestException.class,
+        () -> controller.getVwbWorkspaceAuditLogs("workspace-uuid-123", 0, 0));
+  }
+
+  @Test
+  public void testGetVwbWorkspaceAuditLogs_InvalidOffset() {
+    assertThrows(
+        BadRequestException.class,
+        () -> controller.getVwbWorkspaceAuditLogs("workspace-uuid-123", 10, -1));
+  }
+
+  @Test
+  public void testGetVwbWorkspaceActivityLogs() {
+    when(mockVwbAdminQueryService.queryVwbWorkspaceActivity("workspace-uuid-123", 10, 0))
+        .thenReturn(testAuditLogs);
+
+    ResponseEntity<List<VwbWorkspaceAuditLog>> response =
+        controller.getVwbWorkspaceActivityLogs("workspace-uuid-123", null, null);
+
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    assertThat(response.getBody()).hasSize(1);
+    assertThat(response.getBody().get(0).getChangeType()).isEqualTo("CREATE_WORKSPACE");
+    verify(mockVwbAdminQueryService).queryVwbWorkspaceActivity("workspace-uuid-123", 10, 0);
   }
 
   @Test

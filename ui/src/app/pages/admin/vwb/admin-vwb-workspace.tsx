@@ -126,6 +126,12 @@ export const AdminVwbWorkspace = fp.flow(withRouter)((props: Props) => {
     useState<VwbWorkspaceAdminView>();
   const [workspaceActivity, setWorkspaceActivity] =
     useState<VwbWorkspaceAuditLog[]>();
+  const [workspaceActivityFirst, setWorkspaceActivityFirst] =
+    useState<number>(0);
+  const [workspaceActivityRows, setWorkspaceActivityRows] =
+    useState<number>(10);
+  const [workspaceActivityTotalRecords, setWorkspaceActivityTotalRecords] =
+    useState<number>(0);
   const [loadingWorkspace, setLoadingWorkspace] = useState<boolean>(false);
   const [loadingWorkspaceActivity, setLoadingWorkspaceActivity] =
     useState<boolean>(false);
@@ -154,13 +160,22 @@ export const AdminVwbWorkspace = fp.flow(withRouter)((props: Props) => {
     }
   };
 
-  const getWorkspaceActivity = async (workspaceId: string) => {
+  const getWorkspaceActivity = async (
+    workspaceId: string,
+    first: number = 0,
+    rows: number = 10
+  ) => {
     setLoadingWorkspaceActivity(true);
 
     vwbWorkspaceAdminApi()
-      .getVwbWorkspaceAuditLogs(workspaceId)
+      .getVwbWorkspaceAuditLogs(workspaceId, rows, first)
       .then((result) => {
         setWorkspaceActivity(result);
+        const estimatedTotal =
+          result.length < rows
+            ? first + result.length
+            : first + result.length + 1;
+        setWorkspaceActivityTotalRecords(estimatedTotal);
       })
       .catch((error) => handleDataLoadError(error))
       .finally(() => setLoadingWorkspaceActivity(false));
@@ -182,7 +197,8 @@ export const AdminVwbWorkspace = fp.flow(withRouter)((props: Props) => {
         } catch (e) {
           setResearchPurpose({});
         }
-        getWorkspaceActivity(resp.workspace.id);
+        setWorkspaceActivityFirst(0);
+        getWorkspaceActivity(resp.workspace.id, 0, workspaceActivityRows);
       })
       .catch((error) => handleDataLoadError(error))
       .finally(() => setLoadingWorkspace(false));
@@ -810,28 +826,55 @@ export const AdminVwbWorkspace = fp.flow(withRouter)((props: Props) => {
               ) : (
                 <DataTable
                   paginator
-                  rows={10}
+                  lazy
+                  first={workspaceActivityFirst}
+                  rows={workspaceActivityRows}
+                  totalRecords={workspaceActivityTotalRecords}
                   emptyMessage='No workspace activity found'
                   loading={loadingWorkspaceActivity}
                   value={workspaceActivity}
+                  onPage={({ first, rows }) => {
+                    setWorkspaceActivityFirst(first);
+                    setWorkspaceActivityRows(rows);
+                    if (workspace?.id) {
+                      getWorkspaceActivity(workspace.id, first, rows);
+                    }
+                  }}
                 >
                   <Column
                     field='changeType'
-                    header='Change Type'
+                    header='Activity Type'
                     headerStyle={{ width: '250px' }}
                   />
                   <Column
                     field='actorEmail'
-                    header='Change By'
+                    header='Actor'
                     headerStyle={{ width: '150px' }}
                   />
                   <Column
+                    field='appType'
+                    header='App Type'
+                    headerStyle={{ width: '120px' }}
+                    body={({ appType }) => appType || '-'}
+                  />
+                  <Column
+                    field='changeSubjectId'
+                    header='Affected Subject'
+                    headerStyle={{ width: '220px' }}
+                    body={({ changeSubjectId }) => changeSubjectId || '-'}
+                  />
+                  <Column
                     field='changeTime'
-                    header='Change Time'
+                    header='Activity Time'
                     headerStyle={{ width: '150px' }}
                     body={({ changeTime }) =>
                       new Date(changeTime).toLocaleString()
                     }
+                  />
+                  <Column
+                    field='properties'
+                    header='Details'
+                    body={({ properties }) => properties || '-'}
                   />
                 </DataTable>
               )}

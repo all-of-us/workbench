@@ -29,6 +29,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class VwbWorkspaceAdminController implements VwbWorkspaceAdminApiDelegate {
   private static final Logger log = Logger.getLogger(VwbWorkspaceAdminController.class.getName());
+  private static final int DEFAULT_AUDIT_LIMIT = 10;
+  private static final int MAX_AUDIT_LIMIT = 200;
 
   private final VwbAdminQueryService vwbAdminQueryService;
   private final VwbUserManagerClient vwbUserManagerClient;
@@ -131,10 +133,33 @@ public class VwbWorkspaceAdminController implements VwbWorkspaceAdminApiDelegate
             .toList());
   }
 
-  @Override
   @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
-  public ResponseEntity<List<VwbWorkspaceAuditLog>> getVwbWorkspaceAuditLogs(String workspaceId) {
-    return ResponseEntity.ok(vwbAdminQueryService.queryVwbWorkspaceActivity(workspaceId));
+  public ResponseEntity<List<VwbWorkspaceAuditLog>> getVwbWorkspaceAuditLogs(
+      String workspaceId, Integer limit, Integer offset) {
+    return getPaginatedVwbWorkspaceAuditLogs(workspaceId, limit, offset);
+  }
+
+  @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
+  public ResponseEntity<List<VwbWorkspaceAuditLog>> getVwbWorkspaceActivityLogs(
+      String workspaceId, Integer limit, Integer offset) {
+    return getPaginatedVwbWorkspaceAuditLogs(workspaceId, limit, offset);
+  }
+
+  private ResponseEntity<List<VwbWorkspaceAuditLog>> getPaginatedVwbWorkspaceAuditLogs(
+      String workspaceId, Integer limit, Integer offset) {
+    final int resolvedLimit = Optional.ofNullable(limit).orElse(DEFAULT_AUDIT_LIMIT);
+    final int resolvedOffset = Optional.ofNullable(offset).orElse(0);
+
+    if (resolvedLimit < 1 || resolvedLimit > MAX_AUDIT_LIMIT) {
+      throw new BadRequestException("limit must be between 1 and " + MAX_AUDIT_LIMIT);
+    }
+
+    if (resolvedOffset < 0) {
+      throw new BadRequestException("offset must be non-negative");
+    }
+
+    return ResponseEntity.ok(
+        vwbAdminQueryService.queryVwbWorkspaceActivity(workspaceId, resolvedLimit, resolvedOffset));
   }
 
   @Override
