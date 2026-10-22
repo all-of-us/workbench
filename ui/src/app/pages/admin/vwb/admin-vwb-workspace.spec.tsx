@@ -204,12 +204,11 @@ describe('AdminVwbWorkspace', () => {
     });
   });
 
-  it('should render app type and details when available', async () => {
+  it('should render activity details when available', async () => {
     component();
     await waitUntilPageLoaded();
 
     await waitFor(() => {
-      expect(screen.getByText('VWB')).toBeInTheDocument();
       expect(screen.getByText('{"role":"WRITER"}')).toBeInTheDocument();
     });
   });

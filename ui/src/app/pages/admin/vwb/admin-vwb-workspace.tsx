@@ -852,12 +852,6 @@ export const AdminVwbWorkspace = fp.flow(withRouter)((props: Props) => {
                     headerStyle={{ width: '150px' }}
                   />
                   <Column
-                    field='appType'
-                    header='App Type'
-                    headerStyle={{ width: '120px' }}
-                    body={({ appType }) => appType || '-'}
-                  />
-                  <Column
                     field='changeSubjectId'
                     header='Affected Subject'
                     headerStyle={{ width: '220px' }}
