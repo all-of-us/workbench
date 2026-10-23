@@ -59,6 +59,9 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
   private static final String REGISTERED_TIER_LABEL = "Registered Tier";
   private static final String GRANT_WORKSPACE_ROLE = "GRANT_WORKSPACE_ROLE";
   private static final String REMOVE_WORKSPACE_ROLE = "REMOVE_WORKSPACE_ROLE";
+  private static final String WORKSPACE_ROLE_EVENT_FILTER = "%WORKSPACE_ROLE%";
+
+  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   private static final String QUERY =
       "SELECT \n"
@@ -122,12 +125,18 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
           + " change_type, \n"
           + " change_date, \n"
           + " actor_email, \n"
-          + " workspace_id \n"
+          + " workspace_id, \n"
+          + " change_subject_id, \n"
+          + " properties \n"
           + "FROM \n"
           + " %s \n"
           + "WHERE \n"
-          + " change_subject_id=@WORKSPACE_ID "
-          + "ORDER BY change_date ASC ";
+          + " workspace_id=@WORKSPACE_ID \n"
+          + "AND \n"
+          + " change_type LIKE @CHANGE_TYPE_FILTER \n"
+          + "ORDER BY change_date DESC, change_type DESC, actor_email DESC, change_subject_id DESC \n"
+          + "LIMIT @LIMIT \n"
+          + "OFFSET @OFFSET ";
 
   private static final String USER_POD_IDS_QUERY =
       "SELECT u.pod_id \n"
@@ -379,7 +388,8 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
   }
 
   @Override
-  public List<VwbWorkspaceAuditLog> queryVwbWorkspaceActivity(String workspaceId) {
+  public List<VwbWorkspaceAuditLog> queryVwbWorkspaceActivity(
+      String workspaceId, int limit, int offset) {
 
     final String queryString =
         String.format(AUDIT_QUERY, getTableName(VWB_WORKSPACE_ACTIVITY_LOG_TABLE_PREFIX));
@@ -387,6 +397,10 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
     final QueryJobConfiguration queryJobConfiguration =
         QueryJobConfiguration.newBuilder(queryString)
             .addNamedParameter("WORKSPACE_ID", QueryParameterValue.string(workspaceId))
+            .addNamedParameter(
+                "CHANGE_TYPE_FILTER", QueryParameterValue.string(WORKSPACE_ROLE_EVENT_FILTER))
+            .addNamedParameter("LIMIT", QueryParameterValue.int64(limit))
+            .addNamedParameter("OFFSET", QueryParameterValue.int64(offset))
             .build();
 
     final TableResult result = bigQueryService.executeQuery(queryJobConfiguration);
@@ -697,7 +711,34 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
         .map(OffsetDateTime::toString)
         .ifPresent(auditLog::setChangeTime);
     FieldValues.getString(row, "actor_email").ifPresent(auditLog::setActorEmail);
+    FieldValues.getString(row, "change_subject_id").ifPresent(auditLog::setChangeSubjectId);
+    FieldValues.getString(row, "properties")
+        .ifPresent(
+            properties -> {
+              auditLog.setProperties(properties);
+              extractAppTypeFromProperties(properties).ifPresent(auditLog::setAppType);
+            });
     return auditLog;
+  }
+
+  private Optional<String> extractAppTypeFromProperties(String propertiesJson) {
+    if (propertiesJson == null || propertiesJson.trim().isEmpty()) {
+      return Optional.empty();
+    }
+
+    try {
+      JsonNode node = OBJECT_MAPPER.readTree(propertiesJson);
+      for (String key : List.of("appType", "app_type")) {
+        JsonNode value = node.get(key);
+        if (value != null && !value.isNull() && value.isTextual() && !value.asText().isBlank()) {
+          return Optional.of(value.asText());
+        }
+      }
+    } catch (JsonProcessingException e) {
+      log.debug("Unable to parse app type from workspace activity properties", e);
+    }
+
+    return Optional.empty();
   }
 
   private VwbDataCollectionEntry fieldValueListToVwbDataCollectionEntry(FieldValueList row) {
@@ -769,8 +810,7 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
     }
 
     try {
-      ObjectMapper objectMapper = new ObjectMapper();
-      JsonNode lineageArray = objectMapper.readTree(resourceLineageJson);
+      JsonNode lineageArray = OBJECT_MAPPER.readTree(resourceLineageJson);
 
       if (lineageArray.isArray() && !lineageArray.isEmpty()) {
         JsonNode sourceWorkspaceIdNode = lineageArray.get(0).get("sourceWorkspaceId");

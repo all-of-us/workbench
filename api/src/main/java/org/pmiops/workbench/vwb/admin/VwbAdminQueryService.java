@@ -29,7 +29,7 @@ public interface VwbAdminQueryService {
 
   List<UserRole> queryVwbWorkspaceCollaboratorsByUserFacingId(String id);
 
-  List<VwbWorkspaceAuditLog> queryVwbWorkspaceActivity(String workspaceId);
+  List<VwbWorkspaceAuditLog> queryVwbWorkspaceActivity(String workspaceId, int limit, int offset);
 
   Set<String> queryPodIdsByUserEmail(String email);
 

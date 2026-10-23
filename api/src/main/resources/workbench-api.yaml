@@ -2613,8 +2613,8 @@ paths:
     get:
       tags:
         - vwbWorkspaceAdmin
-      description: Returns all VWB workspaces audit logs for the given workspace. Requires
-        RESEARCHER_DATA_VIEW authority.
+      description: Returns VWB workspace audit logs for the given workspace. Supports
+        pagination via limit/offset. Requires RESEARCHER_DATA_VIEW authority.
       operationId: getVwbWorkspaceAuditLogs
       parameters:
         - name: workspaceId
@@ -2623,9 +2623,78 @@ paths:
           required: true
           schema:
             type: string
+        - name: limit
+          in: query
+          description: Maximum number of logs to return.
+          required: false
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 200
+            default: 10
+        - name: offset
+          in: query
+          description: Zero-based offset of logs to return.
+          required: false
+          schema:
+            type: integer
+            format: int32
+            minimum: 0
+            default: 0
       responses:
         200:
           description: A list of VWB workspace audit logs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/VwbWorkspaceAuditLog'
+
+        403:
+          description: User doesn't have the RESEARCHER_DATA_VIEW authority
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /v2/admin/vwb/workspaces/{workspaceId}/activity-logs:
+    get:
+      tags:
+        - vwbWorkspaceAdmin
+      description: Returns VWB workspace activity logs for the given workspace. Supports
+        pagination via limit/offset. Requires RESEARCHER_DATA_VIEW authority.
+      operationId: getVwbWorkspaceActivityLogs
+      parameters:
+        - name: workspaceId
+          in: path
+          description: The workspace id
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Maximum number of logs to return.
+          required: false
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 200
+            default: 10
+        - name: offset
+          in: query
+          description: Zero-based offset of logs to return.
+          required: false
+          schema:
+            type: integer
+            format: int32
+            minimum: 0
+            default: 0
+      responses:
+        200:
+          description: A list of VWB workspace activity logs
           content:
             application/json:
               schema:
@@ -10308,6 +10377,15 @@ components:
         changeTime:
           type: string
           description: Timestamp the workspace was changed
+        appType:
+          type: string
+          description: Application type associated with the event when present in properties
+        changeSubjectId:
+          type: string
+          description: Subject affected by the change when available
+        properties:
+          type: string
+          description: Additional event properties in serialized form
     VwbAodRequest:
       type: object
       description: Access on demand request
