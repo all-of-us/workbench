@@ -202,7 +202,10 @@ public abstract class EgressRemediationService {
   }
 
   private boolean shouldNotifyForEvent(DbEgressEvent event) {
-    if (event.getWorkspace() == null) {
+    // VWB events never populate the workspace foreign key; they carry the VWB workspace UUID
+    // instead. Returning true for them unconditionally disabled this debounce for every VWB event,
+    // so a single incident that tripped several alert windows emailed the user once per window.
+    if (event.getWorkspace() == null && event.getVwbWorkspaceId() == null) {
       return true;
     }
 
@@ -218,12 +221,19 @@ public abstract class EgressRemediationService {
     // Filtering for REMEDIATED events could also work here, but could result in duplicate
     // notifications when events are processed in close proximity.
     List<DbEgressEvent> priorEvents =
-        egressEventDao.findAllByUserAndWorkspaceAndCreationTimeBetweenAndCreationTimeNot(
-            event.getUser(),
-            event.getWorkspace(),
-            debounceAfter,
-            event.getCreationTime(),
-            event.getCreationTime());
+        event.getWorkspace() != null
+            ? egressEventDao.findAllByUserAndWorkspaceAndCreationTimeBetweenAndCreationTimeNot(
+                event.getUser(),
+                event.getWorkspace(),
+                debounceAfter,
+                event.getCreationTime(),
+                event.getCreationTime())
+            : egressEventDao.findAllByUserAndVwbWorkspaceIdAndCreationTimeBetweenAndCreationTimeNot(
+                event.getUser(),
+                event.getVwbWorkspaceId(),
+                debounceAfter,
+                event.getCreationTime(),
+                event.getCreationTime());
     return priorEvents.isEmpty();
   }
 
