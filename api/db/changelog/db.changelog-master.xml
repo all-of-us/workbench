@@ -297,6 +297,7 @@
   <include file="changelog/db.changelog-287-add-workspace-archive-retry-columns.xml"/>
   <include file="changelog/db.changelog-288-vwb-sa-cleanup.xml"/>
   <include file="changelog/db.changelog-289-add-workspace-recovery-error-log-table.xml"/>
+  <include file="changelog/db.changelog-290-add-vwb-egress-event-id-index.xml"/>
   <!--
    Note: to update the DB locally, do the following:
    - Migrate schema changes: `./project.rb run-local-all-migrations`

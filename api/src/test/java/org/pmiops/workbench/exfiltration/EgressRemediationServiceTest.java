@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.ArgumentMatchers.notNull;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -90,6 +91,8 @@ public class EgressRemediationServiceTest {
 
   @MockitoBean private CommonMappers commonMappers;
   private static final String USER_EMAIL = "asdf@fake-research-aou.org";
+  private static final String VWB_WORKSPACE_ID = "11111111-1111-1111-1111-111111111111";
+  private static final String VWB_WORKSPACE_ID_2 = "22222222-2222-2222-2222-222222222222";
   private static WorkbenchConfig workbenchConfig;
 
   @MockitoBean private UserService mockUserService;
@@ -549,6 +552,70 @@ public class EgressRemediationServiceTest {
 
     AtlassianDocument doc = (AtlassianDocument) comment.getBody();
     assertThat(JiraContent.documentToString(doc)).contains("Additional egress detected");
+  }
+
+  @Test
+  public void testRemediateVwbEgressEvent_notify_skipIfRecentEventSameVwbWorkspace()
+      throws Exception {
+    workbenchConfig.egressAlertRemediationPolicy.escalations =
+        ImmutableList.of(suspendComputeAfter(1, Duration.ofMinutes(1)));
+
+    // A single VWB incident commonly trips several alert windows (180s/600s/3600s). Only the first
+    // should email the user.
+    saveOldEvents(
+        oldVwbEvent(Duration.ofMinutes(30L), VWB_WORKSPACE_ID)
+            .setStatus(DbEgressEventStatus.REMEDIATED));
+    vwbEgressRemediationService.remediateEgressEvent(saveNewEvent(newVwbEvent(VWB_WORKSPACE_ID)));
+
+    verify(mockMailService, never()).sendEgressRemediationEmailForVwb(any(), any());
+  }
+
+  @Test
+  public void testRemediateVwbEgressEvent_notify_sendIfRecentEventOtherVwbWorkspace()
+      throws Exception {
+    workbenchConfig.egressAlertRemediationPolicy.escalations =
+        ImmutableList.of(suspendComputeAfter(1, Duration.ofMinutes(1)));
+
+    // A different VWB workspace is a different incident, so it must still notify.
+    saveOldEvents(
+        oldVwbEvent(Duration.ofMinutes(10L), VWB_WORKSPACE_ID_2)
+            .setStatus(DbEgressEventStatus.REMEDIATED),
+        oldVwbEvent(Duration.ofHours(2L), VWB_WORKSPACE_ID)
+            .setStatus(DbEgressEventStatus.REMEDIATED));
+    vwbEgressRemediationService.remediateEgressEvent(saveNewEvent(newVwbEvent(VWB_WORKSPACE_ID)));
+
+    verify(mockMailService)
+        .sendEgressRemediationEmailForVwb(any(), eq(EgressRemediationAction.SUSPEND_COMPUTE));
+  }
+
+  @Test
+  public void testRemediateVwbEgressEvent_notify_sendWhenNoPriorEvent() throws Exception {
+    workbenchConfig.egressAlertRemediationPolicy.escalations =
+        ImmutableList.of(suspendComputeAfter(1, Duration.ofMinutes(1)));
+
+    vwbEgressRemediationService.remediateEgressEvent(saveNewEvent(newVwbEvent(VWB_WORKSPACE_ID)));
+
+    verify(mockMailService)
+        .sendEgressRemediationEmailForVwb(any(), eq(EgressRemediationAction.SUSPEND_COMPUTE));
+  }
+
+  private DbEgressEvent newVwbEvent(String vwbWorkspaceId) {
+    return new DbEgressEvent()
+        .setUser(getDbUser())
+        .setVwbWorkspaceId(vwbWorkspaceId)
+        .setVwbVmName("vm-name")
+        .setVwbIncidentCount(1)
+        .setGcpProjectId("gcp-project")
+        .setEgressMegabytes(200.0f)
+        .setEgressWindowSeconds(Duration.ofMinutes(3L).toSeconds())
+        .setTimeWindowStart(FakeClockConfiguration.NOW)
+        .setCreationTime(FakeClockConfiguration.NOW)
+        .setStatus(DbEgressEventStatus.PENDING);
+  }
+
+  private DbEgressEvent oldVwbEvent(Duration age, String vwbWorkspaceId) {
+    Timestamp creationTime = Timestamp.from(FakeClockConfiguration.NOW.toInstant().minus(age));
+    return newVwbEvent(vwbWorkspaceId).setCreationTime(creationTime);
   }
 
   private void saveOldEvents(Duration... ages) {

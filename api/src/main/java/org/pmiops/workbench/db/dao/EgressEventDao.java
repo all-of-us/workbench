@@ -3,6 +3,7 @@ package org.pmiops.workbench.db.dao;
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import org.pmiops.workbench.db.model.DbEgressEvent;
 import org.pmiops.workbench.db.model.DbEgressEvent.DbEgressEventStatus;
 import org.pmiops.workbench.db.model.DbUser;
@@ -39,6 +40,19 @@ public interface EgressEventDao
       Timestamp createdAfter,
       Timestamp createdBefore,
       Timestamp notCreatedAt);
+
+  // VWB events do not populate the workspace foreign key, so the notification debounce stratifies
+  // them by VWB workspace UUID instead.
+  List<DbEgressEvent> findAllByUserAndVwbWorkspaceIdAndCreationTimeBetweenAndCreationTimeNot(
+      DbUser user,
+      String vwbWorkspaceId,
+      Timestamp createdAfter,
+      Timestamp createdBefore,
+      Timestamp notCreatedAt);
+
+  // "First" rather than a uniqueness-assuming lookup: vwb_egress_event_id has no unique constraint
+  // yet, so historical rows may already contain duplicates.
+  Optional<DbEgressEvent> findFirstByVwbEgressEventId(String vwbEgressEventId);
 
   List<DbEgressEvent> findAllByUserAndWorkspaceAndEgressWindowSecondsAndCreationTimeGreaterThan(
       DbUser user, DbWorkspace workspace, long egressWindowSeconds, Timestamp creationTimeLimit);

@@ -4,6 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.pmiops.workbench.utils.TestMockFactory.DEFAULT_GOOGLE_PROJECT;
 
@@ -150,6 +151,53 @@ public class EgressEventServiceTest {
         .isEqualTo((float) (500 * ((1 << 20) / 1e6))); // Convert MiB
     assertThat(dbEvent.getGcpProjectId()).isEqualTo("test-gcp-project");
     assertThat(dbEvent.getEgressWindowSeconds()).isEqualTo(600L);
+  }
+
+  @Test
+  public void testHandleVwbEgressEvent_ignoresDuplicateDelivery() {
+    VwbEgressEventRequest vwbEvent = vwbEventWithId("vwb-egress-event-1");
+
+    egressEventService.handleVwbEvent(vwbEvent);
+    // The exfil manager redelivers the same logical event, e.g. after a timeout on our side.
+    egressEventService.handleVwbEvent(vwbEventWithId("vwb-egress-event-1"));
+
+    assertThat(ImmutableList.copyOf(egressEventDao.findAll())).hasSize(1);
+    // The duplicate must not enqueue a second remediation task either.
+    verify(mockTaskQueueService, times(1)).pushEgressEventTask(anyLong(), anyBoolean());
+    verify(mockEgressEventAuditor, times(1)).fireVwbEgressEvent(vwbEvent, dbUser1);
+  }
+
+  @Test
+  public void testHandleVwbEgressEvent_distinctEventIdsBothPersisted() {
+    egressEventService.handleVwbEvent(vwbEventWithId("vwb-egress-event-1"));
+    egressEventService.handleVwbEvent(vwbEventWithId("vwb-egress-event-2"));
+
+    assertThat(ImmutableList.copyOf(egressEventDao.findAll())).hasSize(2);
+    verify(mockTaskQueueService, times(2)).pushEgressEventTask(anyLong(), anyBoolean());
+  }
+
+  @Test
+  public void testHandleVwbEgressEvent_missingEventIdIsNotDeduped() {
+    // vwbEgressEventId is optional in the API. Absent an ID we cannot tell a redelivery from a
+    // distinct event, so both are persisted rather than silently dropping the second.
+    egressEventService.handleVwbEvent(vwbEventWithId(null));
+    egressEventService.handleVwbEvent(vwbEventWithId(null));
+
+    assertThat(ImmutableList.copyOf(egressEventDao.findAll())).hasSize(2);
+  }
+
+  private VwbEgressEventRequest vwbEventWithId(String vwbEgressEventId) {
+    return new VwbEgressEventRequest()
+        .userEmail(dbUser1.getUsername())
+        .vwbEgressEventId(vwbEgressEventId)
+        .vwbWorkspaceId("testWorkspaceId")
+        .vmName("testVmName")
+        .incidentCount(1L)
+        .egressMib(500.0)
+        .egressMibThreshold(100.0)
+        .gcpProjectId("test-gcp-project")
+        .timeWindowDuration(600L)
+        .timeWindowStart(NOW.toEpochMilli());
   }
 
   // I thought about adding this to a mapper, but it's such a backwards, test-only conversion,

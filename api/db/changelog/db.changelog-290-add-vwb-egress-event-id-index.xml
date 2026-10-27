@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+  <!--
+   Supports the duplicate-delivery lookup in EgressEventServiceImpl.handleVwbEvent.
+
+   Deliberately not unique: existing rows may already contain duplicate vwb_egress_event_id values
+   from before that check existed, and a unique constraint would fail the migration. Promote this to
+   unique in a follow-up once the table is confirmed clean.
+  -->
+  <changeSet author="yonghao" id="changelog-290-add-vwb-egress-event-id-index">
+    <createIndex tableName="egress_event" indexName="egress_event_vwb_egress_event_id_idx" unique="false">
+      <column name="vwb_egress_event_id"/>
+    </createIndex>
+  </changeSet>
+</databaseChangeLog>

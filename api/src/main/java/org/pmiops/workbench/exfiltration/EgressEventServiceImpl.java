@@ -37,6 +37,21 @@ public class EgressEventServiceImpl implements EgressEventService {
 
   @Override
   public void handleVwbEvent(VwbEgressEventRequest egressEvent) {
+    // The exfil manager delivers at-least-once, so the same logical egress event can arrive more
+    // than once (e.g. when it retries after a timeout on our side). Without this check a redelivery
+    // creates a second row and a second remediation task, which double-counts the event in incident
+    // reporting and can re-notify the user.
+    Optional<DbEgressEvent> alreadyRecorded =
+        Optional.ofNullable(egressEvent.getVwbEgressEventId())
+            .flatMap(egressEventDao::findFirstByVwbEgressEventId);
+    if (alreadyRecorded.isPresent()) {
+      logger.warning(
+          String.format(
+              "Ignoring duplicate delivery of VWB egress event %s; already recorded as egress event %d",
+              egressEvent.getVwbEgressEventId(), alreadyRecorded.get().getEgressEventId()));
+      return;
+    }
+
     Optional<DbUser> egressUser = userService.getByUsername(egressEvent.getUserEmail());
     if (egressUser.isEmpty()) {
       logger.severe(
