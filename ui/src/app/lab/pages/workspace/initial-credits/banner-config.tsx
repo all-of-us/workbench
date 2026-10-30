@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { supportUrls } from 'app/utils/zendesk';
+
 export const BannerScenario = {
   ExpiringSoon: 'expiringSoon',
   Expired: 'expired',
@@ -26,7 +28,7 @@ interface BannerConfig {
 
 const creditsAndBillingLink = (
   <a
-    href='https://support.researchallofus.org/hc/en-us/sections/6000172946708-Paying-for-Your-Research'
+    href={supportUrls.createBillingAccount}
     target='_blank'
     rel='noopener noreferrer'
   >
@@ -68,7 +70,7 @@ export const bannerConfigs: Record<BannerScenario, BannerConfig> = {
     button: {
       label: 'Link to USH page',
       action: 'openLink',
-      link: 'https://support.researchallofus.org/hc/en-us/categories/5942730401428-Credits-and-Billing',
+      link: supportUrls.createBillingAccount,
     },
   },
   [BannerScenario.LowBalance]: {
@@ -104,7 +106,7 @@ export const bannerConfigs: Record<BannerScenario, BannerConfig> = {
     button: {
       label: 'Link to USH page',
       action: 'openLink',
-      link: 'https://support.researchallofus.org/hc/en-us/categories/5942730401428-Credits-and-Billing',
+      link: supportUrls.createBillingAccount,
     },
   },
 };

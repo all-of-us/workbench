@@ -139,6 +139,10 @@ const getCreditBannerData = (workspace: WorkspaceData, profile: Profile) => {
   const now = Date.now();
   const givenName = workspace?.creatorUser?.givenName;
   const familyName = workspace?.creatorUser?.familyName;
+  const creatorUserName = workspace?.creatorUser?.userName;
+  const creatorName = `${givenName || ''} ${familyName || ''}`.trim();
+  const creatorNameForBanner =
+    creatorName || creatorUserName || 'workspace creator';
   const creditBalance = balance ?? initialCreditsLimit - initialCreditsUsage;
 
   const scenarios = [
@@ -162,27 +166,29 @@ const getCreditBannerData = (workspace: WorkspaceData, profile: Profile) => {
     },
   ];
 
-  const matches = scenarios.filter((s) => s.cond).map((s) => s.scenario);
-  if (matches.length === 0 || !givenName || !familyName) {
+  const matchedScenario = scenarios.find((s) => s.cond)?.scenario;
+  if (!matchedScenario) {
     return null;
   }
 
-  return matches.map((match) => ({
-    scenario: match,
-    expirationDate: new Date(expirationEpochMillis).toLocaleDateString(
-      'en-US',
-      {
-        weekday: 'short', // e.g., 'Mon'
-        year: 'numeric', // e.g., '2025'
-        month: 'short', // e.g., 'Jan'
-        day: '2-digit', // e.g., '01'
-      }
-    ), // e.g., 'Mon, Jan 01, 2025'
-    creatorName: `${givenName} ${familyName}`.trim(),
-    creditBalance: creditBalance.toFixed(2),
-    workspace,
-    profile,
-  }));
+  return [
+    {
+      scenario: matchedScenario,
+      expirationDate: new Date(expirationEpochMillis).toLocaleDateString(
+        'en-US',
+        {
+          weekday: 'short', // e.g., 'Mon'
+          year: 'numeric', // e.g., '2025'
+          month: 'short', // e.g., 'Jan'
+          day: '2-digit', // e.g., '01'
+        }
+      ), // e.g., 'Mon, Jan 01, 2025'
+      creatorName: creatorNameForBanner,
+      creditBalance: creditBalance.toFixed(2),
+      workspace,
+      profile,
+    },
+  ];
 };
 
 interface Props {

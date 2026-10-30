@@ -1,6 +1,7 @@
 import '@testing-library/jest-dom';
 
 import { render, screen } from '@testing-library/react';
+import { supportUrls } from 'app/utils/zendesk';
 
 import { bannerConfigs, BannerScenario } from './banner-config';
 
@@ -20,7 +21,7 @@ describe('bannerConfigs', () => {
     expect(config.title).toBe('This workspace is out of initial credits');
     expect(config.button.label).toBe('Link to USH page');
     expect(config.button.action).toBe('openLink');
-    expect(config.button.link).toMatch(/credits-and-billing/i);
+    expect(config.button.link).toBe(supportUrls.createBillingAccount);
     render(config.body({ creatorName: 'Jane Doe' }));
     expect(screen.getByText(/Jane Doe/)).toBeInTheDocument();
     expect(screen.getByText(/expired/i)).toBeInTheDocument();
@@ -43,7 +44,7 @@ describe('bannerConfigs', () => {
     expect(config.title).toBe('This workspace is out of initial credits');
     expect(config.button.label).toBe('Link to USH page');
     expect(config.button.action).toBe('openLink');
-    expect(config.button.link).toMatch(/credits-and-billing/i);
+    expect(config.button.link).toBe(supportUrls.createBillingAccount);
     render(config.body({ creatorName: 'Jane Doe' }));
     expect(screen.getByText(/Jane Doe/)).toBeInTheDocument();
     expect(screen.getByText(/run out/i)).toBeInTheDocument();

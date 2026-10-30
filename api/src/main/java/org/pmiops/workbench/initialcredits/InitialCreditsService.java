@@ -473,8 +473,31 @@ public class InitialCreditsService {
   }
 
   private boolean shouldCheckApproachingExpirationNotification(DbUserInitialCreditsExpiration exp) {
-    return checkEnableUnlinkBillingForInitialCreditsFlag()
-        || exp.getApproachingExpirationNotificationTime() == null;
+    if (exp == null) {
+      return false;
+    }
+
+    // For the unlink-billing flow, we may notify at multiple configured milestones
+    // (for example 90 and 30 days). Prevent duplicate sends within the same milestone day,
+    // while still allowing later milestones to send.
+    if (checkEnableUnlinkBillingForInitialCreditsFlag()) {
+      Timestamp expirationTime = exp.getExpirationTime();
+      Timestamp previousNotificationTime = exp.getApproachingExpirationNotificationTime();
+      if (expirationTime == null || previousNotificationTime == null) {
+        return true;
+      }
+
+      long previousDaysUntilExpiration =
+          TimeUnit.MILLISECONDS.toDays(
+              expirationTime.getTime() - previousNotificationTime.getTime());
+      long currentDaysUntilExpiration =
+          TimeUnit.MILLISECONDS.toDays(expirationTime.getTime() - clockNow().getTime());
+
+      return previousDaysUntilExpiration != currentDaysUntilExpiration;
+    }
+
+    // Legacy single-warning behavior: send only once.
+    return exp.getApproachingExpirationNotificationTime() == null;
   }
 
   /**

@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -1796,5 +1797,72 @@ public class InitialCreditsServiceTest {
     // for users with no active workspaces
     verify(mailService, times(1)).alertUserInitialCreditsExpired(user);
     assertNotNull(user.getUserInitialCreditsExpiration().getExpirationCleanupTime());
+  }
+
+  @Test
+  public void test_checkCreditsExpirationForUserIDs_expiringSoon_noDuplicateEmailSameMilestoneDay()
+      throws MessagingException {
+    workbenchConfig.featureFlags.enableUnlinkBillingForInitialCredits = true;
+    workbenchConfig.billing.initialCreditsExpirationWarningDaysList = List.of(90L, 30L);
+
+    Instant originalInstant = CLOCK.instant();
+    try {
+      DbUser user = createUser("expiring-soon-no-dup@test.com");
+      createWorkspace(user, "expiring-soon-no-dup-project");
+
+      Timestamp expirationTime =
+          new Timestamp(CLOCK.instant().toEpochMilli() + TimeUnit.DAYS.toMillis(90));
+      user.setUserInitialCreditsExpiration(
+          new DbUserInitialCreditsExpiration()
+              .setUser(user)
+              .setExpirationTime(expirationTime)
+              .setBypassed(false));
+      spyUserDao.save(user);
+
+      when(institutionService.shouldBypassForCreditsExpiration(user)).thenReturn(false);
+
+      initialCreditsService.checkCreditsExpirationForUserIDs(List.of(user.getUserId()));
+      initialCreditsService.checkCreditsExpirationForUserIDs(List.of(user.getUserId()));
+
+      verify(mailService, times(1)).alertUserInitialCreditsExpiring(user);
+    } finally {
+      CLOCK.setInstant(originalInstant);
+    }
+  }
+
+  @Test
+  public void
+      test_checkCreditsExpirationForUserIDs_expiringSoon_sendsAtSeparateConfiguredMilestones()
+          throws MessagingException {
+    workbenchConfig.featureFlags.enableUnlinkBillingForInitialCredits = true;
+    workbenchConfig.billing.initialCreditsExpirationWarningDaysList = List.of(90L, 30L);
+
+    Instant originalInstant = CLOCK.instant();
+    try {
+      DbUser user = createUser("expiring-soon-multi@test.com");
+      createWorkspace(user, "expiring-soon-multi-project");
+
+      Timestamp expirationTime =
+          new Timestamp(CLOCK.instant().toEpochMilli() + TimeUnit.DAYS.toMillis(90));
+      user.setUserInitialCreditsExpiration(
+          new DbUserInitialCreditsExpiration()
+              .setUser(user)
+              .setExpirationTime(expirationTime)
+              .setBypassed(false));
+      spyUserDao.save(user);
+
+      when(institutionService.shouldBypassForCreditsExpiration(user)).thenReturn(false);
+
+      // 90-day milestone
+      initialCreditsService.checkCreditsExpirationForUserIDs(List.of(user.getUserId()));
+
+      // Advance to 30-day milestone.
+      CLOCK.increment(TimeUnit.DAYS.toMillis(60));
+      initialCreditsService.checkCreditsExpirationForUserIDs(List.of(user.getUserId()));
+
+      verify(mailService, times(2)).alertUserInitialCreditsExpiring(user);
+    } finally {
+      CLOCK.setInstant(originalInstant);
+    }
   }
 }

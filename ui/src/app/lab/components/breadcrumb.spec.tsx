@@ -45,8 +45,10 @@ jest.mock('app/lab/pages/workspace/invalid-billing-banner', () => {
 // Mock the CreditBanner component
 jest.mock('app/lab/pages/workspace/initial-credits/credit-banner', () => {
   return {
-    CreditBanner: () => (
-      <div data-testid='credit-banner'>Credit Banner (Mocked)</div>
+    CreditBanner: ({ banners }) => (
+      <div data-testid='credit-banner' data-banner-count={banners?.length ?? 0}>
+        Credit Banner (Mocked)
+      </div>
     ),
   };
 });
@@ -393,6 +395,55 @@ describe('CreditBanner Component', () => {
     expect(
       await screen.findByText('Credit Banner (Mocked)')
     ).toBeInTheDocument();
+    expect(screen.getByText('Credit Banner (Mocked)')).toHaveAttribute(
+      'data-banner-count',
+      '1'
+    );
+  });
+
+  it('should render only one prioritized scenario when multiple conditions match', async () => {
+    // Arrange
+    const modifiedWorkspace = makeWorkspaceWithInitialCreditsBillingAccount();
+    modifiedWorkspace.creatorUser = {
+      givenName: 'Test',
+      familyName: 'User',
+      userName: 'test@example.com',
+    };
+    modifiedWorkspace.initialCredits = {
+      exhausted: true,
+      expirationEpochMillis: plusDays(Date.now(), 1),
+      expirationBypassed: false,
+      balance: 100,
+    };
+
+    currentWorkspaceStore.next(modifiedWorkspace);
+
+    profileStore.set({
+      profile: {
+        ...ProfileStubVariables.PROFILE_STUB,
+        initialCreditsLimit: 300,
+        initialCreditsUsage: 250,
+      },
+      load,
+      reload,
+      updateCache,
+    });
+
+    // Act
+    render(
+      <MemoryRouter>
+        <Breadcrumb />
+      </MemoryRouter>
+    );
+
+    // Assert
+    expect(
+      await screen.findByText('Credit Banner (Mocked)')
+    ).toBeInTheDocument();
+    expect(screen.getByText('Credit Banner (Mocked)')).toHaveAttribute(
+      'data-banner-count',
+      '1'
+    );
   });
 
   it('should display CreditBanner when credits are expired and not bypassed', async () => {

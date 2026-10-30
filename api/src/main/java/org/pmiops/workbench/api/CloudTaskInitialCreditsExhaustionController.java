@@ -34,6 +34,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class CloudTaskInitialCreditsExhaustionController
     implements CloudTaskInitialCreditExhaustionApiDelegate {
 
+  private static final double DEFAULT_INITIAL_CREDITS_DOLLAR_LIMIT = 300.0;
+  private static final double FIFTY_PERCENT_THRESHOLD = 0.5;
+  private static final double SEVENTY_FIVE_PERCENT_THRESHOLD = 0.75;
+
   private static final Logger logger =
       LoggerFactory.getLogger(CloudTaskInitialCreditsExhaustionController.class);
 
@@ -132,9 +136,7 @@ public class CloudTaskInitialCreditsExhaustionController
       Map<Long, Double> dbCostByCreator,
       Map<Long, Double> liveCostByCreator,
       Set<DbUser> newlyExhaustedUsers) {
-    final List<Double> costThresholdsInDescOrder =
-        workbenchConfig.get().billing.initialCreditsCostAlertThresholds;
-    costThresholdsInDescOrder.sort(Comparator.reverseOrder());
+    final List<Double> costThresholdsInDescOrder = getCostThresholdsInDescOrder();
 
     Map<Long, DbUser> usersCache =
         users.stream()
@@ -162,6 +164,29 @@ public class CloudTaskInitialCreditsExhaustionController
               previousCost,
               costThresholdsInDescOrder);
         });
+  }
+
+  private List<Double> getCostThresholdsInDescOrder() {
+    final List<Double> configuredThresholds =
+        Optional.ofNullable(workbenchConfig.get().billing.initialCreditsCostAlertThresholds)
+            .orElse(List.of());
+
+    // Ensure 50%- and 75%-usage alerts are available for default $300 initial credits
+    // environments, which correspond to the $150- and $75-remaining communication milestones.
+    final boolean shouldAddDollarMilestoneThresholds =
+        CostComparisonUtils.compareCosts(
+                workbenchConfig.get().billing.defaultInitialCreditsDollarLimit,
+                DEFAULT_INITIAL_CREDITS_DOLLAR_LIMIT)
+            == 0;
+
+    return (shouldAddDollarMilestoneThresholds
+            ? java.util.stream.Stream.concat(
+                configuredThresholds.stream(),
+                java.util.stream.Stream.of(FIFTY_PERCENT_THRESHOLD, SEVENTY_FIVE_PERCENT_THRESHOLD))
+            : configuredThresholds.stream())
+        .distinct()
+        .sorted(Comparator.reverseOrder())
+        .toList();
   }
 
   /**

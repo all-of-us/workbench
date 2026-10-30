@@ -3,6 +3,7 @@ package org.pmiops.workbench.api;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -789,6 +790,202 @@ class CloudTaskInitialCreditsExhaustionControllerTest {
     // SHOULD send exhaustion email because user still has an initial credits workspace
     verify(mailService).alertUserInitialCreditsExhausted(eq(user));
     verify(initialCreditsService).updateInitialCreditsExhaustion(eq(user), eq(true));
+  }
+
+  @Test
+  public void
+      handleInitialCreditsExhaustionBatch_alertsAtSeventyFivePercent_whenDefaultThreeHundredAndThresholdMissing()
+          throws MessagingException {
+    // Simulate environment config where 0.75 is missing.
+    workbenchConfig.billing.initialCreditsCostAlertThresholds = Doubles.asList(.25, .5);
+    workbenchConfig.billing.defaultInitialCreditsDollarLimit = 300.0;
+
+    final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
+    createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
+
+    // Previous run at $150 (50% usage), current run crosses 75% usage at $226.
+    Map<String, Double> allDbCosts = Maps.newHashMap();
+    allDbCosts.put(String.valueOf(user.getUserId()), 150.0d);
+
+    Map<String, Double> allBQCosts = Maps.newHashMap();
+    allBQCosts.put(String.valueOf(user.getUserId()), 226.0d);
+
+    ExhaustedInitialCreditsEventRequest request =
+        buildExhaustedInitialCreditsEventRequest(List.of(user), allBQCosts, allDbCosts);
+
+    controller.handleInitialCreditsExhaustionBatch(request);
+
+    verify(mailService)
+        .alertUserInitialCreditsDollarThreshold(eq(user), eq(0.75d), eq(226.0d), eq(74.0d));
+  }
+
+  @Test
+  public void
+      handleInitialCreditsExhaustionBatch_alertsAtFiftyPercent_whenDefaultThreeHundredAndThresholdMissing()
+          throws MessagingException {
+    // Simulate environment config where 0.5 is missing.
+    workbenchConfig.billing.initialCreditsCostAlertThresholds = Doubles.asList(.25);
+    workbenchConfig.billing.defaultInitialCreditsDollarLimit = 300.0;
+
+    final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
+    createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
+
+    // Previous run below 50% usage, current run crosses to $151 usage ($149 remaining).
+    Map<String, Double> allDbCosts = Maps.newHashMap();
+    allDbCosts.put(String.valueOf(user.getUserId()), 100.0d);
+
+    Map<String, Double> allBQCosts = Maps.newHashMap();
+    allBQCosts.put(String.valueOf(user.getUserId()), 151.0d);
+
+    ExhaustedInitialCreditsEventRequest request =
+        buildExhaustedInitialCreditsEventRequest(List.of(user), allBQCosts, allDbCosts);
+
+    controller.handleInitialCreditsExhaustionBatch(request);
+
+    verify(mailService)
+        .alertUserInitialCreditsDollarThreshold(eq(user), eq(0.5d), eq(151.0d), eq(149.0d));
+  }
+
+  @Test
+  public void
+      handleInitialCreditsExhaustionBatch_delayedProcessing_crossesFiftyAndSeventyFive_sendsOnlySeventyFive()
+          throws MessagingException {
+    workbenchConfig.billing.defaultInitialCreditsDollarLimit = 300.0;
+    // Keep configured thresholds small to verify automatic addition of 0.5 and 0.75 for $300.
+    workbenchConfig.billing.initialCreditsCostAlertThresholds = Doubles.asList(.25);
+
+    final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
+    createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
+
+    final Map<String, Double> dbCosts = new HashMap<>();
+    dbCosts.put(String.valueOf(user.getUserId()), 140.0);
+    final Map<String, Double> liveCosts = new HashMap<>();
+    liveCosts.put(String.valueOf(user.getUserId()), 230.0);
+
+    controller.handleInitialCreditsExhaustionBatch(
+        buildExhaustedInitialCreditsEventRequest(List.of(user), liveCosts, dbCosts));
+
+    verify(mailService)
+        .alertUserInitialCreditsDollarThreshold(eq(user), eq(0.75), eq(230.0), eq(70.0));
+    verify(initialCreditsService, never()).updateInitialCreditsExhaustion(any(), anyBoolean());
+
+    // Once DB catches up, repeated processing at the same balance does not resend.
+    dbCosts.put(String.valueOf(user.getUserId()), 230.0);
+    controller.handleInitialCreditsExhaustionBatch(
+        buildExhaustedInitialCreditsEventRequest(List.of(user), liveCosts, dbCosts));
+    verifyNoMoreInteractions(mailService);
+  }
+
+  @Test
+  public void
+      handleInitialCreditsExhaustionBatch_exactlySeventyFivePercentUsage_doesNotTriggerSeventyFiveAlert()
+          throws MessagingException {
+    workbenchConfig.billing.defaultInitialCreditsDollarLimit = 300.0;
+    workbenchConfig.billing.initialCreditsCostAlertThresholds = Doubles.asList(.5, .75);
+
+    final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
+    createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
+
+    final Map<String, Double> dbCosts = Map.of(String.valueOf(user.getUserId()), 170.0);
+    final Map<String, Double> liveCosts = Map.of(String.valueOf(user.getUserId()), 225.0);
+
+    controller.handleInitialCreditsExhaustionBatch(
+        buildExhaustedInitialCreditsEventRequest(List.of(user), liveCosts, dbCosts));
+
+    verifyNoInteractions(mailService);
+    verify(initialCreditsService, never()).updateInitialCreditsExhaustion(any(), anyBoolean());
+  }
+
+  @Test
+  public void
+      handleInitialCreditsExhaustionBatch_zeroRemainingBalance_sendsThresholdOnly_notExhaustion()
+          throws MessagingException {
+    workbenchConfig.billing.defaultInitialCreditsDollarLimit = 300.0;
+    workbenchConfig.billing.initialCreditsCostAlertThresholds = Doubles.asList(.5, .75);
+
+    final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
+    createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
+
+    final Map<String, Double> dbCosts = Map.of(String.valueOf(user.getUserId()), 200.0);
+    final Map<String, Double> liveCosts = Map.of(String.valueOf(user.getUserId()), 300.0);
+
+    controller.handleInitialCreditsExhaustionBatch(
+        buildExhaustedInitialCreditsEventRequest(List.of(user), liveCosts, dbCosts));
+
+    verify(mailService)
+        .alertUserInitialCreditsDollarThreshold(eq(user), eq(0.75), eq(300.0), eq(0.0));
+    verify(initialCreditsService, never()).updateInitialCreditsExhaustion(any(), anyBoolean());
+    verify(mailService, never()).alertUserInitialCreditsExhausted(any());
+  }
+
+  @Test
+  public void
+      handleInitialCreditsExhaustionBatch_repeatedRunsWithoutBalanceChange_doNotDuplicateThresholdAlert()
+          throws MessagingException {
+    workbenchConfig.billing.defaultInitialCreditsDollarLimit = 300.0;
+    workbenchConfig.billing.initialCreditsCostAlertThresholds = Doubles.asList(.5, .75);
+
+    final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
+    createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
+
+    final Map<String, Double> costs = Map.of(String.valueOf(user.getUserId()), 230.0);
+
+    controller.handleInitialCreditsExhaustionBatch(
+        buildExhaustedInitialCreditsEventRequest(List.of(user), costs, costs));
+    controller.handleInitialCreditsExhaustionBatch(
+        buildExhaustedInitialCreditsEventRequest(List.of(user), costs, costs));
+
+    verifyNoInteractions(mailService);
+    verify(initialCreditsService, never()).updateInitialCreditsExhaustion(any(), anyBoolean());
+  }
+
+  @Test
+  public void
+      handleInitialCreditsExhaustionBatch_retryingIdenticalPayload_resendsThresholdAlert()
+          throws MessagingException {
+    workbenchConfig.billing.defaultInitialCreditsDollarLimit = 300.0;
+    workbenchConfig.billing.initialCreditsCostAlertThresholds = Doubles.asList(.5, .75);
+
+    final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
+    createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
+
+    // Simulate cloud-task retry with unchanged payload before DB cost state is advanced.
+    final Map<String, Double> dbCosts = Map.of(String.valueOf(user.getUserId()), 140.0);
+    final Map<String, Double> liveCosts = Map.of(String.valueOf(user.getUserId()), 230.0);
+
+    ExhaustedInitialCreditsEventRequest request =
+        buildExhaustedInitialCreditsEventRequest(List.of(user), liveCosts, dbCosts);
+
+    controller.handleInitialCreditsExhaustionBatch(request);
+    controller.handleInitialCreditsExhaustionBatch(request);
+
+    verify(mailService, times(2))
+        .alertUserInitialCreditsDollarThreshold(eq(user), eq(0.75), eq(230.0), eq(70.0));
+    verify(initialCreditsService, never()).updateInitialCreditsExhaustion(any(), anyBoolean());
+  }
+
+  @Test
+  public void
+      handleInitialCreditsExhaustionBatch_nonDefaultLimit_keepsConfiguredThresholdsWithoutAutoAdditions()
+          throws MessagingException {
+    workbenchConfig.billing.defaultInitialCreditsDollarLimit = 400.0;
+    workbenchConfig.billing.initialCreditsCostAlertThresholds = Doubles.asList(.25);
+
+    final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
+    createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
+
+    final Map<String, Double> dbCosts = Map.of(String.valueOf(user.getUserId()), 0.0);
+    final Map<String, Double> liveCosts = Map.of(String.valueOf(user.getUserId()), 220.0);
+
+    controller.handleInitialCreditsExhaustionBatch(
+        buildExhaustedInitialCreditsEventRequest(List.of(user), liveCosts, dbCosts));
+
+    verify(mailService)
+        .alertUserInitialCreditsDollarThreshold(eq(user), eq(0.25), eq(220.0), eq(180.0));
+    verify(mailService, never())
+        .alertUserInitialCreditsDollarThreshold(eq(user), eq(0.5), anyDouble(), anyDouble());
+    verify(mailService, never())
+        .alertUserInitialCreditsDollarThreshold(eq(user), eq(0.75), anyDouble(), anyDouble());
   }
 
   private DbUser createUser(String email) {
