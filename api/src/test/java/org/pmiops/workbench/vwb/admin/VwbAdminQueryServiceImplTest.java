@@ -248,7 +248,7 @@ public class VwbAdminQueryServiceImplTest {
   }
 
   @Test
-  public void testWorkspaceActivityQuery_usesWorkspaceIdRoleFilterAndPagination() {
+  public void testWorkspaceActivityQuery_usesWorkspaceIdAndPagination() {
     service.queryVwbWorkspaceActivity("workspace-uuid-123", 25, 50);
 
     ArgumentCaptor<QueryJobConfiguration> configCaptor =
@@ -260,8 +260,6 @@ public class VwbAdminQueryServiceImplTest {
 
     org.junit.jupiter.api.Assertions.assertTrue(query.contains("workspace_id=@WORKSPACE_ID"));
     org.junit.jupiter.api.Assertions.assertTrue(
-        query.contains("change_type LIKE @CHANGE_TYPE_FILTER"));
-    org.junit.jupiter.api.Assertions.assertTrue(
         query.contains(
             "ORDER BY change_date DESC, change_type DESC, actor_email DESC, change_subject_id DESC"));
     org.junit.jupiter.api.Assertions.assertTrue(query.contains("LIMIT @LIMIT"));
@@ -269,9 +267,6 @@ public class VwbAdminQueryServiceImplTest {
 
     assertEquals(
         "workspace-uuid-123", capturedConfig.getNamedParameters().get("WORKSPACE_ID").getValue());
-    assertEquals(
-        "%WORKSPACE_ROLE%",
-        capturedConfig.getNamedParameters().get("CHANGE_TYPE_FILTER").getValue());
     assertEquals("25", capturedConfig.getNamedParameters().get("LIMIT").getValue());
     assertEquals("50", capturedConfig.getNamedParameters().get("OFFSET").getValue());
   }

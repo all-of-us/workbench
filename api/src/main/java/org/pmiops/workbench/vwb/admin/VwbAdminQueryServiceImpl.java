@@ -59,7 +59,6 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
   private static final String REGISTERED_TIER_LABEL = "Registered Tier";
   private static final String GRANT_WORKSPACE_ROLE = "GRANT_WORKSPACE_ROLE";
   private static final String REMOVE_WORKSPACE_ROLE = "REMOVE_WORKSPACE_ROLE";
-  private static final String WORKSPACE_ROLE_EVENT_FILTER = "%WORKSPACE_ROLE%";
 
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
@@ -132,8 +131,6 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
           + " %s \n"
           + "WHERE \n"
           + " workspace_id=@WORKSPACE_ID \n"
-          + "AND \n"
-          + " change_type LIKE @CHANGE_TYPE_FILTER \n"
           + "ORDER BY change_date DESC, change_type DESC, actor_email DESC, change_subject_id DESC \n"
           + "LIMIT @LIMIT \n"
           + "OFFSET @OFFSET ";
@@ -397,8 +394,6 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
     final QueryJobConfiguration queryJobConfiguration =
         QueryJobConfiguration.newBuilder(queryString)
             .addNamedParameter("WORKSPACE_ID", QueryParameterValue.string(workspaceId))
-            .addNamedParameter(
-                "CHANGE_TYPE_FILTER", QueryParameterValue.string(WORKSPACE_ROLE_EVENT_FILTER))
             .addNamedParameter("LIMIT", QueryParameterValue.int64(limit))
             .addNamedParameter("OFFSET", QueryParameterValue.int64(offset))
             .build();
