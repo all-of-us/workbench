@@ -256,7 +256,7 @@ public class MailServiceImpl implements MailService {
     sendWithRetries(
         Collections.singletonList(user.getContactEmail()),
         Collections.emptyList(),
-        "Alert - Initial credit expiration in All of Us Researcher Workbench",
+        "Action Required: Your All of Us Initial Credits Expire Soon",
         logMsg,
         htmlMessage);
   }
