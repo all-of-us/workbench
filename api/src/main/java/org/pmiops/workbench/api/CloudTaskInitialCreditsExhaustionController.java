@@ -294,13 +294,13 @@ public class CloudTaskInitialCreditsExhaustionController
       logger.warn(msg);
     }
 
-    final double currentFraction = currentCost / limit;
-    final double previousFraction = previousCost / limit;
+    final double currentCredits = limit - currentCost;
+    final double previousCredits = limit - previousCost;
 
     for (final double threshold : thresholdsInDescOrder) {
-      if (CostComparisonUtils.compareCostFractions(currentFraction, threshold) > 0) {
+      if (CostComparisonUtils.compareCosts(currentCredits, threshold) < 0) {
         // only alert if we have not done so previously
-        if (CostComparisonUtils.compareCostFractions(previousFraction, threshold) <= 0) {
+        if (CostComparisonUtils.compareCosts(previousCredits, threshold) >= 0) {
           try {
             mailService.alertUserInitialCreditsDollarThreshold(
                 user, threshold, currentCost, remainingBalance);

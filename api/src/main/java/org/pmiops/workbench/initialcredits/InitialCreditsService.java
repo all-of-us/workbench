@@ -153,7 +153,7 @@ public class InitialCreditsService {
             liveCostsInBQ, workspaceByProject, creatorByWorkspace, vwbUserLiveCosts);
 
     final Set<DbUser> filteredUsers =
-        filterUsersHigherThanTheLowestThreshold(users, liveCostByCreator);
+        filterUsersLowerThanTheHighestThreshold(users, liveCostByCreator);
     if (filteredUsers.isEmpty()) {
       return;
     }
@@ -174,23 +174,23 @@ public class InitialCreditsService {
   }
 
   /**
-   * Filter the users to get only the users that have costs higher than the lowest threshold. This
-   * means we'll be pushing cloud tasks for these users to notify them about their costs but the
-   * decision to notify or not is left to the handleInitialCreditsExhaustionBatch cloud task.
-   * Another way to think about this is to have the logic to decide whether to include the user to
-   * be notified here. This is done to avoid pushing cloud tasks for users that have costs lower
-   * than the lowest threshold.
+   * Filter the users to get only the users that have remaining credits lower than the highest
+   * threshold. This means we'll be pushing cloud tasks for these users to notify them about their
+   * costs but the decision to notify or not is left to the handleInitialCreditsExhaustionBatch
+   * cloud task. Another way to think about this is to have the logic to decide whether to include
+   * the user tobe notified here. This is done to avoid pushing cloud tasks for users that have more
+   * remaining credits than the highest threshold.
    *
    * @param users the users to filter
    * @param liveCostByCreator the live cost by creator
-   * @return the users that have costs higher than the lowest threshold
+   * @return the users that have less remaining credits than the highest threshold
    */
-  private Set<DbUser> filterUsersHigherThanTheLowestThreshold(
+  private Set<DbUser> filterUsersLowerThanTheHighestThreshold(
       Set<DbUser> users, final Map<Long, Double> liveCostByCreator) {
     return workbenchConfigProvider.get().billing.initialCreditsCostAlertThresholds.stream()
-        .min(Comparator.naturalOrder())
+        .max(Comparator.naturalOrder())
         .map(
-            lowestThreshold ->
+            highestThreshold ->
                 users.stream()
                     .filter(
                         user -> {
@@ -198,7 +198,7 @@ public class InitialCreditsService {
                           final double userLiveCost =
                               Optional.ofNullable(liveCostByCreator.get(user.getUserId()))
                                   .orElse(0.0);
-                          return userLiveCost / limit >= lowestThreshold;
+                          return limit - userLiveCost <= highestThreshold;
                         })
                     .collect(Collectors.toSet()))
         .orElse(Collections.emptySet());
@@ -374,30 +374,18 @@ public class InitialCreditsService {
     return workbenchConfigProvider.get().featureFlags.enableUnlinkBillingForInitialCredits;
   }
 
-  // Returns true if the user's credits expiry matches the initialCreditsExpirationWarningDays.
+  // Returns true if the user's credits expiry matches any value of
+  // initialCreditsExpirationWarningDaysList.
   private boolean areCreditsExpiringSoon(DbUser user) {
-    if (checkEnableUnlinkBillingForInitialCreditsFlag()) {
-      List<Long> initialCreditsExpirationWarningDaysList =
-          workbenchConfigProvider.get().billing.initialCreditsExpirationWarningDaysList;
-      return getCreditsExpiration(user)
-          .map(
-              expirationTime -> {
-                long millisDiff = expirationTime.getTime() - clockNow().getTime();
-                long daysDiff = TimeUnit.MILLISECONDS.toDays(millisDiff);
-                return initialCreditsExpirationWarningDaysList.contains(daysDiff);
-              })
-          .orElse(false);
-    }
-    long initialCreditsExpirationWarningDays =
-        workbenchConfigProvider.get().billing.initialCreditsExpirationWarningDays;
+    List<Long> initialCreditsExpirationWarningDaysList =
+        workbenchConfigProvider.get().billing.initialCreditsExpirationWarningDaysList;
     return getCreditsExpiration(user)
         .map(
-            expirationTime ->
-                clockNow()
-                    .after(
-                        new Timestamp(
-                            expirationTime.getTime()
-                                - TimeUnit.DAYS.toMillis(initialCreditsExpirationWarningDays))))
+            expirationTime -> {
+              long millisDiff = expirationTime.getTime() - clockNow().getTime();
+              long daysDiff = TimeUnit.MILLISECONDS.toDays(millisDiff);
+              return initialCreditsExpirationWarningDaysList.contains(daysDiff);
+            })
         .orElse(false);
   }
 
@@ -534,7 +522,6 @@ public class InitialCreditsService {
         && !hasOnlyUserProvidedBillingWorkspaces(user)) {
       handleExpiredCredits(user, userInitialCreditsExpiration);
     } else if (areCreditsExpiringSoon(user)
-        && shouldCheckApproachingExpirationNotification(userInitialCreditsExpiration)
         && !hasExhaustedWorkspaces(user)
         && !hasOnlyUserProvidedBillingWorkspaces(user)) {
       handleExpiringSoonCredits(user, userInitialCreditsExpiration);
