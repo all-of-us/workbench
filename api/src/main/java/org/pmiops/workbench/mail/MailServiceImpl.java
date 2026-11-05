@@ -14,6 +14,7 @@ import jakarta.mail.MessagingException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.text.NumberFormat;
+import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -24,6 +25,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -42,6 +44,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class MailServiceImpl implements MailService {
+  private final Clock clock;
   private static final Logger logger =
       Logger.getLogger(WorkspaceMigrationServiceImpl.class.getName());
   private static final String AOU_ITALICS = "<i>All of Us</i>";
@@ -87,16 +90,24 @@ public class MailServiceImpl implements MailService {
       "emails/egress_remediation/content.html";
   private static final String INITIAL_CREDITS_DOLLAR_THRESHOLD_RESOURCE_V1 =
       "emails/initial_credits_dollar_threshold/v1/content.html";
-  private static final String INITIAL_CREDITS_DOLLAR_THRESHOLD_RESOURCE_V2 =
-      "emails/initial_credits_dollar_threshold/v2/content.html";
+  private static final double INITIAL_CREDITS_150_DOLLAR_THRESHOLD = 150.0;
+  private static final String INITIAL_CREDITS_150_DOLLAR_THRESHOLD_RESOURCE_V2 =
+      "emails/initial_credits_dollar_threshold/v2/150_credits/content.html";
+  private static final double INITIAL_CREDITS_75_DOLLAR_THRESHOLD = 75.0;
+  private static final String INITIAL_CREDITS_75_DOLLAR_THRESHOLD_RESOURCE_V2 =
+      "emails/initial_credits_dollar_threshold/v2/75_credits/content.html";
   private static final String INITIAL_CREDITS_EXHAUSTION_RESOURCE_V1 =
       "emails/initial_credits_exhaustion/v1/content.html";
   private static final String INITIAL_CREDITS_EXHAUSTION_RESOURCE_V2 =
       "emails/initial_credits_exhaustion/v2/content.html";
   private static final String INITIAL_CREDITS_EXPIRING_RESOURCE_V1 =
       "emails/initial_credits_expiring/v1/content.html";
-  private static final String INITIAL_CREDITS_EXPIRING_RESOURCE_V2 =
-      "emails/initial_credits_expiring/v2/content.html";
+  private static final long INITIAL_CREDITS_EXPIRING_30_DAYS = 30;
+  private static final String INITIAL_CREDITS_EXPIRING_30_DAYS_RESOURCE_V2 =
+      "emails/initial_credits_expiring/v2/30_days/content.html";
+  private static final long INITIAL_CREDITS_EXPIRING_90_DAYS = 90;
+  private static final String INITIAL_CREDITS_EXPIRING_90_DAYS_RESOURCE_V2 =
+      "emails/initial_credits_expiring/v2/90_days/content.html";
   private static final String INITIAL_CREDITS_EXPIRED_RESOURCE =
       "emails/initial_credits_expired/content.html";
   private static final String INSTRUCTIONS_RESOURCE = "emails/instructions/content.html";
@@ -147,9 +158,11 @@ public class MailServiceImpl implements MailService {
 
   @Autowired
   public MailServiceImpl(
+      Clock clock,
       Provider<MailSender> mailSenderProvider,
       Provider<CloudStorageClient> cloudStorageClientProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider) {
+    this.clock = clock;
     this.mailSenderProvider = mailSenderProvider;
     this.cloudStorageClientProvider = cloudStorageClientProvider;
     this.workbenchConfigProvider = workbenchConfigProvider;
@@ -201,21 +214,36 @@ public class MailServiceImpl implements MailService {
 
     final String logMsg =
         String.format(
-            "User %s has passed the %.2f initial credits dollar threshold.  Current total usage is $%.2f with remaining balance $%.2f",
+            "User %s has less initial credits than the %.2f dollar threshold.  Current total usage is $%.2f with remaining balance $%.2f",
             userForLogging(user), threshold, currentUsage, remainingBalance);
     log.info(logMsg);
 
-    final String htmlMessage =
-        buildHtml(
-            INITIAL_CREDITS_DOLLAR_THRESHOLD_RESOURCE_V2,
-            initialCreditsDollarThresholdSubstitutionMapV2(user, currentUsage, remainingBalance));
+    String htmlMessage;
+    String subject;
+    if (threshold == INITIAL_CREDITS_150_DOLLAR_THRESHOLD) {
+      htmlMessage =
+          buildHtml(
+              INITIAL_CREDITS_150_DOLLAR_THRESHOLD_RESOURCE_V2,
+              initialCreditsDollarThresholdSubstitutionMapV2(user, currentUsage, remainingBalance));
+      subject = "Action Recommended: $150 in All of Us Credits Remaining";
+    } else if (threshold == INITIAL_CREDITS_75_DOLLAR_THRESHOLD) {
+      htmlMessage =
+          buildHtml(
+              INITIAL_CREDITS_75_DOLLAR_THRESHOLD_RESOURCE_V2,
+              initialCreditsDollarThresholdSubstitutionMapV2(user, currentUsage, remainingBalance));
+      subject = "Urgent: Only $75 of All of Us Credits Remaining";
+    } else {
+      log.warning(
+          String.format(
+              "Invalid threshold %.2f. Email alert not sent for user %s",
+              threshold, userForLogging(user)));
+      return;
+    }
 
     sendWithRetries(
         Collections.singletonList(user.getContactEmail()),
         Collections.emptyList(),
-        String.format(
-            "Reminder - %s Initial credit usage in All of Us Researcher Workbench",
-            formatPercentage(threshold)),
+        subject,
         String.format("User %s passed an initial credits dollar threshold", userForLogging(user)),
         htmlMessage);
   }
@@ -249,14 +277,36 @@ public class MailServiceImpl implements MailService {
             userForLogging(user));
     log.info(logMsg);
 
-    final String htmlMessage =
-        buildHtml(
-            INITIAL_CREDITS_EXPIRING_RESOURCE_V2, initialCreditsExpiringSubstitutionMap(user));
+    long millisDiff =
+        user.getUserInitialCreditsExpiration().getExpirationTime().getTime()
+            - clock.instant().toEpochMilli();
+    long daysDiff = TimeUnit.MILLISECONDS.toDays(millisDiff);
+    String htmlMessage;
+    String subject;
+    if (daysDiff == INITIAL_CREDITS_EXPIRING_30_DAYS) {
+      htmlMessage =
+          buildHtml(
+              INITIAL_CREDITS_EXPIRING_30_DAYS_RESOURCE_V2,
+              initialCreditsExpiringSubstitutionMap(user));
+      subject = "Urgent: Your All of Us Initial Credits Expire in 30 Days";
+    } else if (daysDiff == INITIAL_CREDITS_EXPIRING_90_DAYS) {
+      htmlMessage =
+          buildHtml(
+              INITIAL_CREDITS_EXPIRING_90_DAYS_RESOURCE_V2,
+              initialCreditsExpiringSubstitutionMap(user));
+      subject = "Action Required: Your All of Us Initial Credits Expire Soon";
+    } else {
+      log.warning(
+          String.format(
+              "Invalid expiration days %d. Email alert not sent for user %s",
+              daysDiff, userForLogging(user)));
+      return;
+    }
 
     sendWithRetries(
         Collections.singletonList(user.getContactEmail()),
         Collections.emptyList(),
-        "Alert - Initial credit expiration in All of Us Researcher Workbench",
+        subject,
         logMsg,
         htmlMessage);
   }
@@ -817,8 +867,8 @@ public class MailServiceImpl implements MailService {
     return cloudStorageClientProvider.get().getImageUrl(imageURL);
   }
 
-  private String formatPercentage(double threshold) {
-    return NumberFormat.getPercentInstance().format(threshold);
+  private String formatThreshold(double threshold) {
+    return NumberFormat.getIntegerInstance().format(threshold);
   }
 
   private String formatCurrency(double currentUsage) {

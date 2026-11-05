@@ -141,7 +141,7 @@ public class InitialCreditsServiceTest {
   @BeforeEach
   public void setUp() throws MessagingException {
     workbenchConfig = WorkbenchConfig.createEmptyConfig();
-    workbenchConfig.billing.initialCreditsCostAlertThresholds = Doubles.asList(.5, .75);
+    workbenchConfig.billing.initialCreditsCostAlertThresholds = Doubles.asList(150.0, 75.0);
     workbenchConfig.billing.accountId = "initial-credits";
     workbenchConfig.billing.defaultInitialCreditsDollarLimit = 1000.0;
     workbenchConfig.billing.initialCreditsValidityPeriodDays = validityPeriodDays;
@@ -175,8 +175,8 @@ public class InitialCreditsServiceTest {
 
   @Test
   public void checkInitialCreditsUsage_exceedsDollarThresholds() {
-    final double limit = 100.0;
-    final double costUnderThreshold = 49.5;
+    final double limit = 300.0;
+    final double costUnderThreshold = 149.5;
 
     workbenchConfig.billing.defaultInitialCreditsDollarLimit = limit;
 
@@ -192,8 +192,8 @@ public class InitialCreditsServiceTest {
         Sets.newHashSet(user), allBQCosts, Collections.emptyMap());
     verifyNoInteractions(taskQueueService);
 
-    // check that we alert for the 50% threshold
-    double costOverThreshold = 50.5;
+    // check that we alert for the $150 threshold
+    double costOverThreshold = 150.5;
     allBQCosts.put(SINGLE_WORKSPACE_TEST_PROJECT, costOverThreshold);
     initialCreditsService.checkInitialCreditsUsageForUsers(
         Sets.newHashSet(user), allBQCosts, Collections.emptyMap());
@@ -203,8 +203,8 @@ public class InitialCreditsServiceTest {
             argThat(new MapMatcher(Map.of(user.getUserId(), costUnderThreshold))),
             argThat(new MapMatcher(Map.of(user.getUserId(), costOverThreshold))));
 
-    // check that we alert for the 75% threshold
-    costOverThreshold = 75.3;
+    // check that we alert for the $75 threshold
+    costOverThreshold = 225.3;
 
     allBQCosts.put(SINGLE_WORKSPACE_TEST_PROJECT, costOverThreshold);
     initialCreditsService.checkInitialCreditsUsageForUsers(
@@ -212,73 +212,13 @@ public class InitialCreditsServiceTest {
     verify(taskQueueService)
         .pushInitialCreditsExhaustionTask(
             argThat(new UserListMatcher(List.of(user.getUserId()))),
-            argThat(new MapMatcher(Map.of(user.getUserId(), 50.5d))),
+            argThat(new MapMatcher(Map.of(user.getUserId(), 150.5d))),
             argThat(new MapMatcher(Map.of(user.getUserId(), costOverThreshold))));
 
     // check that we alert for expiration when we hit 100%
 
-    final double costToTriggerExpiration = 100.01;
+    final double costToTriggerExpiration = 300.01;
 
-    allBQCosts.put(SINGLE_WORKSPACE_TEST_PROJECT, costToTriggerExpiration);
-
-    initialCreditsService.checkInitialCreditsUsageForUsers(
-        Sets.newHashSet(user), allBQCosts, Collections.emptyMap());
-    verify(taskQueueService)
-        .pushInitialCreditsExhaustionTask(
-            argThat(new UserListMatcher(List.of(user.getUserId()))),
-            argThat(new MapMatcher(Map.of(user.getUserId(), costOverThreshold))),
-            argThat(new MapMatcher(Map.of(user.getUserId(), costToTriggerExpiration))));
-  }
-
-  @Test
-  public void checkInitialCreditsUsage_altDollarThresholds() {
-
-    // set alert thresholds at 30% and 65% instead
-    workbenchConfig.billing.initialCreditsCostAlertThresholds = Doubles.asList(.3, .65);
-
-    final double limit = 100.0;
-    final double costUnderThreshold = 29.9;
-
-    double costOverThreshold = 30.1;
-
-    workbenchConfig.billing.defaultInitialCreditsDollarLimit = limit;
-
-    final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
-    createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
-
-    commitTransaction();
-    // check that we have not alerted before the threshold
-    Map<String, Double> allBQCosts = Maps.newHashMap();
-    allBQCosts.put(SINGLE_WORKSPACE_TEST_PROJECT, costUnderThreshold);
-
-    initialCreditsService.checkInitialCreditsUsageForUsers(
-        Sets.newHashSet(user), allBQCosts, Collections.emptyMap());
-    verifyNoInteractions(taskQueueService);
-
-    // check that we detect the 30% threshold
-    allBQCosts.put(SINGLE_WORKSPACE_TEST_PROJECT, costOverThreshold);
-    initialCreditsService.checkInitialCreditsUsageForUsers(
-        Sets.newHashSet(user), allBQCosts, Collections.emptyMap());
-    verify(taskQueueService)
-        .pushInitialCreditsExhaustionTask(
-            argThat(new UserListMatcher(List.of(user.getUserId()))),
-            argThat(new MapMatcher(Map.of(user.getUserId(), costUnderThreshold))),
-            argThat(new MapMatcher(Map.of(user.getUserId(), costOverThreshold))));
-
-    costOverThreshold = 65.01;
-
-    allBQCosts.put(SINGLE_WORKSPACE_TEST_PROJECT, costOverThreshold);
-    initialCreditsService.checkInitialCreditsUsageForUsers(
-        Sets.newHashSet(user), allBQCosts, Collections.emptyMap());
-    verify(taskQueueService)
-        .pushInitialCreditsExhaustionTask(
-            argThat(new UserListMatcher(List.of(user.getUserId()))),
-            argThat(
-                new MapMatcher(Map.of(user.getUserId(), 30.1))), // The previous costOverThreshold
-            argThat(new MapMatcher(Map.of(user.getUserId(), costOverThreshold))));
-
-    // check that we detect expiration when we hit 100%
-    final double costToTriggerExpiration = 100.01;
     allBQCosts.put(SINGLE_WORKSPACE_TEST_PROJECT, costToTriggerExpiration);
 
     initialCreditsService.checkInitialCreditsUsageForUsers(
@@ -341,11 +281,11 @@ public class InitialCreditsServiceTest {
 
   @Test
   public void checkInitialCreditsUsage_noAlert() {
-    // set limit so usage is just under the 50% threshold
-    workbenchConfig.billing.defaultInitialCreditsDollarLimit = 100.0;
+    // set limit so usage is just under the $150 threshold
+    workbenchConfig.billing.defaultInitialCreditsDollarLimit = 300.0;
 
     Map<String, Double> allBQCosts = Maps.newHashMap();
-    allBQCosts.put(SINGLE_WORKSPACE_TEST_PROJECT, 49.99);
+    allBQCosts.put(SINGLE_WORKSPACE_TEST_PROJECT, 149.99);
 
     final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
     final DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
@@ -356,16 +296,16 @@ public class InitialCreditsServiceTest {
         Sets.newHashSet(user), allBQCosts, Collections.emptyMap());
     verifyNoInteractions(taskQueueService); // No tasks have been added to the queue
 
-    assertSingleWorkspaceTestDbState(user, workspace, 49.99);
+    assertSingleWorkspaceTestDbState(user, workspace, 149.99);
   }
 
   @Test
   public void checkInitialCreditsUsage_workspaceMissingCreatorNoNPE() {
-    // set limit so usage is just under the 50% threshold
-    workbenchConfig.billing.defaultInitialCreditsDollarLimit = 100.0;
+    // set limit so usage is just under the $150 threshold
+    workbenchConfig.billing.defaultInitialCreditsDollarLimit = 300.0;
 
     Map<String, Double> allBQCosts = Maps.newHashMap();
-    allBQCosts.put(SINGLE_WORKSPACE_TEST_PROJECT, 49.99);
+    allBQCosts.put(SINGLE_WORKSPACE_TEST_PROJECT, 149.99);
 
     final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
     final DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
@@ -377,7 +317,7 @@ public class InitialCreditsServiceTest {
         Sets.newHashSet(user), allBQCosts, Collections.emptyMap());
     verifyNoInteractions(taskQueueService);
 
-    assertSingleWorkspaceTestDbState(user, workspace, 49.99);
+    assertSingleWorkspaceTestDbState(user, workspace, 149.99);
   }
 
   @Test
@@ -1200,7 +1140,7 @@ public class InitialCreditsServiceTest {
     final double vwbPodCostInDb = 50.0;
     final double vwbPodLiveCost = 50.0; // Same as DB cost (recently updated)
 
-    workbenchConfig.billing.defaultInitialCreditsDollarLimit = 200.0;
+    workbenchConfig.billing.defaultInitialCreditsDollarLimit = 300.0;
     workbenchConfig.featureFlags.enableVWBInitialCreditsExhaustion = true;
     workbenchConfig.billing.minutesBeforeLastInitialCreditsJob = 60;
 

@@ -24,8 +24,8 @@
     "exportBigQueryTable": "all-of-us-workbench-test-bd.billing_data.rw_test_firecloud_view",
     "defaultInitialCreditsDollarLimit": 300.0,
     "initialCreditsCostAlertThresholds": [
-      0.25,
-      0.5
+      150.0,
+      75.0
     ],
     "initialCreditsValidityPeriodDays": 365,
     "initialCreditsExtensionPeriodDays": 365,
