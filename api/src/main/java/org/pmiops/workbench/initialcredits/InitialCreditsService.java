@@ -155,6 +155,7 @@ public class InitialCreditsService {
     final Set<DbUser> filteredUsers =
         filterUsersLowerThanTheHighestThreshold(users, liveCostByCreator);
     if (filteredUsers.isEmpty()) {
+      logger.info("No users met alert thresholds for initial credits usage");
       return;
     }
 
@@ -198,6 +199,11 @@ public class InitialCreditsService {
                           final double userLiveCost =
                               Optional.ofNullable(liveCostByCreator.get(user.getUserId()))
                                   .orElse(0.0);
+                          logger.info(
+                              "limit: {}, userLiveCost: {}, highestThreshold: {}",
+                              limit,
+                              userLiveCost,
+                              highestThreshold);
                           return limit - userLiveCost <= highestThreshold;
                         })
                     .collect(Collectors.toSet()))

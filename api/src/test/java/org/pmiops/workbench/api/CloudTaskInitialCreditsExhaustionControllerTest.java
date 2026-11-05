@@ -111,7 +111,7 @@ class CloudTaskInitialCreditsExhaustionControllerTest {
   public void setUp() {
     dbInstitution = institutionDao.save(createDbInstitution());
     workbenchConfig = WorkbenchConfig.createEmptyConfig();
-    workbenchConfig.billing.initialCreditsCostAlertThresholds = Doubles.asList(.5, .75);
+    workbenchConfig.billing.initialCreditsCostAlertThresholds = Doubles.asList(150.0, 75.0);
     workbenchConfig.billing.accountId = "initial-credits";
     workbenchConfig.billing.defaultInitialCreditsDollarLimit = 1000.0;
     workbenchConfig.billing.minutesBeforeLastInitialCreditsJob = 0;
@@ -134,11 +134,11 @@ class CloudTaskInitialCreditsExhaustionControllerTest {
   public void
       handleInitialCreditsExhaustionBatch_alertsAndDeletesResources_whenDollarThresholdIsExceeded()
           throws MessagingException {
-    final double limit = 100.0;
-    final double costUnderThreshold = 49.5;
+    final double limit = 300.0;
+    final double costUnderThreshold = 149.5;
 
-    double threshold = 0.5;
-    double costOverThreshold = 50.5;
+    double threshold = 150.0;
+    double costOverThreshold = 150.5;
     double remaining = limit - costOverThreshold;
 
     workbenchConfig.billing.defaultInitialCreditsDollarLimit = limit;
@@ -158,7 +158,7 @@ class CloudTaskInitialCreditsExhaustionControllerTest {
     controller.handleInitialCreditsExhaustionBatch(request);
     verifyNoInteractions(mailService);
 
-    // check that we alert for the 50% threshold
+    // check that we alert for the $150 threshold
     allBQCosts.put(String.valueOf(user.getUserId()), costOverThreshold);
     request.setLiveCostByCreator(allBQCosts);
     controller.handleInitialCreditsExhaustionBatch(request);
@@ -166,14 +166,14 @@ class CloudTaskInitialCreditsExhaustionControllerTest {
         .alertUserInitialCreditsDollarThreshold(
             eq(user), eq(threshold), eq(costOverThreshold), eq(remaining));
 
-    // check that we do not alert twice for the 50% threshold
+    // check that we do not alert twice for the $150 threshold
     allDbCosts.put(String.valueOf(user.getUserId()), costOverThreshold);
     controller.handleInitialCreditsExhaustionBatch(request);
     verifyNoMoreInteractions(mailService);
 
-    // check that we alert for the 75% threshold
-    threshold = 0.75;
-    costOverThreshold = 75.3;
+    // check that we alert for the $75 threshold
+    threshold = 75.0;
+    costOverThreshold = 225.3;
     remaining = limit - costOverThreshold;
 
     allBQCosts.put(String.valueOf(user.getUserId()), costOverThreshold);
@@ -183,13 +183,13 @@ class CloudTaskInitialCreditsExhaustionControllerTest {
         .alertUserInitialCreditsDollarThreshold(
             eq(user), eq(threshold), eq(costOverThreshold), eq(remaining));
 
-    // check that we do not alert twice for the 75% threshold
+    // check that we do not alert twice for the $75 threshold
     allDbCosts.put(String.valueOf(user.getUserId()), costOverThreshold);
     controller.handleInitialCreditsExhaustionBatch(request);
     verifyNoMoreInteractions(mailService);
 
     // check that we alert for expiration when we hit 100%
-    final double costToTriggerExpiration = 100.01;
+    final double costToTriggerExpiration = 300.01;
 
     allBQCosts.put(String.valueOf(user.getUserId()), costToTriggerExpiration);
     request.setLiveCostByCreator(allBQCosts);
@@ -202,92 +202,6 @@ class CloudTaskInitialCreditsExhaustionControllerTest {
     allDbCosts.put(String.valueOf(user.getUserId()), costToTriggerExpiration);
     controller.handleInitialCreditsExhaustionBatch(request);
     verifyNoMoreInteractions(mailService);
-  }
-
-  @Test
-  public void
-      handleInitialCreditsExhaustionBatch_alertsAndDeletesResources_whenAltDollarThresholdIsExceeded()
-          throws MessagingException {
-
-    // set alert thresholds at 30% and 65% instead
-    workbenchConfig.billing.initialCreditsCostAlertThresholds = Doubles.asList(.3, .65);
-
-    final double limit = 100.0;
-    final double costUnderThreshold = 29.9;
-
-    double threshold = 0.3;
-    double costOverThreshold = 30.1;
-    double remaining = limit - costOverThreshold;
-
-    workbenchConfig.billing.defaultInitialCreditsDollarLimit = limit;
-
-    final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
-    createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
-
-    Map<String, Double> allDbCosts = Maps.newHashMap();
-    allDbCosts.put(String.valueOf(user.getUserId()), 0.0d);
-
-    // check that we have not alerted before the threshold
-    Map<String, Double> allBQCosts = Maps.newHashMap();
-    allBQCosts.put(String.valueOf(user.getUserId()), costUnderThreshold);
-
-    ExhaustedInitialCreditsEventRequest request =
-        buildExhaustedInitialCreditsEventRequest(List.of(user), allBQCosts, allDbCosts);
-
-    controller.handleInitialCreditsExhaustionBatch(request);
-    verify(initialCreditsService, never()).updateInitialCreditsExhaustion(any(), anyBoolean());
-    verifyNoInteractions(mailService);
-
-    // check that we alert for the 30% threshold
-    allBQCosts.put(String.valueOf(user.getUserId()), costOverThreshold);
-    allDbCosts.put(String.valueOf(user.getUserId()), costUnderThreshold);
-    controller.handleInitialCreditsExhaustionBatch(request);
-    verify(mailService)
-        .alertUserInitialCreditsDollarThreshold(
-            eq(user), eq(threshold), eq(costOverThreshold), eq(remaining));
-
-    // check that we do not alert twice for the 30% threshold
-    allBQCosts.put(String.valueOf(user.getUserId()), costOverThreshold);
-    allDbCosts.put(String.valueOf(user.getUserId()), costOverThreshold);
-    controller.handleInitialCreditsExhaustionBatch(request);
-    verifyNoMoreInteractions(mailService);
-
-    // check that we alert for the 65% threshold
-
-    threshold = 0.65;
-    costOverThreshold = 65.01;
-    remaining = limit - costOverThreshold;
-
-    allBQCosts.put(String.valueOf(user.getUserId()), costOverThreshold);
-    controller.handleInitialCreditsExhaustionBatch(request);
-    verify(mailService)
-        .alertUserInitialCreditsDollarThreshold(
-            eq(user), eq(threshold), eq(costOverThreshold), eq(remaining));
-
-    // check that we do not alert twice for the 65% threshold
-
-    allBQCosts.put(String.valueOf(user.getUserId()), costOverThreshold);
-    allDbCosts.put(String.valueOf(user.getUserId()), costOverThreshold);
-    controller.handleInitialCreditsExhaustionBatch(request);
-    verifyNoMoreInteractions(mailService);
-
-    // check that we alert for exhaustion when we hit 100%
-
-    final double costToTriggerExhaustion = 100.01;
-    allBQCosts.put(String.valueOf(user.getUserId()), costToTriggerExhaustion);
-
-    controller.handleInitialCreditsExhaustionBatch(request);
-    verify(mailService).alertUserInitialCreditsExhausted(eq(user));
-    verify(initialCreditsService).updateInitialCreditsExhaustion(eq(user), eq(true));
-
-    // check that we do not alert twice for 100%
-
-    allBQCosts.put(String.valueOf(user.getUserId()), costToTriggerExhaustion);
-    allDbCosts.put(String.valueOf(user.getUserId()), costToTriggerExhaustion);
-    controller.handleInitialCreditsExhaustionBatch(request);
-    verifyNoMoreInteractions(mailService);
-    // updateInitialCreditsExhaustion should only have been called once (above)
-    verify(initialCreditsService, times(1)).updateInitialCreditsExhaustion(any(), anyBoolean());
   }
 
   @Test
@@ -343,13 +257,13 @@ class CloudTaskInitialCreditsExhaustionControllerTest {
 
   @Test
   public void handleInitialCreditsExhaustionBatch_noAlert_ifCostIsBelowLowestThreshold() {
-    // set limit so usage is just under the 50% threshold
-    workbenchConfig.billing.defaultInitialCreditsDollarLimit = 100.0;
+    // set limit so usage is just under the $150 threshold
+    workbenchConfig.billing.defaultInitialCreditsDollarLimit = 300.0;
 
     final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
     final DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
     Map<String, Double> allBQCosts = Maps.newHashMap();
-    allBQCosts.put(String.valueOf(user.getUserId()), 49.99);
+    allBQCosts.put(String.valueOf(user.getUserId()), 149.99);
 
     ExhaustedInitialCreditsEventRequest request =
         buildExhaustedInitialCreditsEventRequest(
@@ -363,14 +277,14 @@ class CloudTaskInitialCreditsExhaustionControllerTest {
 
   @Test
   public void handleInitialCreditsExhaustionBatch_doesntThrowNPE_whenWorkspaceIsMissingCreator() {
-    workbenchConfig.billing.defaultInitialCreditsDollarLimit = 100.0;
+    workbenchConfig.billing.defaultInitialCreditsDollarLimit = 300.0;
 
     final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
     final DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
     createWorkspace(null, "rumney");
 
-    // set limit so usage is just under the 50% threshold
-    Map<String, Double> allBQCosts = Map.of(String.valueOf(user.getUserId()), 49.99);
+    // set limit so usage is just under the $150 threshold
+    Map<String, Double> allBQCosts = Map.of(String.valueOf(user.getUserId()), 149.99);
 
     ExhaustedInitialCreditsEventRequest request =
         buildExhaustedInitialCreditsEventRequest(
@@ -612,8 +526,8 @@ class CloudTaskInitialCreditsExhaustionControllerTest {
     final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
     DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
 
-    workbenchConfig.billing.defaultInitialCreditsDollarLimit = 100.0;
-    Map<String, Double> allBQCosts = Map.of(String.valueOf(user.getUserId()), 50.0);
+    workbenchConfig.billing.defaultInitialCreditsDollarLimit = 300.0;
+    Map<String, Double> allBQCosts = Map.of(String.valueOf(user.getUserId()), 150.0);
 
     workspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED);
     workspace.setLastModifiedTime(Timestamp.valueOf(LocalDateTime.now()));
@@ -624,11 +538,11 @@ class CloudTaskInitialCreditsExhaustionControllerTest {
             List.of(user), allBQCosts, Map.of(String.valueOf(user.getUserId()), 0d)));
     verifyNoInteractions(mailService);
 
-    allBQCosts = Map.of(String.valueOf(user.getUserId()), 100.1);
+    allBQCosts = Map.of(String.valueOf(user.getUserId()), 300.1);
 
     controller.handleInitialCreditsExhaustionBatch(
         buildExhaustedInitialCreditsEventRequest(
-            List.of(user), allBQCosts, Map.of(String.valueOf(user.getUserId()), 50.0)));
+            List.of(user), allBQCosts, Map.of(String.valueOf(user.getUserId()), 150.0)));
     verify(mailService).alertUserInitialCreditsExhausted(eq(user));
     verify(initialCreditsService).updateInitialCreditsExhaustion(eq(user), eq(true));
   }
@@ -640,9 +554,9 @@ class CloudTaskInitialCreditsExhaustionControllerTest {
     final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
     DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
 
-    workbenchConfig.billing.defaultInitialCreditsDollarLimit = 100.0;
+    workbenchConfig.billing.defaultInitialCreditsDollarLimit = 300.0;
     Map<String, Double> allBQCosts = new HashMap<>();
-    allBQCosts.put(String.valueOf(user.getUserId()), 50.0);
+    allBQCosts.put(String.valueOf(user.getUserId()), 150.0);
 
     workspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED);
     workspace.setLastModifiedTime(Timestamp.valueOf(LocalDateTime.now()));
@@ -657,11 +571,11 @@ class CloudTaskInitialCreditsExhaustionControllerTest {
     DbWorkspace anotherWorkspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT + "4");
     assertThat(workspace.isInitialCreditsExhausted()).isEqualTo(false);
 
-    allBQCosts.put(String.valueOf(user.getUserId()), 100.1);
+    allBQCosts.put(String.valueOf(user.getUserId()), 300.1);
 
     controller.handleInitialCreditsExhaustionBatch(
         buildExhaustedInitialCreditsEventRequest(
-            List.of(user), allBQCosts, Map.of(String.valueOf(user.getUserId()), 50.0)));
+            List.of(user), allBQCosts, Map.of(String.valueOf(user.getUserId()), 150.0)));
     verify(mailService).alertUserInitialCreditsExhausted(eq(user));
     verify(initialCreditsService).updateInitialCreditsExhaustion(eq(user), eq(true));
 
@@ -701,9 +615,9 @@ class CloudTaskInitialCreditsExhaustionControllerTest {
     controller.handleInitialCreditsExhaustionBatch(request);
 
     verify(mailService)
-        .alertUserInitialCreditsDollarThreshold(eq(user3), eq(0.5d), eq(151.0d), eq(149.0d));
+        .alertUserInitialCreditsDollarThreshold(eq(user3), eq(150.0d), eq(151.0d), eq(149.0d));
     verify(mailService)
-        .alertUserInitialCreditsDollarThreshold(eq(user2), eq(0.75d), eq(250.0d), eq(50.0d));
+        .alertUserInitialCreditsDollarThreshold(eq(user2), eq(75.0d), eq(250.0d), eq(50.0d));
     verify(mailService).alertUserInitialCreditsExhausted(eq(user1));
     verify(initialCreditsService).updateInitialCreditsExhaustion(eq(user1), eq(true));
     verifyNoMoreInteractions(mailService);

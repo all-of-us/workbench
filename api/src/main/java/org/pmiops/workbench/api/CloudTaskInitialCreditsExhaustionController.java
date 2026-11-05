@@ -132,9 +132,9 @@ public class CloudTaskInitialCreditsExhaustionController
       Map<Long, Double> dbCostByCreator,
       Map<Long, Double> liveCostByCreator,
       Set<DbUser> newlyExhaustedUsers) {
-    final List<Double> costThresholdsInDescOrder =
+    final List<Double> costThresholdsInAscOrder =
         workbenchConfig.get().billing.initialCreditsCostAlertThresholds;
-    costThresholdsInDescOrder.sort(Comparator.reverseOrder());
+    costThresholdsInAscOrder.sort(Comparator.naturalOrder());
 
     Map<Long, DbUser> usersCache =
         users.stream()
@@ -160,7 +160,7 @@ public class CloudTaskInitialCreditsExhaustionController
                   : userDao.findUserByUserId(userId),
               Math.max(currentCost, previousCost),
               previousCost,
-              costThresholdsInDescOrder);
+              costThresholdsInAscOrder);
         });
   }
 
@@ -270,10 +270,10 @@ public class CloudTaskInitialCreditsExhaustionController
    * @param currentCost The current total cost incurred by this user, according to BigQuery
    * @param previousCost The total cost incurred by this user at the time of the previous check, as
    *     stored in the database
-   * @param thresholdsInDescOrder the cost alerting thresholds, in descending order
+   * @param thresholdsInAscOrder the cost alerting thresholds, in ascending order
    */
   private void maybeAlertOnCostThresholds(
-      DbUser user, double currentCost, double previousCost, List<Double> thresholdsInDescOrder) {
+      DbUser user, double currentCost, double previousCost, List<Double> thresholdsInAscOrder) {
 
     final double limit =
         getUserInitialCreditsLimit(
@@ -297,10 +297,14 @@ public class CloudTaskInitialCreditsExhaustionController
     final double currentCredits = limit - currentCost;
     final double previousCredits = limit - previousCost;
 
-    for (final double threshold : thresholdsInDescOrder) {
+    for (final double threshold : thresholdsInAscOrder) {
+      logger.info("comparing threshold: {}   current credits: {}", threshold, currentCredits);
       if (CostComparisonUtils.compareCosts(currentCredits, threshold) < 0) {
+        logger.info("compared threshold and current credits");
         // only alert if we have not done so previously
+        logger.info("comparing threshold: {}   previousCredits: {}", threshold, previousCredits);
         if (CostComparisonUtils.compareCosts(previousCredits, threshold) >= 0) {
+          logger.info("compared threshold and previous credits");
           try {
             mailService.alertUserInitialCreditsDollarThreshold(
                 user, threshold, currentCost, remainingBalance);
