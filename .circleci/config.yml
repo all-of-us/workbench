@@ -1257,6 +1257,8 @@ workflows:
             - ui-unit-test
       # Deploy local UI server connected to "test" API server. Run Puppeteer tests for PR commits only
       - puppeteer-env-setup
+      - puppeteer-generate-access-tokens:
+          env_name: "local"
       - puppeteer-test:
           <<: *filter-pr-branch
           env_name: "local"
@@ -1267,6 +1269,7 @@ workflows:
 #            - halt-puppeteer-check
           requires:
             - puppeteer-env-setup
+            - puppeteer-generate-access-tokens
       # On main branch merges, run Puppeteer tests after ui and api deployed to "test" env successfully
       - puppeteer-test:
           parallel_num: 5
@@ -1274,6 +1277,7 @@ workflows:
           <<: *filter-main-branch
           requires:
             - puppeteer-env-setup
+            - puppeteer-generate-access-tokens
             - api-deploy-to-test
             - ui-deploy-to-test
           post-steps:
