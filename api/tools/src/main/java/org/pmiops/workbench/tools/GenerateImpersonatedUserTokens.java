@@ -55,7 +55,7 @@ public class GenerateImpersonatedUserTokens {
           .addOption(impersonatedUsername)
           .addOption(outputTokenFilename);
 
-  private static final String ADMIN_SERVICE_ACCOUNT_NAME = "cloud-resource-admin";
+  private static final String ADMIN_SERVICE_ACCOUNT_NAME = "firecloud-admin";
 
   private static final Logger log =
       Logger.getLogger(GenerateImpersonatedUserTokens.class.getName());
