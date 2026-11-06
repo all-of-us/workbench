@@ -212,8 +212,7 @@ export const AdminWorkspaceRecoveryModal = ({
   );
   const [selectedPod, setSelectedPod] = useState<VwbPodDescription>();
   const [selectedUser, setSelectedUser] = useState(
-    collaborators.find((c) => c.userModel.userName === workspace.creator)
-      ?.userModel.userName ?? collaborators[0]?.userModel.userName
+    workspace.creator ?? collaborators[0]?.userModel.userName
   );
   const [pods, setPods] = useState<VwbPodDescription[]>([]);
   const [loadingPods, setLoadingPods] = useState(false);
@@ -308,9 +307,12 @@ export const AdminWorkspaceRecoveryModal = ({
                 <Dropdown
                   style={{ flex: 1, marginRight: '4px' }}
                   value={selectedUser}
-                  options={collaborators
-                    .filter((c) => c.role === WorkspaceAccessLevel.OWNER)
-                    .map((c) => c.userModel.userName)}
+                  options={[
+                    workspace.creator,
+                    ...collaborators
+                      .filter((c) => c.role === WorkspaceAccessLevel.OWNER)
+                      .map((c) => c.userModel.userName),
+                  ]}
                   onChange={(e) => setSelectedUser(e.value)}
                   disabled={loadingPods}
                 />
