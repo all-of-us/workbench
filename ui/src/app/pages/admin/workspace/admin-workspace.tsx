@@ -154,7 +154,7 @@ const AdminWorkspaceImpl = (props: Props) => {
           {showRecoveryModal && (
             <AdminWorkspaceRecoveryModal
               workspace={workspace}
-              collaborators={collaborators || workspaceCollaborators}
+              collaborators={workspaceCollaborators || []}
               onClose={() => setShowRecoveryModal(false)}
               onFailure={() =>
                 setRecoveryLogsRefreshKey((currentKey) => currentKey + 1)
